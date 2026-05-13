@@ -6,24 +6,203 @@ import {
   ClockCircleOutlined,
   CrownOutlined,
   CustomerServiceOutlined,
+  FileTextOutlined,
   GiftOutlined,
   HomeOutlined,
+  MessageOutlined,
+  NotificationOutlined,
   PercentageOutlined,
   QuestionCircleOutlined,
   RightOutlined,
-  ShoppingCartOutlined,
+  SettingOutlined,
   ShopOutlined,
   TeamOutlined,
+  ToolOutlined,
   TrophyOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { ConfigProvider, Layout, Menu, Row, Col, theme } from 'antd'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import './App.css'
 
 const { Sider, Content } = Layout
+
+export type PrimaryKey =
+  | 'home'
+  | 'customer'
+  | 'message'
+  | 'marketing'
+  | 'shop'
+  | 'content'
+  | 'ai'
+  | 'tools'
+  | 'settings'
+  | 'apps'
+
+/** 二级菜单：「小店」模块（对照运营后台截图） */
+export const shopSecondaryMenuItems: MenuProps['items'] = [
+  { key: 'shop-overview', label: '概览' },
+  {
+    key: 'shop-points',
+    label: '积分运营',
+    children: [
+      { key: 'shop-points-settings', label: '积分设置' },
+      { key: 'shop-points-mall', label: '积分商城' },
+      { key: 'shop-points-order', label: '订单管理' },
+      { key: 'shop-points-flow', label: '积分流水' },
+      { key: 'shop-points-detail', label: '积分明细' },
+      { key: 'shop-points-report', label: '积分报表' },
+    ],
+  },
+  {
+    key: 'shop-order-group',
+    label: '订单管理',
+    children: [
+      { key: 'shop-order-query', label: '订单查询' },
+      { key: 'shop-order-writeoff', label: '订单核销' },
+    ],
+  },
+  {
+    key: 'shop-product-group',
+    label: '商品管理',
+    children: [
+      { key: 'shop-product-list', label: '商品列表' },
+      { key: 'shop-product-category', label: '商品分类' },
+      { key: 'shop-product-shelf', label: '商品上架' },
+    ],
+  },
+  {
+    key: 'shop-mkt-tools',
+    label: '营销工具',
+    children: [
+      { key: 'shop-mkt-tools-home', label: '营销工具' },
+      { key: 'shop-member-card', label: '会员卡' },
+      { key: 'shop-coupons', label: '优惠券' },
+      { key: 'shop-coupon-center', label: '领券中心' },
+      { key: 'shop-flash-sale', label: '秒杀' },
+      { key: 'shop-group-buy', label: '拼团' },
+      { key: 'shop-distribution', label: '分销' },
+    ],
+  },
+  {
+    key: 'shop-interactive',
+    label: '互动营销',
+    children: [
+      { key: 'shop-interactive-home', label: '互动营销' },
+      { key: 'shop-lucky-wheel', label: '幸运大转盘' },
+      { key: 'shop-scratch', label: '刮刮乐' },
+    ],
+  },
+  {
+    key: 'shop-member',
+    label: '会员管理',
+    children: [
+      { key: 'shop-member-list', label: '会员列表' },
+      { key: 'shop-member-level', label: '会员等级' },
+      { key: 'shop-member-benefit', label: '会员权益' },
+    ],
+  },
+  {
+    key: 'shop-decoration',
+    label: '店铺装修',
+    children: [{ key: 'shop-decoration-home', label: '店铺装修' }],
+  },
+]
+
+export const shopMenuDefaultOpenKeys = [
+  'shop-points',
+  'shop-order-group',
+  'shop-product-group',
+  'shop-mkt-tools',
+  'shop-interactive',
+  'shop-member',
+  'shop-decoration',
+]
+
+const placeholderMenus: Record<PrimaryKey, MenuProps['items']> = {
+  home: [
+    { key: 'dash-home-overview', label: '数据概览' },
+    { key: 'dash-home-shortcut', label: '快捷入口' },
+  ],
+  customer: [
+    { key: 'dash-customer-assets', label: '客户资产' },
+    { key: 'dash-customer-group', label: '客群管理' },
+  ],
+  message: [
+    { key: 'dash-msg-inbox', label: '消息中心' },
+    { key: 'dash-msg-template', label: '通知模板' },
+  ],
+  marketing: [
+    { key: 'dash-mkt-plan', label: '营销计划' },
+    { key: 'dash-mkt-automation', label: '自动化' },
+  ],
+  shop: shopSecondaryMenuItems,
+  content: [
+    { key: 'dash-content-lib', label: '内容库' },
+    { key: 'dash-content-material', label: '素材中心' },
+  ],
+  ai: [
+    { key: 'dash-ai-chat', label: '智能助手' },
+    { key: 'dash-ai-insight', label: '经营洞察' },
+  ],
+  tools: [
+    { key: 'dash-tools-list', label: '工具列表' },
+    { key: 'dash-tools-plugin', label: '应用插件' },
+  ],
+  settings: [
+    { key: 'dash-settings-store', label: '店铺设置' },
+    { key: 'dash-settings-perm', label: '权限管理' },
+  ],
+  apps: [
+    { key: 'dash-apps-market', label: '应用市场' },
+    { key: 'dash-apps-installed', label: '已购应用' },
+  ],
+}
+
+const defaultSecondaryKey: Record<PrimaryKey, string> = {
+  home: 'dash-home-overview',
+  customer: 'dash-customer-assets',
+  message: 'dash-msg-inbox',
+  marketing: 'dash-mkt-plan',
+  shop: 'shop-overview',
+  content: 'dash-content-lib',
+  ai: 'dash-ai-chat',
+  tools: 'dash-tools-list',
+  settings: 'dash-settings-store',
+  apps: 'dash-apps-market',
+}
+
+const defaultOpenKeysByPrimary: Record<PrimaryKey, string[]> = {
+  home: [],
+  customer: [],
+  message: [],
+  marketing: [],
+  shop: shopMenuDefaultOpenKeys,
+  content: [],
+  ai: [],
+  tools: [],
+  settings: [],
+  apps: [],
+}
+
+const primaryNavConfig: {
+  key: PrimaryKey
+  label: string
+  icon: ReactNode
+}[] = [
+  { key: 'home', label: '首页', icon: <HomeOutlined /> },
+  { key: 'customer', label: '客户', icon: <UserOutlined /> },
+  { key: 'message', label: '消息', icon: <MessageOutlined /> },
+  { key: 'marketing', label: '营销', icon: <NotificationOutlined /> },
+  { key: 'shop', label: '小店', icon: <ShopOutlined /> },
+  { key: 'content', label: '内容', icon: <FileTextOutlined /> },
+  { key: 'ai', label: 'AI', icon: <span className="icon-rail-ai">AI</span> },
+  { key: 'tools', label: '工具', icon: <ToolOutlined /> },
+  { key: 'settings', label: '设置', icon: <SettingOutlined /> },
+  { key: 'apps', label: '应用', icon: <AppstoreOutlined /> },
+]
 
 type ToolItem = {
   key: string
@@ -122,41 +301,6 @@ const otherTools: ToolItem[] = [
   },
 ]
 
-const menuItems: MenuProps['items'] = [
-  {
-    key: 'order',
-    label: '订单管理',
-    children: [
-      { key: 'order-all', label: '全部订单' },
-      { key: 'order-refund', label: '售后管理' },
-    ],
-  },
-  {
-    key: 'product',
-    label: '商品管理',
-    children: [
-      { key: 'product-list', label: '商品列表' },
-      { key: 'product-category', label: '分类管理' },
-    ],
-  },
-  {
-    key: 'marketing',
-    label: '营销工具',
-    children: [
-      { key: 'tool-list', label: '工具列表' },
-      { key: 'marketing-activity', label: '活动管理' },
-    ],
-  },
-  {
-    key: 'member',
-    label: '会员管理',
-    children: [
-      { key: 'member-list', label: '会员列表' },
-      { key: 'member-level', label: '会员等级' },
-    ],
-  },
-]
-
 function ToolCard({ item }: { item: ToolItem }) {
   return (
     <div className="tool-card">
@@ -191,15 +335,52 @@ function ToolSection({ title, items }: { title: string; items: ToolItem[] }) {
   )
 }
 
+function getItemLabel(
+  items: MenuProps['items'] | undefined,
+  key: string,
+): string {
+  if (!items) return ''
+  for (const raw of items) {
+    if (!raw || typeof raw !== 'object') continue
+    const it = raw as {
+      key?: string
+      label?: ReactNode
+      children?: MenuProps['items']
+    }
+    if (it.key === key && typeof it.label === 'string') return it.label
+    const nested = getItemLabel(it.children, key)
+    if (nested) return nested
+  }
+  return ''
+}
+
 export default function App() {
-  const [railKey, setRailKey] = useState('marketing')
+  const [railKey, setRailKey] = useState<PrimaryKey>('shop')
+  const [secondaryKey, setSecondaryKey] = useState<string>(
+    defaultSecondaryKey.shop,
+  )
+
+  const selectPrimary = useCallback((key: PrimaryKey) => {
+    setRailKey(key)
+    setSecondaryKey(defaultSecondaryKey[key])
+  }, [])
+
+  const menuItems = useMemo(
+    () => placeholderMenus[railKey],
+    [railKey],
+  )
+
+  const menuDefaultOpenKeys = useMemo(
+    () => defaultOpenKeysByPrimary[railKey],
+    [railKey],
+  )
 
   return (
     <ConfigProvider
       theme={{
         algorithm: theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#fa8c16',
+          colorPrimary: '#1890ff',
           borderRadius: 4,
           colorBgLayout: '#f5f5f5',
         },
@@ -213,52 +394,24 @@ export default function App() {
       }}
     >
       <Layout className="marketing-page" hasSider>
-        <div className="icon-rail" aria-label="主导航">
-          <button
-            type="button"
-            className={`icon-rail-btn${railKey === 'home' ? ' active' : ''}`}
-            onClick={() => setRailKey('home')}
-            title="首页"
-          >
-            <HomeOutlined />
-          </button>
-          <button
-            type="button"
-            className={`icon-rail-btn${railKey === 'order' ? ' active' : ''}`}
-            onClick={() => setRailKey('order')}
-            title="订单"
-          >
-            <ShoppingCartOutlined />
-          </button>
-          <button
-            type="button"
-            className={`icon-rail-btn${railKey === 'product' ? ' active' : ''}`}
-            onClick={() => setRailKey('product')}
-            title="商品"
-          >
-            <AppstoreOutlined />
-          </button>
-          <button
-            type="button"
-            className={`icon-rail-btn${railKey === 'marketing' ? ' active' : ''}`}
-            onClick={() => setRailKey('marketing')}
-            title="营销"
-          >
-            <GiftOutlined />
-          </button>
-          <button
-            type="button"
-            className={`icon-rail-btn${railKey === 'member' ? ' active' : ''}`}
-            onClick={() => setRailKey('member')}
-            title="会员"
-          >
-            <UserOutlined />
-          </button>
+        <div className="icon-rail" aria-label="一级菜单">
+          {primaryNavConfig.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              className={`icon-rail-item${railKey === item.key ? ' active' : ''}`}
+              onClick={() => selectPrimary(item.key)}
+              title={item.label}
+            >
+              {item.icon}
+              <span className="icon-rail-label">{item.label}</span>
+            </button>
+          ))}
         </div>
 
         <Sider
           className="sub-sider"
-          width={216}
+          width={232}
           style={{
             background: '#fff',
             overflow: 'auto',
@@ -268,11 +421,13 @@ export default function App() {
           }}
         >
           <Menu
+            key={railKey}
             mode="inline"
-            selectedKeys={['tool-list']}
-            defaultOpenKeys={['marketing']}
+            selectedKeys={[secondaryKey]}
+            defaultOpenKeys={menuDefaultOpenKeys}
             style={{ borderInlineEnd: 0, paddingTop: 12 }}
             items={menuItems}
+            onSelect={({ key }) => setSecondaryKey(key)}
           />
         </Sider>
 
@@ -292,6 +447,21 @@ export default function App() {
                   </a>
                 </span>
               </header>
+
+              {railKey === 'shop' ? (
+                <p
+                  style={{
+                    margin: '0 0 20px',
+                    fontSize: 13,
+                    color: 'rgba(0,0,0,0.45)',
+                  }}
+                >
+                  小店 ·{' '}
+                  <strong style={{ color: 'rgba(0,0,0,0.88)' }}>
+                    {getItemLabel(menuItems, secondaryKey) || '概览'}
+                  </strong>
+                </p>
+              ) : null}
 
               <ToolSection title="经典营销" items={classicTools} />
               <ToolSection title="赠品工具" items={giftTools} />
