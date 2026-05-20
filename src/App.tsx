@@ -35,9 +35,31 @@ import {
   ShoppingOutlined,
   DatabaseOutlined,
   SafetyOutlined,
+  // Editor icons
+  UploadOutlined,
+  ReloadOutlined,
+  InfoCircleOutlined,
+  QuestionCircleOutlined,
+  PlusOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { ConfigProvider, Layout, Menu, Row, Col, theme, Empty } from 'antd'
+import {
+  ConfigProvider,
+  Layout,
+  Menu,
+  Row,
+  Col,
+  Empty,
+  Tabs,
+  Radio,
+  Slider,
+  InputNumber,
+  ColorPicker,
+  Switch,
+  Tooltip,
+  Upload,
+  Button,
+} from 'antd'
 import type { ReactNode } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import './App.css'
@@ -63,7 +85,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     key: 'shop-points',
     label: '客群运营',
     children: [
-      { key: 'shop-points-lottery', label: '积分抽奖' },
+      { key: 'shop-points-lottery', label: '积分抽奖' }, // 触发抽奖装修页面
       { key: 'shop-points-mall', label: '积分商城' },
       { key: 'shop-points-task', label: '积分任务' },
       { key: 'shop-points-mkt', label: '积分营销' }, // 触发蓝色页面
@@ -94,7 +116,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-mkt-tools-home', label: '营销工具' }, // 触发橙色页面
       { key: 'shop-member-mkt', label: '会员营销' },
       { key: 'shop-member-center', label: '会员中心' },
-      { key: 'shop-lottery-center', label: '抽奖中心' },
+      { key: 'shop-lottery-center', label: '抽奖中心' }, // 触发抽奖装修页面
       { key: 'shop-coupon-list', label: '卡券列表' },
       { key: 'shop-distributor', label: '分销商' },
     ],
@@ -288,7 +310,7 @@ const orangeClassicTools: ToolItem[] = [
 
 const orangeSourcingTools: ToolItem[] = [
   {
-    key: '選品優選',
+    key: '选品优选',
     title: '选品优选',
     desc: '智能匹配货源以更有性价比的拿货',
     icon: <ShoppingOutlined />,
@@ -505,7 +527,7 @@ const blueMaintenanceTools: ToolItem[] = [
 ]
 
 // ==========================================
-// 组件定义
+// 辅助子组件
 // ==========================================
 function ToolCard({ item, theme }: { item: ToolItem; theme: 'orange' | 'blue' }) {
   return (
@@ -594,6 +616,669 @@ function getParentMenuLabel(
   return ''
 }
 
+// ==========================================
+// 【新组件】LotteryEditor：高体验的抽奖页面装修编辑器
+// ==========================================
+function LotteryEditor() {
+  // Tab 状态
+  const [activeTab, setActiveTab] = useState<string>('page')
+
+  // 1. 基础布局设置
+  const [lotteryType, setLotteryType] = useState<'grid' | 'wheel'>('grid')
+  const [lotteryStyle, setLotteryStyle] = useState<string>('style-custom')
+
+  // 2. 皮肤与图片配置
+  const [bgType, setBgType] = useState<'color' | 'image'>('image')
+  const [bgImage, setBgImage] = useState<string>('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')
+  const [bgColor, setBgColor] = useState<string>('#E60B30') // 经典中国红底色
+  
+  // 3. 抽奖机外壳与奖台设置
+  const [machineBgType, setMachineBgType] = useState<'default' | 'custom'>('default')
+  const [customMachineImage, setCustomMachineImage] = useState<string>('')
+  const [showPedestal, setShowPedestal] = useState<boolean>(true)
+  const [customPedestalImage, setCustomPedestalImage] = useState<string>('')
+
+  // 4. 【核心 Slider 调节控制参数】
+  const [machineY, setMachineY] = useState<number>(140)         // 抽奖机垂直偏移距离 (50 - 350)
+  const [machineX, setMachineX] = useState<number>(0)           // 抽奖机水平平移距离 (-40 - 40)
+  const [pedestalY, setPedestalY] = useState<number>(390)       // 奖台垂直定位 (200 - 500)
+  const [pedestalScale, setPedestalScale] = useState<number>(1.0) // 奖台高度/大小缩放比 (0.6 - 1.6)
+  const [gridPadding, setGridPadding] = useState<number>(24)     // 奖品区域上下间距 (10 - 80)
+
+  // 5. 配色设置
+  const [btnBgColor, setBtnBgColor] = useState<string>('#FFAE00') // 按钮金黄色
+  const [btnTextColor, setBtnTextColor] = useState<string>('#E60B30') // 按钮红色文字
+
+  // 6. 展示选项
+  const [showWinnerRecord, setShowWinnerRecord] = useState<boolean>(true)
+  const [enableAd, setEnableAd] = useState<boolean>(false)
+  const [enableRecharge, setEnableRecharge] = useState<boolean>(true)
+
+  // 默认重置所有属性
+  const resetSettings = () => {
+    setLotteryType('grid')
+    setLotteryStyle('style-custom')
+    setBgType('image')
+    setBgImage('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')
+    setBgColor('#E60B30')
+    setMachineBgType('default')
+    setCustomMachineImage('')
+    setShowPedestal(true)
+    setCustomPedestalImage('')
+    setMachineY(140)
+    setMachineX(0)
+    setPedestalY(390)
+    setPedestalScale(1.0)
+    setGridPadding(24)
+    setBtnBgColor('#FFAE00')
+    setBtnTextColor('#E60B30')
+    setShowWinnerRecord(true)
+    setEnableAd(false)
+    setEnableRecharge(true)
+  }
+
+  // 模拟的 9 个格子奖品数据
+  const mockPrizes = [
+    { id: 1, name: '1 积分', icon: <DatabaseOutlined style={{ color: '#FF9C1A' }} /> },
+    { id: 2, name: '1积分', icon: <DatabaseOutlined style={{ color: '#FF9C1A' }} /> },
+    { id: 3, name: '1 积分', icon: <DatabaseOutlined style={{ color: '#FF9C1A' }} /> },
+    { id: 4, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
+    { id: 5, action: true, name: '立即抽奖' }, // 中间按钮
+    { id: 6, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
+    { id: 7, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
+    { id: 8, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
+    { id: 9, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
+  ]
+
+  return (
+    <div className="lottery-editor-wrapper">
+      {/* 选项卡头部 */}
+      <div className="editor-tab-header">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            { key: 'page', label: '抽奖页面' },
+            { key: 'poster', label: '分享海报' },
+            { key: 'card', label: '分享卡片' },
+          ]}
+        />
+      </div>
+
+      <Row gutter={24} style={{ marginTop: 12 }}>
+        {/* 左侧：手机预览模拟器 */}
+        <Col xs={24} lg={9} xl={8} style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="mobile-phone-frame">
+            {/* 听筒和镜头 */}
+            <div className="phone-top-notch"></div>
+            
+            {/* 状态栏 */}
+            <div className="phone-status-bar">
+              <span className="time">9:41</span>
+              <div className="icons">
+                <span className="cellular">📶</span>
+                <span className="wifi">🔋</span>
+              </div>
+            </div>
+
+            {/* 页面预览内容 */}
+            <div
+              className="phone-screen-content"
+              style={{
+                backgroundColor: bgColor,
+                backgroundImage: bgType === 'image' ? `url(${bgImage})` : 'none',
+              }}
+            >
+              {/* 返回按钮和活动名称 */}
+              <div className="phone-page-header">
+                <span className="back-arrow">〈</span>
+                <span className="activity-title">特步会员惊喜大抽奖</span>
+                <span className="more-menu">•••</span>
+              </div>
+
+              {/* 头部大标题装饰 */}
+              <div className="lottery-head-banner">
+                <div className="main-title">特步会员</div>
+                <div className="sub-title">惊喜大抽奖</div>
+              </div>
+
+              {/* 【互动层 1】抽奖机主体 */}
+              <div
+                className="preview-lottery-machine"
+                style={{
+                  transform: `translate(${machineX}px, ${machineY}px)`,
+                  backgroundImage: machineBgType === 'custom' && customMachineImage ? `url(${customMachineImage})` : undefined,
+                }}
+              >
+                {/* 奖品网格区域，其 padding 由 gridPadding 控制 */}
+                <div
+                  className="preview-grid-container"
+                  style={{
+                    paddingTop: `${gridPadding}px`,
+                    paddingBottom: `${gridPadding}px`,
+                  }}
+                >
+                  {lotteryType === 'grid' ? (
+                    <div className="preview-nine-grid">
+                      {mockPrizes.map((p, idx) => {
+                        if (p.action) {
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              className="grid-prize-action"
+                              style={{
+                                backgroundColor: btnBgColor,
+                                color: btnTextColor,
+                              }}
+                            >
+                              <div className="btn-label">{p.name}</div>
+                              <div className="btn-sub">扣除10积分</div>
+                            </button>
+                          )
+                        }
+                        return (
+                          <div key={idx} className="grid-prize-cell">
+                            {p.icon}
+                            <span className="prize-name">{p.name}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    // 大转盘极简化预览
+                    <div className="preview-wheel-container">
+                      <div className="preview-wheel-circle" style={{ borderColor: btnBgColor }}>
+                        <div className="wheel-segment-line" style={{ transform: 'rotate(45deg)' }}></div>
+                        <div className="wheel-segment-line" style={{ transform: 'rotate(90deg)' }}></div>
+                        <div className="wheel-segment-line" style={{ transform: 'rotate(135deg)' }}></div>
+                        <div className="wheel-segment-line" style={{ transform: 'rotate(180deg)' }}></div>
+                        <button
+                          type="button"
+                          className="wheel-center-pointer"
+                          style={{ backgroundColor: btnBgColor, color: btnTextColor }}
+                        >
+                          抽奖
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 底部副操作按钮 */}
+                <div className="preview-machine-footer">
+                  <div className="footer-pill-btn">道具商城 ＞</div>
+                  <div className="footer-pill-btn color-orange">积分兑换 ＞</div>
+                </div>
+              </div>
+
+              {/* 【互动层 2】自定义奖台/底座，其位置与大小缩放由 pedestalY & pedestalScale 控制 */}
+              {showPedestal && (
+                <div
+                  className="preview-pedestal-platform"
+                  style={{
+                    transform: `translate(-50%, ${pedestalY}px) scale(${pedestalScale})`,
+                    backgroundImage: customPedestalImage ? `url(${customPedestalImage})` : undefined,
+                  }}
+                >
+                  {/* 小指示按钮模拟 */}
+                  {!customPedestalImage && (
+                    <div className="pedestal-indicator-lights">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 中奖滚动区域 */}
+              {showWinnerRecord && (
+                <div className="preview-winner-records-bar">
+                  <span className="record-item">🎉 微信用户A 刚刚抽中了“100积分”</span>
+                </div>
+              )}
+
+              {/* 底部奖品详情卡片 */}
+              <div className="preview-my-prizes-card">
+                <div className="card-header-bar">
+                  <span className="title">我的奖品</span>
+                  <span className="more">查看全部 ＞</span>
+                </div>
+                <div className="prize-list-item">
+                  <span className="badge">优惠券</span>
+                  <div className="info">
+                    <div className="name">优惠券</div>
+                    <div className="time">有效期至：2026年11月22日</div>
+                  </div>
+                  <button type="button" className="btn-exchange">兑换</button>
+                </div>
+                <div className="prize-list-item">
+                  <span className="badge color-gray">实物</span>
+                  <div className="info">
+                    <div className="name">秋冬长袖外套</div>
+                    <div className="time">有效期至：2026年12月01日</div>
+                  </div>
+                  <button type="button" className="btn-exchange outline">提货</button>
+                </div>
+              </div>
+
+              {/* 广告位 */}
+              {enableAd && (
+                <div className="preview-ad-banner">
+                  <span className="ad-label">广告</span>
+                  <div className="ad-text">特步夏季凉鞋新品上新，全场5折起！</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Col>
+
+        {/* 右侧：配置属性面板 */}
+        <Col xs={24} lg={15} xl={16}>
+          <div className="editor-properties-panel">
+            
+            {/* 顶栏控制组 */}
+            <div className="panel-header-section">
+              <span className="title">装修属性配置</span>
+              <Button
+                type="text"
+                icon={<ReloadOutlined />}
+                onClick={resetSettings}
+                style={{ color: '#8c8c8c' }}
+              >
+                重置默认配置
+              </Button>
+            </div>
+
+            {/* 一、基础布局设置 */}
+            <div className="prop-group-card">
+              <h3 className="group-title">一、基础设置</h3>
+              
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>抽奖类型</span>
+                  <Tooltip title="选择不同的前台展现形式，九宫格更聚人气，大转盘则趣味互动性强。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control">
+                  <Radio.Group
+                    value={lotteryType}
+                    onChange={(e) => setLotteryType(e.target.value)}
+                    optionType="button"
+                    buttonStyle="solid"
+                  >
+                    <Radio.Button value="grid">九宫格</Radio.Button>
+                    <Radio.Button value="wheel">大转盘</Radio.Button>
+                  </Radio.Group>
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>抽奖风格</span>
+                  <Tooltip title="使用预置的主题模板风格，也可以使用“自定义”上传您的专属设计外壳。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control">
+                  <Radio.Group
+                    value={lotteryStyle}
+                    onChange={(e) => {
+                      setLotteryStyle(e.target.value)
+                      if (e.target.value !== 'style-custom') {
+                        // 预设主题配色联动
+                        if (e.target.value === 'style-gold') {
+                          setBgColor('#B32400')
+                          setBtnBgColor('#FFE654')
+                          setBtnTextColor('#B32400')
+                        } else {
+                          setBgColor('#E60B30')
+                          setBtnBgColor('#FFAE00')
+                          setBtnTextColor('#E60B30')
+                        }
+                      }
+                    }}
+                    optionType="button"
+                  >
+                    <Radio.Button value="style-1">风格一</Radio.Button>
+                    <Radio.Button value="style-2">风格二</Radio.Button>
+                    <Radio.Button value="style-3">风格三</Radio.Button>
+                    <Radio.Button value="style-gold">风金黄板</Radio.Button>
+                    <Radio.Button value="style-custom">自定义</Radio.Button>
+                  </Radio.Group>
+                </div>
+              </div>
+            </div>
+
+            {/* 二、布局与空间微调 (Sliders - 重构重点) */}
+            <div className="prop-group-card highlight-card">
+              <h3 className="group-title">二、抽奖机及奖台定位微调</h3>
+              <p className="group-intro-text">
+                <InfoCircleOutlined style={{ color: '#1890ff', marginRight: 4 }} />
+                为了匹配不同的背景图布局，您可以使用以下滑动条来精细化调节前台位置。
+              </p>
+
+              {/* 属性 1：抽奖机垂直高度 */}
+              <div className="prop-row slider-row">
+                <div className="prop-label">
+                  <span>抽奖机垂直高度</span>
+                  <Tooltip title="【高度定位】调整抽奖机外框距离页面顶部的距离。如果背景图上部有大幅标题或精美画作，建议向下拉大本参数防止被遮挡。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control slider-control-group">
+                  <div className="slider-wrapper">
+                    <Slider
+                      min={60}
+                      max={320}
+                      value={machineY}
+                      onChange={setMachineY}
+                      tooltip={{ formatter: (v) => v !== undefined ? `${v}px` : '' }}
+                    />
+                  </div>
+                  <InputNumber
+                    min={60}
+                    max={320}
+                    value={machineY}
+                    onChange={(val) => val !== null && setMachineY(val)}
+                    addonAfter="px"
+                    style={{ width: 95 }}
+                  />
+                </div>
+                <div className="prop-tip-text">推荐设置：背景图较空时使用 120-150px，大标题设计时使用 180-220px。</div>
+              </div>
+
+              {/* 属性 2：抽奖机左右平移 */}
+              <div className="prop-row slider-row">
+                <div className="prop-label">
+                  <span>抽奖机左右平移</span>
+                  <Tooltip title="【水平纠偏】微调抽奖机的水平偏心距。当背景图的主体人物或视觉中心偏向一侧时，可以使用此项进行非对称偏心设计，让网格和背景巧妙契合。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control slider-control-group">
+                  <div className="slider-wrapper">
+                    <Slider
+                      min={-40}
+                      max={40}
+                      value={machineX}
+                      onChange={setMachineX}
+                      tooltip={{ formatter: (v) => v !== undefined ? `${v}px` : '' }}
+                    />
+                  </div>
+                  <InputNumber
+                    min={-40}
+                    max={40}
+                    value={machineX}
+                    onChange={(val) => val !== null && setMachineX(val)}
+                    addonAfter="px"
+                    style={{ width: 95 }}
+                  />
+                </div>
+                <div className="prop-tip-text">向左为负，向右为正。如非特定非对称背景，建议保持 0px 居中。</div>
+              </div>
+
+              {/* 属性 3：底座奖台垂直位置 */}
+              <div className="prop-row slider-row">
+                <div className="prop-label">
+                  <span>底座奖台垂直位置</span>
+                  <Tooltip title="【底座定位】调整底座奖台相对页面顶部的垂直定位，从而能精准贴合到抽奖机底端。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control slider-control-group">
+                  <div className="slider-wrapper">
+                    <Slider
+                      min={240}
+                      max={460}
+                      value={pedestalY}
+                      onChange={setPedestalY}
+                      tooltip={{ formatter: (v) => v !== undefined ? `${v}px` : '' }}
+                    />
+                  </div>
+                  <InputNumber
+                    min={240}
+                    max={460}
+                    value={pedestalY}
+                    onChange={(val) => val !== null && setPedestalY(val)}
+                    addonAfter="px"
+                    style={{ width: 95 }}
+                  />
+                </div>
+              </div>
+
+              {/* 属性 4：底座奖台尺寸缩放 */}
+              <div className="prop-row slider-row">
+                <div className="prop-label">
+                  <span>底座奖台尺寸缩放</span>
+                  <Tooltip title="【底座大小】调整底部装饰奖台的比例缩放。放大可营造出更宏大的托盘视觉效果。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control slider-control-group">
+                  <div className="slider-wrapper">
+                    <Slider
+                      min={0.6}
+                      max={1.6}
+                      step={0.05}
+                      value={pedestalScale}
+                      onChange={setPedestalScale}
+                      tooltip={{ formatter: (v) => v !== undefined ? `${Math.round(v * 100)}%` : '' }}
+                    />
+                  </div>
+                  <InputNumber
+                    min={0.6}
+                    max={1.6}
+                    step={0.05}
+                    value={pedestalScale}
+                    onChange={(val) => val !== null && setPedestalScale(val)}
+                    style={{ width: 95 }}
+                  />
+                </div>
+              </div>
+
+              {/* 属性 5：奖品区域上下间距 */}
+              <div className="prop-row slider-row">
+                <div className="prop-label">
+                  <span>奖品格子上下间距</span>
+                  <Tooltip title="【内部留白】控制九宫格奖品包在抽奖机外壳内部的上下 Padding 间距。增加该间距会压缩网格的纵向分布空间，收缩留白，避免九宫格顶破抽奖机的发光外边框。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control slider-control-group">
+                  <div className="slider-wrapper">
+                    <Slider
+                      min={10}
+                      max={80}
+                      value={gridPadding}
+                      onChange={setGridPadding}
+                      tooltip={{ formatter: (v) => v !== undefined ? `${v}px` : '' }}
+                    />
+                  </div>
+                  <InputNumber
+                    min={10}
+                    max={80}
+                    value={gridPadding}
+                    onChange={(val) => val !== null && setGridPadding(val)}
+                    addonAfter="px"
+                    style={{ width: 95 }}
+                  />
+                </div>
+                <div className="prop-tip-text">建议根据自定义抽奖机图片的外框厚度进行自适应微调。</div>
+              </div>
+            </div>
+
+            {/* 三、背景与装饰图素材上传 */}
+            <div className="prop-group-card">
+              <h3 className="group-title">三、皮肤与素材上传</h3>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>页面背景图</span>
+                  <Tooltip title="上传活动整体的页面主背景。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control upload-control-group">
+                  <Radio.Group
+                    value={bgType}
+                    onChange={(e) => setBgType(e.target.value)}
+                    style={{ marginBottom: 12, display: 'block' }}
+                  >
+                    <Radio value="color">纯色底色</Radio>
+                    <Radio value="image">图片背景</Radio>
+                  </Radio.Group>
+                  
+                  {bgType === 'image' && (
+                    <div className="image-uploader-block">
+                      <img src={bgImage} alt="背景缩略图" className="uploader-preview-img" />
+                      <div className="uploader-actions">
+                        <Upload maxCount={1} showUploadList={false}>
+                          <Button size="small" icon={<UploadOutlined />}>上传新背景</Button>
+                        </Upload>
+                        <Button
+                          size="small"
+                          type="text"
+                          danger
+                          onClick={() => setBgImage('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80')}
+                        >
+                          恢复默认
+                        </Button>
+                        <span className="file-format-spec">支持 PNG / JPG，推荐尺寸 1125 × 1410 px</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>自定义抽奖机外壳</span>
+                  <Tooltip title="上传您量身定制的抽奖机外部壳图，要求中间部分镂空（或透明），以便露出下层的九宫格奖品。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control">
+                  <Radio.Group
+                    value={machineBgType}
+                    onChange={(e) => setMachineBgType(e.target.value)}
+                    style={{ marginBottom: 12, display: 'block' }}
+                  >
+                    <Radio value="default">官方经典红色机壳</Radio>
+                    <Radio value="custom">自定义设计机壳</Radio>
+                  </Radio.Group>
+
+                  {machineBgType === 'custom' && (
+                    <div className="image-uploader-block">
+                      <div className="uploader-box-placeholder">
+                        <PlusOutlined />
+                        <div style={{ marginTop: 8, fontSize: 11 }}>上传透明图</div>
+                      </div>
+                      <span className="file-format-spec">必须为带透明通道的 PNG 格式图片，推荐大小小于 800KB。</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>自定义底座奖台</span>
+                </div>
+                <div className="prop-control">
+                  <Switch
+                    checked={showPedestal}
+                    onChange={setShowPedestal}
+                    checkedChildren="启用奖台"
+                    unCheckedChildren="关闭奖台"
+                    style={{ marginBottom: 8 }}
+                  />
+                  {showPedestal && (
+                    <div className="image-uploader-block" style={{ marginTop: 8 }}>
+                      <Upload maxCount={1} showUploadList={false}>
+                        <Button size="small" icon={<UploadOutlined />}>上传专属底座图片</Button>
+                      </Upload>
+                      <span className="file-format-spec">PNG 格式，让抽奖活动更具仪式感和高品质感。</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 四、配色与交互展示项 */}
+            <div className="prop-group-card">
+              <h3 className="group-title">四、配色与按钮交互配置</h3>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>活动主底色</span>
+                  <Tooltip title="控制无背景图时的底色，或者背景图加载失败时的兜底纯色。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control color-picker-group">
+                  <ColorPicker value={bgColor} onChange={(c) => setBgColor(c.toHexString())} showText />
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>抽奖主按钮背景</span>
+                </div>
+                <div className="prop-control color-picker-group">
+                  <ColorPicker value={btnBgColor} onChange={(c) => setBtnBgColor(c.toHexString())} showText />
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>主按钮文本色</span>
+                </div>
+                <div className="prop-control color-picker-group">
+                  <ColorPicker value={btnTextColor} onChange={(c) => setBtnTextColor(c.toHexString())} showText />
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>中奖横幅滚动</span>
+                </div>
+                <div className="prop-control">
+                  <Switch checked={showWinnerRecord} onChange={setShowWinnerRecord} />
+                  <span className="side-switch-explain">开启后，前台将以弹幕跑马灯形式轮播滚动用户的真实中奖通知。</span>
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>底部流量广告位</span>
+                </div>
+                <div className="prop-control">
+                  <Switch checked={enableAd} onChange={setEnableAd} />
+                  <span className="side-switch-explain">开启后将在下方嵌入小程序原生流量主广告，推荐大流量店铺开启以赚取收益（仅支持v1.9.22及以上）。</span>
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>积分充值引导</span>
+                </div>
+                <div className="prop-control">
+                  <Switch checked={enableRecharge} onChange={setEnableRecharge} />
+                  <span className="side-switch-explain">若用户积分余额不足时，引导用户直接跳转至会员卡充值页面。</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </Col>
+      </Row>
+    </div>
+  )
+}
+
 export default function App() {
   const [railKey, setRailKey] = useState<PrimaryKey>('shop')
   const [secondaryKey, setSecondaryKey] = useState<string>(
@@ -618,16 +1303,16 @@ export default function App() {
   // 决定当前使用何种色彩主题与面板内容
   const isMarketingToolsPage = railKey === 'shop' && secondaryKey === 'shop-mkt-tools-home'
   const isPointsMarketingPage = railKey === 'shop' && secondaryKey === 'shop-points-mkt'
+  const isPointsLotteryPage = railKey === 'shop' && (secondaryKey === 'shop-points-lottery' || secondaryKey === 'shop-lottery-center')
+  
+  // 基础主题色
   const activeTheme = isPointsMarketingPage ? 'blue' : 'orange'
-
-  // 主题色配置对象
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
   return (
     <ConfigProvider
       theme={{
-        algorithm: theme.defaultAlgorithm,
         token: {
           colorPrimary: brandColor,
           borderRadius: 4,
@@ -728,6 +1413,8 @@ export default function App() {
                   <ToolSection title="有礼营销" items={blueGiftTools} theme="blue" />
                   <ToolSection title="客群维护" items={blueMaintenanceTools} theme="blue" />
                 </div>
+              ) : isPointsLotteryPage ? (
+                <LotteryEditor />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
@@ -738,6 +1425,8 @@ export default function App() {
                         1. <strong>营销工具 -&gt; 营销工具</strong> (经典营销面)
                         <br />
                         2. <strong>客群运营 -&gt; 积分营销</strong> (积分营销面)
+                        <br />
+                        3. <strong>客群运营 -&gt; 积分抽奖</strong> (大抽奖页面装修)
                       </span>
                     }
                   />
