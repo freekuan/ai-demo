@@ -1,118 +1,272 @@
+/* ==========================================
+   一、系统通用与基础布局
+   ========================================== */
 .marketing-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #f5f7fa;
 }
 
+/* 一级菜单窄栏 (Rail) */
 .icon-rail {
-  width: 56px;
+  width: 68px;
   flex-shrink: 0;
-  background: #fff;
-  border-right: 1px solid #f0f0f0;
+  background: #ffffff;
+  border-right: 1px solid #ebedf0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 16px;
-  gap: 4px;
+  padding: 16px 0;
+  gap: 6px;
 }
 
-.icon-rail-btn {
-  width: 40px;
-  height: 40px;
+.icon-rail-item {
+  width: 56px;
+  min-height: 54px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  padding: 6px 2px;
   border-radius: 8px;
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(0, 0, 0, 0.55);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   background: transparent;
   font-size: 18px;
+  line-height: 1;
 }
 
-.icon-rail-btn:hover {
+.icon-rail-item:hover {
   background: #f5f5f5;
-  color: #fa8c16;
+  color: #1890ff;
 }
 
-.icon-rail-btn.active {
-  background: #fff7e6;
-  color: #fa8c16;
+/* 根据当前激活的主题自定义 Rail Item 激活色 */
+.theme-orange .icon-rail-item.active {
+  background: #fff2ec;
+  color: #ff5e29;
 }
 
+.theme-blue .icon-rail-item.active {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.icon-rail-label {
+  font-size: 11px;
+  line-height: 1.1;
+  max-width: 100%;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.icon-rail-ai {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.theme-orange .icon-rail-ai {
+  background: linear-gradient(135deg, #ff5e29 0%, #ff007f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 二级菜单侧边栏 */
 .sub-sider .ant-layout-sider-children {
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid #ebedf0;
 }
 
+/* 右侧主内容间距 */
 .main-inner {
-  padding: 20px 28px 40px;
-  max-width: 1200px;
+  padding: 16px 24px 48px;
 }
 
 .main-header {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  align-items: center;
 }
 
-.main-header a {
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 13px;
+/* 顶部护航服务浮条 */
+.top-banner-bar {
+  background: #e6f7ff;
+  border: 1px solid #bae7ff;
+  padding: 6px 14px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
-.main-header a:hover {
-  color: #fa8c16;
+.banner-icon {
+  color: #1890ff;
+  font-size: 14px;
 }
 
+.banner-text {
+  font-weight: 400;
+}
+
+.banner-separator {
+  color: #d9d9d9;
+  margin: 0 4px;
+}
+
+.banner-link {
+  color: #1890ff;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+}
+
+.banner-link:hover {
+  text-decoration: underline;
+}
+
+/* 面包屑 / 导航定位 */
+.breadcrumb-path {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.path-split {
+  margin: 0 8px;
+  color: rgba(0, 0, 0, 0.15);
+}
+
+.path-current {
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 500;
+}
+
+/* ==========================================
+   二、经典营销与客群营销模块样式 (页面1和页面2)
+   ========================================== */
 .tool-section {
-  margin-top: 28px;
+  margin-top: 32px;
 }
 
 .tool-section:first-of-type {
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .tool-section-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.88);
   margin: 0 0 16px;
+  position: relative;
+  padding-left: 10px;
 }
 
+.tool-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.theme-orange .tool-section-title::before {
+  background: #ff5e29;
+}
+
+.theme-blue .tool-section-title::before {
+  background: #1890ff;
+}
+
+/* 工具卡片 */
 .tool-card {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 4px;
-  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid #ebedf0;
+  border-radius: 6px;
+  padding: 16px;
   display: flex;
   align-items: flex-start;
   gap: 14px;
   height: 100%;
-  transition:
-    box-shadow 0.2s,
-    border-color 0.2s;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.01);
 }
 
-.tool-card:hover {
+/* 橙色卡片特异样式 */
+.card-orange:hover {
   border-color: #ffd591;
-  box-shadow: 0 2px 8px rgba(250, 140, 22, 0.08);
+  box-shadow: 0 6px 16px rgba(255, 94, 41, 0.06);
+  transform: translateY(-2px);
 }
 
+.card-orange .tool-card-icon-wrap {
+  background: #fff2ec;
+  color: #ff5e29;
+}
+
+.card-orange .tool-card-action {
+  color: #ff5e29;
+}
+
+.card-orange .tool-card-action:hover {
+  color: #e04513;
+}
+
+/* 蓝色卡片特异样式 */
+.card-blue:hover {
+  border-color: #91d5ff;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+.card-blue .tool-card-icon-wrap {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.card-blue .tool-card-action {
+  color: #1890ff;
+}
+
+.card-blue .tool-card-action:hover {
+  color: #096dd9;
+}
+
+/* 卡片内部结构 */
 .tool-card-icon-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fa8c16;
-  font-size: 22px;
+  font-size: 20px;
+  transition: transform 0.2s;
+}
+
+.tool-card:hover .tool-card-icon-wrap {
+  transform: scale(1.05);
 }
 
 .tool-card-body {
@@ -121,52 +275,725 @@
 }
 
 .tool-card-title {
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.88);
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
 }
 
 .tool-card-desc {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11.5px;
+  line-height: 1.45;
   color: rgba(0, 0, 0, 0.45);
 }
 
 .tool-card-action {
   flex-shrink: 0;
   align-self: center;
-  color: #fa8c16;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   cursor: pointer;
   white-space: nowrap;
+  opacity: 0.85;
+  transition: opacity 0.2s;
 }
 
-.tool-card-action:hover {
-  color: #d46b08;
+.tool-card:hover .tool-card-action {
+  opacity: 1;
 }
 
+/* Badge 角标 */
 .badge-new,
 .badge-hot {
   position: absolute;
-  top: -6px;
-  left: -4px;
-  font-size: 10px;
+  top: -8px;
+  left: -8px;
+  font-size: 9px;
   line-height: 1;
-  padding: 2px 5px;
-  border-radius: 2px;
-  font-weight: 500;
-  color: #fff;
+  padding: 2px 4px;
+  border-radius: 4px 1px 4px 1px;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .badge-new {
-  background: #ff4d4f;
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
 }
 
 .badge-hot {
-  background: #fa8c16;
+  background: linear-gradient(135deg, #fa8c16 0%, #ffc069 100%);
+}
+
+
+/* ==========================================
+   三、【全新优化】LotteryEditor 大抽奖装修界面
+   ========================================== */
+.lottery-editor-wrapper {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ebedf0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+/* 装修顶部 tab 排版 */
+.editor-tab-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 2px;
+  margin-bottom: 16px;
+}
+
+.editor-tab-header .ant-tabs-nav {
+  margin-bottom: 0;
+}
+
+/* 3.1 手机壳模拟器 (Mobile Simulator) */
+.mobile-phone-frame {
+  width: 320px;
+  height: 680px;
+  border: 10px solid #262626;
+  border-radius: 36px;
+  background: #000;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15), 0 0 1px 2px rgba(0,0,0,0.2) inset;
+  position: relative;
+  box-sizing: content-box;
+}
+
+/* 手机顶部听筒 notch */
+.phone-top-notch {
+  width: 140px;
+  height: 18px;
+  background: #262626;
+  border-radius: 0 0 14px 14px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+/* 状态栏 */
+.phone-status-bar {
+  height: 24px;
+  padding: 0 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  font-size: 11px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  z-index: 9;
+}
+
+/* 手机内部屏幕显示 */
+.phone-screen-content {
+  width: 320px;
+  height: 648px;
+  margin-top: 24px;
+  border-radius: 0 0 26px 26px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-size: cover;
+  background-position: center;
+  transition: background 0.3s ease;
+  scrollbar-width: none; /* Firefox */
+}
+
+.phone-screen-content::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* 手机内页面标题头 */
+.phone-page-header {
+  height: 38px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  color: #ffffff;
+  font-size: 13px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.phone-page-header .back-arrow {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.phone-page-header .activity-title {
+  font-weight: 500;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 惊喜大抽奖头部大横幅 */
+.lottery-head-banner {
+  text-align: center;
+  margin-top: 14px;
+  position: relative;
+  z-index: 2;
+}
+
+.lottery-head-banner .main-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #fffde6;
+  text-shadow: 0 3px 0 #b3001e, 0 5px 10px rgba(0, 0, 0, 0.4);
+  font-style: italic;
+  letter-spacing: 1px;
+  line-height: 1.1;
+}
+
+.lottery-head-banner .sub-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fffde6;
+  text-shadow: 0 3px 0 #b3001e, 0 6px 12px rgba(0, 0, 0, 0.5);
+  font-style: italic;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+/* 3.2 抽奖机主体 */
+.preview-lottery-machine {
+  width: 288px;
+  min-height: 280px;
+  margin: 0 auto;
+  border-radius: 16px;
+  border: 6px solid #ffe599;
+  background: linear-gradient(180deg, #d80c1c 0%, #99000a 100%);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 2px 4px rgba(255,255,255,0.2) inset;
+  padding: 12px;
+  box-sizing: border-box;
+  position: absolute;
+  left: 16px;
+  z-index: 5;
+  transition: transform 0.15s ease-out; /* 高度/平移变化时产生顺滑过渡 */
+}
+
+/* 奖品区域网格容器 */
+.preview-grid-container {
+  background: #800005;
+  border-radius: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3) inset;
+  transition: padding 0.15s ease-out; /* 留白间距调节时平滑变化 */
+}
+
+/* 九宫格布局 */
+.preview-nine-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+/* 奖品格子 */
+.grid-prize-cell {
+  background: #ffffff;
+  border-radius: 6px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #333333;
+  box-shadow: 0 2px 0 #e0e0e0;
+  gap: 4px;
+}
+
+.grid-prize-cell .prize-name {
+  font-weight: 500;
+  transform: scale(0.95);
+}
+
+/* 立即抽奖核心动作按钮 */
+.grid-prize-action {
+  background: #ffae00;
+  color: #d80c1c;
+  border: none;
+  border-radius: 6px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b37400, 0 1px 2px rgba(0,0,0,0.2);
+  transition: transform 0.1s;
+}
+
+.grid-prize-action:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #b37400;
+}
+
+.grid-prize-action .btn-label {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.grid-prize-action .btn-sub {
+  font-size: 8px;
+  opacity: 0.85;
+  transform: scale(0.85);
+  margin-top: 1px;
+}
+
+/* 大转盘预览视觉 */
+.preview-wheel-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.preview-wheel-circle {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: #fffef0;
+  border: 6px solid #ffae00;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.wheel-segment-line {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: rgba(216, 12, 28, 0.15);
+  top: 50%;
+  left: 0;
+}
+
+.wheel-center-pointer {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ffae00;
+  color: #d80c1c;
+  border: 3px solid #ffffff;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 2;
+  cursor: pointer;
+}
+
+.wheel-center-pointer::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 5px;
+  border-style: solid;
+  border-color: transparent transparent #ffffff transparent;
+}
+
+/* 抽奖机辅助选项按钮 */
+.preview-machine-footer {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 12px;
+}
+
+.footer-pill-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 9px;
+  color: #ffffff;
+}
+
+.footer-pill-btn.color-orange {
+  background: #ffae00;
+  color: #800005;
+  border-color: #ffe599;
+  font-weight: 600;
+}
+
+/* 3.3 底部装饰底座/奖台 */
+.preview-pedestal-platform {
+  width: 300px;
+  height: 52px;
+  background: linear-gradient(180deg, #ffc000 0%, #ff6000 100%);
+  border-radius: 16px 16px 20px 20px;
+  position: absolute;
+  left: 50%;
+  z-index: 4;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(255,255,255,0.4) inset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.15s ease-out; /* 联动位移和大小变化时平滑过渡 */
+}
+
+.pedestal-indicator-lights {
+  display: flex;
+  gap: 20px;
+}
+
+.pedestal-indicator-lights span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
+  animation: lightsBlink 1s infinite alternate;
+}
+
+.pedestal-indicator-lights span:nth-child(even) {
+  animation-delay: 0.5s;
+}
+
+@keyframes lightsBlink {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* 中奖记录通告 */
+.preview-winner-records-bar {
+  width: 288px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  position: absolute;
+  top: 450px;
+  left: 16px;
+  z-index: 3;
+}
+
+.preview-winner-records-bar .record-item {
+  color: #ffffff;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+/* 3.4 手机底部“我的奖品”卡片 */
+.preview-my-prizes-card {
+  width: 288px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px;
+  position: absolute;
+  top: 486px;
+  left: 16px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 3;
+}
+
+.preview-my-prizes-card .card-header-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.preview-my-prizes-card .card-header-bar .title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333333;
+}
+
+.preview-my-prizes-card .card-header-bar .more {
+  font-size: 10px;
+  color: #999999;
+}
+
+.prize-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.prize-list-item:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.prize-list-item .badge {
+  background: #fff2f0;
+  color: #ff4d4f;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  transform: scale(0.9);
+}
+
+.prize-list-item .badge.color-gray {
+  background: #f5f5f5;
+  color: #8c8c8c;
+}
+
+.prize-list-item .info {
+  flex: 1;
+  min-width: 0;
+}
+
+.prize-list-item .info .name {
+  font-size: 11px;
+  font-weight: 500;
+  color: #333333;
+}
+
+.prize-list-item .info .time {
+  font-size: 8px;
+  color: #999999;
+  transform: scale(0.9);
+  transform-origin: left;
+}
+
+.prize-list-item .btn-exchange {
+  background: #ff4d4f;
+  color: #ffffff;
+  border: none;
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.prize-list-item .btn-exchange.outline {
+  background: transparent;
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+}
+
+/* 广告位卡片 */
+.preview-ad-banner {
+  width: 288px;
+  height: 48px;
+  background: #2e3033;
+  border-radius: 6px;
+  position: absolute;
+  top: 618px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  box-sizing: border-box;
+  gap: 8px;
+  z-index: 3;
+}
+
+.preview-ad-banner .ad-label {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 8px;
+  padding: 1px 3px;
+  border-radius: 2px;
+}
+
+.preview-ad-banner .ad-text {
+  color: #ffffff;
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ==========================================
+   四、右侧：表单配置面板样式 (Editor Properties)
+   ========================================== */
+.editor-properties-panel {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 20px;
+  height: 680px;
+  overflow-y: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01) inset;
+}
+
+/* 属性卡片分组 */
+.prop-group-card {
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+}
+
+.prop-group-card.highlight-card {
+  border-left: 4px solid #1890ff;
+  background: #fbfdff;
+}
+
+.prop-group-card .group-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f5f5f5;
+  padding-bottom: 8px;
+}
+
+.group-intro-text {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: -6px;
+  margin-bottom: 14px;
+}
+
+/* 控制面板头部重置 */
+.panel-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.panel-header-section .title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* 属性行排版 */
+.prop-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.prop-row:last-child {
+  margin-bottom: 0;
+}
+
+.prop-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
+  margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.label-help-icon {
+  color: #bfbfbf;
+  cursor: help;
+  font-size: 12px;
+}
+
+.label-help-icon:hover {
+  color: #8c8c8c;
+}
+
+.prop-control {
+  min-height: 32px;
+}
+
+/* 滑动条控制组排版 */
+.slider-control-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.slider-control-group .slider-wrapper {
+  flex: 1;
+}
+
+.prop-tip-text {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 4px;
+}
+
+.side-switch-explain {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+/* 上传控件模块 */
+.image-uploader-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fbfbfb;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.uploader-preview-img {
+  width: 48px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+}
+
+.uploader-box-placeholder {
+  width: 50px;
+  height: 50px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #bfbfbf;
+  cursor: pointer;
+  background: #ffffff;
+}
+
+.uploader-box-placeholder:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.uploader-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-format-spec {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.color-picker-group {
+  display: flex;
+  align-items: center;
 }
