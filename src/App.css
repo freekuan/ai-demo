@@ -1,36 +1,38 @@
+/* 主容器 */
 .marketing-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #f5f7fa;
 }
 
+/* 一级菜单 Rail */
 .icon-rail {
-  width: 64px;
+  width: 68px;
   flex-shrink: 0;
-  background: #fff;
-  border-right: 1px solid #f0f0f0;
+  background: #ffffff;
+  border-right: 1px solid #ebedf0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 0 16px;
-  gap: 2px;
+  padding: 16px 0;
+  gap: 6px;
 }
 
 .icon-rail-item {
   width: 56px;
-  min-height: 52px;
+  min-height: 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 6px 4px;
+  padding: 6px 2px;
   border-radius: 8px;
   color: rgba(0, 0, 0, 0.55);
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   background: transparent;
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
 }
 
@@ -39,7 +41,13 @@
   color: #1890ff;
 }
 
-.icon-rail-item.active {
+/* 根据当前激活的主题自定义 Rail Item 激活色 */
+.theme-orange .icon-rail-item.active {
+  background: #fff2ec;
+  color: #ff5e29;
+}
+
+.theme-blue .icon-rail-item.active {
   background: #e6f7ff;
   color: #1890ff;
 }
@@ -59,81 +67,202 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
+.theme-orange .icon-rail-ai {
+  background: linear-gradient(135deg, #ff5e29 0%, #ff007f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 二级菜单侧边栏 */
 .sub-sider .ant-layout-sider-children {
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid #ebedf0;
 }
 
+/* 右侧主内容间距 */
 .main-inner {
-  padding: 20px 28px 40px;
-  max-width: 1200px;
+  padding: 16px 24px 48px;
 }
 
 .main-header {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  align-items: center;
 }
 
-.main-header a {
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 13px;
+/* 顶部护航服务浮条 */
+.top-banner-bar {
+  background: #e6f7ff;
+  border: 1px solid #bae7ff;
+  padding: 6px 14px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
-.main-header a:hover {
-  color: #fa8c16;
+.banner-icon {
+  color: #1890ff;
+  font-size: 14px;
 }
 
+.banner-text {
+  font-weight: 400;
+}
+
+.banner-separator {
+  color: #d9d9d9;
+  margin: 0 4px;
+}
+
+.banner-link {
+  color: #1890ff;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+}
+
+.banner-link:hover {
+  text-decoration: underline;
+}
+
+/* 面包屑 / 导航定位 */
+.breadcrumb-path {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.path-split {
+  margin: 0 8px;
+  color: rgba(0, 0, 0, 0.15);
+}
+
+.path-current {
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 500;
+}
+
+/* 列表区块样式 */
 .tool-section {
-  margin-top: 28px;
+  margin-top: 32px;
 }
 
 .tool-section:first-of-type {
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .tool-section-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.88);
   margin: 0 0 16px;
+  position: relative;
+  padding-left: 10px;
 }
 
+.tool-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.theme-orange .tool-section-title::before {
+  background: #ff5e29;
+}
+
+.theme-blue .tool-section-title::before {
+  background: #1890ff;
+}
+
+/* 工具卡片 */
 .tool-card {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 4px;
-  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid #ebedf0;
+  border-radius: 6px;
+  padding: 16px;
   display: flex;
   align-items: flex-start;
   gap: 14px;
   height: 100%;
-  transition:
-    box-shadow 0.2s,
-    border-color 0.2s;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.01);
 }
 
-.tool-card:hover {
+/* 橙色卡片特异样式 */
+.card-orange:hover {
   border-color: #ffd591;
-  box-shadow: 0 2px 8px rgba(250, 140, 22, 0.08);
+  box-shadow: 0 6px 16px rgba(255, 94, 41, 0.06);
+  transform: translateY(-2px);
 }
 
+.card-orange .tool-card-icon-wrap {
+  background: #fff2ec;
+  color: #ff5e29;
+}
+
+.card-orange .tool-card-action {
+  color: #ff5e29;
+}
+
+.card-orange .tool-card-action:hover {
+  color: #e04513;
+}
+
+/* 蓝色卡片特异样式 */
+.card-blue:hover {
+  border-color: #91d5ff;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+.card-blue .tool-card-icon-wrap {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.card-blue .tool-card-action {
+  color: #1890ff;
+}
+
+.card-blue .tool-card-action:hover {
+  color: #096dd9;
+}
+
+/* 卡片内部结构 */
 .tool-card-icon-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fa8c16;
-  font-size: 22px;
+  font-size: 20px;
+  transition: transform 0.2s;
+}
+
+.tool-card:hover .tool-card-icon-wrap {
+  transform: scale(1.05);
 }
 
 .tool-card-body {
@@ -142,52 +271,63 @@
 }
 
 .tool-card-title {
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.88);
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
 }
 
 .tool-card-desc {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11.5px;
+  line-height: 1.45;
   color: rgba(0, 0, 0, 0.45);
 }
 
 .tool-card-action {
   flex-shrink: 0;
   align-self: center;
-  color: #fa8c16;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   cursor: pointer;
   white-space: nowrap;
+  opacity: 0.85;
+  transition: opacity 0.2s;
 }
 
-.tool-card-action:hover {
-  color: #d46b08;
+.tool-card:hover .tool-card-action {
+  opacity: 1;
 }
 
+/* Badge 角标 */
 .badge-new,
 .badge-hot {
   position: absolute;
-  top: -6px;
-  left: -4px;
-  font-size: 10px;
+  top: -8px;
+  left: -8px;
+  font-size: 9px;
   line-height: 1;
-  padding: 2px 5px;
-  border-radius: 2px;
-  font-weight: 500;
-  color: #fff;
+  padding: 2px 4px;
+  border-radius: 4px 1px 4px 1px;
+  font-weight: 600;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .badge-new {
-  background: #ff4d4f;
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
 }
 
 .badge-hot {
-  background: #fa8c16;
+  background: linear-gradient(135deg, #fa8c16 0%, #ffc069 100%);
+}
+
+/* 自适应阴影和精细边距优化 */
+@media (max-width: 768px) {
+  .icon-rail {
+    display: none;
+  }
 }
