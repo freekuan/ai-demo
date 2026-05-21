@@ -997,3 +997,594 @@
   display: flex;
   align-items: center;
 }
+
+/* ==========================================
+   五、互动任务 (TaskEditor) 专属样式
+   ========================================== */
+
+/* 5.1 微信小程序任务详情页面预览 */
+.task-detail-preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  min-height: 100%;
+}
+
+/* 顶部视觉 Banner */
+.task-preview-banner {
+  height: 120px;
+  background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #ffffff;
+}
+
+.task-preview-banner::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+}
+
+.task-preview-banner .banner-main-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.task-preview-banner .banner-sub-title {
+  font-size: 11px;
+  opacity: 0.9;
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
+/* 奖励积分卡片 */
+.task-reward-card {
+  margin: -12px 12px 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.task-reward-card .reward-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-reward-card .reward-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.task-reward-card .reward-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff4d4f;
+  margin-top: 2px;
+}
+
+.task-reward-card .reward-value span {
+  font-size: 11px;
+  font-weight: 400;
+  margin-left: 2px;
+  color: #8c8c8c;
+}
+
+.task-reward-card .reward-badge {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: #ff4d4f;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* 步骤引导列表 */
+.task-steps-container {
+  padding: 0 12px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-step-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+/* 步骤头部 */
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.step-number-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-number-badge.blue-theme {
+  background: #1890ff;
+}
+
+.step-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #262626;
+}
+
+.step-desc {
+  font-size: 11px;
+  color: #8c8c8c;
+  margin-left: auto;
+}
+
+/* 第一步：认准目标帖子卡片 */
+.post-target-visual {
+  background: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+  padding: 8px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.post-target-visual::after {
+  content: "认准目标帖子";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 8px;
+  padding: 2px 6px;
+  border-radius: 0 5px 0 5px;
+  transform: scale(0.9);
+  transform-origin: top right;
+}
+
+.post-visual-img {
+  width: 52px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+
+.post-visual-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.post-visual-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #262626;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-visual-author {
+  font-size: 9px;
+  color: #8c8c8c;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.post-visual-platform-tag {
+  font-size: 8px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  background: #fff2f0;
+  color: #ff4d4f;
+  transform: scale(0.95);
+  display: inline-block;
+}
+
+.post-visual-platform-tag.xhs {
+  background: #ff4d4f;
+  color: #ffffff;
+}
+
+.post-visual-platform-tag.dy {
+  background: #1c0b2b;
+  color: #ffffff;
+}
+
+/* 按钮组 */
+.step-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn-pill {
+  flex: 1;
+  height: 30px;
+  border-radius: 15px;
+  border: 1px solid #ff4d4f;
+  background: transparent;
+  color: #ff4d4f;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn-pill.blue-theme {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.action-btn-pill:active {
+  transform: scale(0.97);
+  background: rgba(255, 77, 79, 0.05);
+}
+
+.action-btn-pill.blue-theme:active {
+  background: rgba(24, 144, 255, 0.05);
+}
+
+.action-btn-pill.filled {
+  background: #ff4d4f;
+  color: #ffffff;
+}
+
+.action-btn-pill.filled.blue-theme {
+  background: #1890ff;
+  color: #ffffff;
+}
+
+.action-btn-subtip {
+  font-size: 8.5px;
+  color: #8c8c8c;
+  text-align: center;
+  margin-top: 5px;
+  line-height: 1.3;
+}
+
+/* 第二步：互动要求和关键词 */
+.step-requirements-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.requirement-check-list {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.requirement-check-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #595959;
+}
+
+.requirement-check-item.active {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.requirement-check-item.active.blue-theme {
+  color: #1890ff;
+}
+
+.keyword-highlight-box {
+  background: #fffbe6;
+  border: 1px dashed #ffe58f;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.keyword-highlight-box.blue-theme {
+  background: #f0f5ff;
+  border-color: #adc6ff;
+}
+
+.keyword-text-area {
+  font-size: 11px;
+  color: #d46b08;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.keyword-text-area.blue-theme {
+  color: #1d39c4;
+}
+
+.keyword-text-area span {
+  font-size: 9px;
+  color: #8c8c8c;
+  font-weight: 400;
+}
+
+.keyword-copy-link {
+  font-size: 10px;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.keyword-copy-link.blue-theme {
+  color: #1890ff;
+}
+
+/* 第三步：上传凭证 */
+.screenshot-upload-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.screenshot-mock-box {
+  width: 60px;
+  height: 60px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #bfbfbf;
+  cursor: pointer;
+  background: #fafafa;
+}
+
+.screenshot-mock-box:hover {
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+.screenshot-mock-box.blue-theme:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.screenshot-mock-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+.screenshot-upload-tip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.screenshot-upload-tip-text {
+  font-size: 10.5px;
+  color: #8c8c8c;
+  line-height: 1.4;
+}
+
+.view-example-trigger {
+  font-size: 10.5px;
+  color: #ff4d4f;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.view-example-trigger.blue-theme {
+  color: #1890ff;
+}
+
+/* 底部浮动提交按钮 */
+.task-bottom-action-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: #ffffff;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.task-submit-btn-full {
+  width: 100%;
+  height: 36px;
+  background: #ff4d4f;
+  color: #ffffff;
+  border: none;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.2);
+}
+
+.task-submit-btn-full.blue-theme {
+  background: #1890ff;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
+}
+
+.task-submit-btn-full:active {
+  opacity: 0.9;
+}
+
+/* 5.2 后台配置表单 */
+.task-properties-form {
+  padding: 8px 0;
+}
+
+.task-properties-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.task-properties-form .ant-form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-item-help-tip {
+  font-size: 11px;
+  color: #8c8c8c;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* 图片上传预览块 */
+.media-uploader-box {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  padding: 12px;
+  background: #fafafa;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.media-uploader-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #f0f0f0;
+  background: #ffffff;
+}
+
+.media-uploader-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.media-uploader-actions .btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.media-uploader-actions .format-desc {
+  font-size: 10px;
+  color: #bfbfbf;
+}
+
+/* 弹出框示例图 */
+.example-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.example-modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 250px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.example-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 16px;
+  color: #bfbfbf;
+  cursor: pointer;
+}
+
+.example-modal-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #262626;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.example-modal-img {
+  width: 140px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+}
+
+.example-modal-tip {
+  font-size: 10px;
+  color: #ff4d4f;
+  margin-top: 8px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.example-modal-tip.blue-theme {
+  color: #1890ff;
+}
+
