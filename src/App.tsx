@@ -1301,6 +1301,12 @@ function TaskEditor() {
   const [coverImage, setCoverImage] = useState<string>('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80')
   const [qrCodeImage, setQrCodeImage] = useState<string>('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.xiaohongshu.com')
   const [customGuideText, setCustomGuideText] = useState<string>('由于微信限制，请选择以下任一方式打开帖子完成任务：')
+  
+  // 头部海报配置
+  const [bannerType, setBannerType] = useState<'gradient' | 'image'>('image')
+  const [bannerImage, setBannerImage] = useState<string>('/task_banner_default.png')
+  const [bannerTitle, setBannerTitle] = useState<string>('互动宠粉')
+  const [bannerSubtitle, setBannerSubtitle] = useState<string>('这波福利直接拉满，完成指定互动即可领奖！')
 
   // 前台模拟交互 State
   const [uploadedScreenshot, setUploadedScreenshot] = useState<string>('')
@@ -1318,6 +1324,12 @@ function TaskEditor() {
     setCoverImage('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80')
     setQrCodeImage('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.xiaohongshu.com')
     setCustomGuideText('由于微信限制，请选择以下任一方式打开帖子完成任务：')
+    
+    // 重置海报配置
+    setBannerType('image')
+    setBannerImage('/task_banner_default.png')
+    setBannerTitle('互动宠粉')
+    setBannerSubtitle('这波福利直接拉满，完成指定互动即可领奖！')
     
     // 重置交互状态
     setUploadedScreenshot('')
@@ -1425,10 +1437,16 @@ function TaskEditor() {
               </div>
 
               {/* 顶部海报 Banner */}
-              <div className="task-preview-banner">
-                <h2 className="banner-main-title">互动宠粉</h2>
-                <p className="banner-sub-title">这波福利直接拉满，完成指定互动即可领奖！</p>
-              </div>
+              {bannerType === 'image' ? (
+                <div className="task-preview-banner-img-wrap">
+                  <img src={bannerImage} alt="活动介绍海报" className="task-preview-banner-img" />
+                </div>
+              ) : (
+                <div className="task-preview-banner">
+                  <h2 className="banner-main-title">{bannerTitle}</h2>
+                  <p className="banner-sub-title">{bannerSubtitle}</p>
+                </div>
+              )}
 
               {/* 奖励积分卡片 */}
               <div className="task-reward-card">
@@ -1638,9 +1656,95 @@ function TaskEditor() {
                 </div>
               </div>
 
-              {/* 二、互动要求与动作 */}
+              {/* 二、头部海报设置 */}
               <div className="prop-group-card">
-                <h3 className="group-title">二、要求互动动作</h3>
+                <h3 className="group-title">二、头部海报设置</h3>
+                
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>头部海报类型</span>
+                    <Tooltip title="配置手机预览页面头部的海报样式，支持自定义设计大图或者经典的渐变色配标题。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <Radio.Group
+                      value={bannerType}
+                      onChange={(e) => setBannerType(e.target.value)}
+                      optionType="button"
+                      buttonStyle="solid"
+                    >
+                      <Radio.Button value="image">图片海报 (推荐)</Radio.Button>
+                      <Radio.Button value="gradient">渐变文字海报</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                </div>
+
+                {bannerType === 'image' ? (
+                  <div className="prop-row">
+                    <div className="prop-label">
+                      <span>活动介绍海报图</span>
+                      <Tooltip title="用户端小程序顶部的大型活动介绍海报。建议上传宽度: 100% 占比、高度适中的精美设计图（支持 PNG/JPG）。">
+                        <QuestionCircleOutlined className="label-help-icon" />
+                      </Tooltip>
+                    </div>
+                    <div className="prop-control">
+                      <div className="media-uploader-box">
+                        <img src={bannerImage} alt="海报预览" className="media-uploader-preview" style={{ height: 60, objectFit: 'cover' }} />
+                        <div className="media-uploader-actions">
+                          <div className="btn-row">
+                            <Upload maxCount={1} showUploadList={false}>
+                              <Button size="small" icon={<UploadOutlined />}>上传新海报</Button>
+                            </Upload>
+                            <Button 
+                              size="small" 
+                              type="text" 
+                              danger 
+                              onClick={() => setBannerImage('/task_banner_default.png')}
+                            >
+                              恢复默认海报
+                            </Button>
+                          </div>
+                          <span className="format-desc">支持 PNG/JPG，宽屏铺满，避免文字被折叠</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="prop-row">
+                      <div className="prop-label">
+                        <span>海报主标题</span>
+                      </div>
+                      <div className="prop-control">
+                        <Input
+                          value={bannerTitle}
+                          onChange={(e) => setBannerTitle(e.target.value)}
+                          placeholder="请输入海报主标题"
+                          style={{ maxWidth: 300 }}
+                        />
+                      </div>
+                    </div>
+                    <div className="prop-row">
+                      <div className="prop-label">
+                        <span>海报副标题</span>
+                      </div>
+                      <div className="prop-control">
+                        <Input
+                          value={bannerSubtitle}
+                          onChange={(e) => setBannerSubtitle(e.target.value)}
+                          placeholder="请输入海报副标题描述"
+                          style={{ maxWidth: 300 }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* 三、要求互动动作 */}
+              <div className="prop-group-card">
+                <h3 className="group-title">三、要求互动动作</h3>
                 
                 <div className="prop-row">
                   <div className="prop-label">
@@ -1682,9 +1786,9 @@ function TaskEditor() {
                 )}
               </div>
 
-              {/* 三、目标内容资源 */}
+              {/* 四、目标内容资源 */}
               <div className="prop-group-card">
-                <h3 className="group-title">三、目标内容资产 (直接呈现给C端)</h3>
+                <h3 className="group-title">四、目标内容资产 (直接呈现给C端)</h3>
                 
                 <div className="prop-row">
                   <div className="prop-label">
@@ -1764,9 +1868,9 @@ function TaskEditor() {
                 </div>
               </div>
 
-              {/* 四、文案引导自定义 */}
+              {/* 五、文案引导自定义 */}
               <div className="prop-group-card">
-                <h3 className="group-title">四、C端用户操作提示与引导语</h3>
+                <h3 className="group-title">五、C端用户操作提示与引导语</h3>
                 
                 <div className="prop-row">
                   <div className="prop-label">
