@@ -424,6 +424,7 @@
   color: #ffffff;
   font-size: 13px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  flex-shrink: 0; /* 防止被 flex 布局压缩高度 */
 }
 
 .phone-page-header .back-arrow {
@@ -1019,6 +1020,7 @@
   position: relative;
   background: #fdf2f2;
   border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0; /* 防止被 flex 布局压缩高度 */
 }
 
 .task-preview-banner-img {
@@ -1039,6 +1041,7 @@
   flex-direction: column;
   justify-content: flex-end;
   color: #ffffff;
+  flex-shrink: 0; /* 防止被 flex 布局压缩高度 */
 }
 
 .task-preview-banner::after {
