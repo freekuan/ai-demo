@@ -62,6 +62,7 @@ export default function InviteReward() {
 
   // 3. 阶梯里程碑
   const [milestones, setMilestones] = useState<Milestone[]>(DEFAULT_MILESTONES)
+  const [milestoneCaliber, setMilestoneCaliber] = useState<'register' | 'order'>('order')
 
   // 4. 规则列表
   const [rules, setRules] = useState([
@@ -88,6 +89,7 @@ export default function InviteReward() {
     setOrderRewardType('coupon')
     setOrderRewardValue('10元无门槛通用券')
     setMilestones([...DEFAULT_MILESTONES])
+    setMilestoneCaliber('order')
     setRules([
       '分享您的专属邀请二维码或海报给好友。',
       '好友扫码进入小程序并成功绑定手机号注册，您即可获得邀请注册奖励。',
@@ -97,6 +99,14 @@ export default function InviteReward() {
     ])
     setSimulatedInvites(2)
     message.success('已恢复系统预置的邀请方案模板')
+  }
+
+  // 联动处理：当关闭下单奖励时，必须锁定阶梯口径为注册成功
+  const handleOrderRewardChange = (checked: boolean) => {
+    setEnableOrderReward(checked)
+    if (!checked) {
+      setMilestoneCaliber('register')
+    }
   }
 
   // 模拟保存
@@ -178,12 +188,13 @@ export default function InviteReward() {
 
   // 模拟点击手机预览中的宝箱
   const handleChestClick = (milestone: Milestone) => {
+    const caliberText = milestoneCaliber === 'order' ? '下单' : '注册'
     if (simulatedInvites >= milestone.target) {
       Modal.success({
         title: '解锁达标大礼包 🎉',
         content: (
           <div style={{ marginTop: 12 }}>
-            <p>您已达成累计邀请 <strong>{milestone.target}</strong> 人要求！</p>
+            <p>您已达成累计邀请 <strong>{milestone.target}</strong> 人{caliberText}要求！</p>
             <p>恭喜获得：<span style={{ color: '#ff4d4f', fontWeight: 'bold' }}>{milestone.rewardValue}</span></p>
             <p style={{ color: '#8c8c8c', fontSize: 12 }}>（系统已自动发放到您的微信会员中心，实物礼品请联系客服核销）</p>
           </div>
@@ -196,8 +207,8 @@ export default function InviteReward() {
         title: '宝箱未解锁 🔒',
         content: (
           <div style={{ marginTop: 12 }}>
-            <p>该宝箱需要累计成功邀请 <strong>{milestone.target}</strong> 人。</p>
-            <p>您目前已邀请 <strong>{simulatedInvites}</strong> 人，还差 <strong style={{ color: '#ff4d4f' }}>{milestone.target - simulatedInvites}</strong> 人即可解锁。</p>
+            <p>该宝箱需要累计成功邀请 <strong>{milestone.target}</strong> 人{caliberText}。</p>
+            <p>您目前已邀请 <strong>{simulatedInvites}</strong> 人{caliberText}，还差 <strong style={{ color: '#ff4d4f' }}>{milestone.target - simulatedInvites}</strong> 人即可解锁。</p>
             <p>解锁后可得：<strong>{milestone.rewardValue}</strong></p>
           </div>
         ),
@@ -332,7 +343,7 @@ export default function InviteReward() {
                         </div>
                         
                         <div className="invite-milestone-hint">
-                          您当前已累计邀请 <strong>{simulatedInvites}</strong> 人
+                          您当前已累计邀请 <strong>{simulatedInvites}</strong> 人{milestoneCaliber === 'order' ? '下单' : '注册'}
                         </div>
 
                         <div className="invite-milestone-section">
@@ -404,7 +415,9 @@ export default function InviteReward() {
                       >
                         立即邀请好友领好礼
                       </button>
-                      <span className="invite-action-hint">好友注册并完成首单即算邀请成功</span>
+                      <span className="invite-action-hint">
+                        {milestoneCaliber === 'order' ? '好友完成首单即算邀请成功，计入阶梯进度' : '好友成功扫描您的二维码注册即算邀请成功'}
+                      </span>
                     </div>
 
                     {/* 4. 邀请动态记录 */}
@@ -448,9 +461,16 @@ export default function InviteReward() {
                     <div className="invite-preview-card" style={{ marginBottom: 12 }}>
                       <div className="invite-preview-card-title">活动细则</div>
                       <ol className="invite-rules-list">
-                        {rules.map((rule, index) => (
-                          <li key={index}>{rule}</li>
-                        ))}
+                        {rules.map((rule, index) => {
+                          if (index === 3) {
+                            return (
+                              <li key={index}>
+                                累计成功邀请人数达到3人、5人、10人，且被邀请好友{milestoneCaliber === 'order' ? '成功下单首单' : '成功绑定手机号注册'}时，可分别解锁解锁对应的超级达标盲盒。
+                              </li>
+                            )
+                          }
+                          return <li key={index}>{rule}</li>
+                        })}
                       </ol>
                     </div>
 
@@ -624,7 +644,7 @@ export default function InviteReward() {
                       <div className="invite-form-card">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                           <span className="invite-form-card-title" style={{ margin: 0 }}>基础奖励②：邀请下单交易成功</span>
-                          <Switch checked={enableOrderReward} onChange={setEnableOrderReward} />
+                          <Switch checked={enableOrderReward} onChange={handleOrderRewardChange} />
                         </div>
                         {enableOrderReward && (
                           <Form layout="vertical">
@@ -682,8 +702,8 @@ export default function InviteReward() {
                           </Form>
                         )}
                         {!enableOrderReward && (
-                          <div style={{ color: '#8c8c8c', fontSize: 12, padding: '10px 0' }}>
-                            <InfoCircleOutlined /> 已关闭下单成功奖励。关闭后，被邀请人下单，邀请人将不会收到直接的下单分成奖励。
+                          <div style={{ color: '#faad14', fontSize: 12, padding: '10px 0' }}>
+                            <InfoCircleOutlined /> 已关闭下单成功奖励。关闭后，被邀请人下单将不会获得基础订单奖励，<strong>同时「阶梯里程碑」累计达标人数也将自动锁定以「注册成功」统计。</strong>
                           </div>
                         )}
                       </div>
@@ -705,7 +725,7 @@ export default function InviteReward() {
                           <div>
                             <span className="invite-form-card-title" style={{ margin: 0 }}>累计达标阶梯里程碑</span>
                             <div style={{ color: '#8c8c8c', fontSize: 11, marginTop: 4 }}>
-                              当邀请人累计成功邀请人数（成功下单）达到设定的阶梯数时，可额外解锁该段对应的宝箱好礼。
+                              当邀请人累计成功邀请人数（当前设为：{milestoneCaliber === 'order' ? '好友完成首单' : '好友注册成功'}）达到设定的阶梯数时，可额外解锁该段对应的宝箱好礼。
                             </div>
                           </div>
                           <Button 
@@ -716,6 +736,59 @@ export default function InviteReward() {
                           >
                             添加新阶梯
                           </Button>
+                        </div>
+
+                        <div style={{ background: '#fcfcfc', border: '1px solid #f0f0f0', borderRadius: 6, padding: '12px 14px', marginBottom: 16 }}>
+                          {/* 联动规则提示 */}
+                          {enableRegisterReward && enableOrderReward && (
+                            <div style={{ 
+                              background: '#e6f7ff', 
+                              border: '1px solid #91d5ff', 
+                              padding: '8px 12px', 
+                              borderRadius: 4, 
+                              marginBottom: 12, 
+                              fontSize: 12,
+                              color: '#0050b3',
+                              lineHeight: 1.5
+                            }}>
+                              💡 <strong>口径联动说明：</strong>当前已同时开启「注册奖励」与「下单奖励」。
+                              阶梯累计人数的统计口径<strong>并非必须</strong>是下单条件。
+                              您可在下方灵活配置：既可以按照较低门槛的「好友注册」进行累计，也可以按照防刷单的「首单下单成功」进行累计。
+                            </div>
+                          )}
+                          {!enableOrderReward && (
+                            <div style={{ 
+                              background: '#fffbe6', 
+                              border: '1px solid #ffe58f', 
+                              padding: '8px 12px', 
+                              borderRadius: 4, 
+                              marginBottom: 12, 
+                              fontSize: 12,
+                              color: '#ad6800',
+                              lineHeight: 1.5
+                            }}>
+                              ⚠️ <strong>系统限制提示：</strong>当前未开启基础「下单奖励」。为了防止逻辑冲突（即被邀请人无需下单，但阶梯又要求下单），
+                              阶梯达标口径<strong>已锁定为「注册成功」</strong>。若要改为以首单下单成功统计阶梯，请先在「基础邀请奖励」中开启下单奖励。
+                            </div>
+                          )}
+                          <Form layout="vertical">
+                            <Form.Item 
+                              label={<strong style={{ fontSize: 12 }}>阶梯达标统计口径配置</strong>} 
+                              required 
+                              tooltip="决定被邀请的好友完成什么动作时，才算作一次成功的邀请并计入累计达标阶梯中"
+                              style={{ marginBottom: 0 }}
+                            >
+                              <Radio.Group 
+                                value={milestoneCaliber} 
+                                onChange={(e) => setMilestoneCaliber(e.target.value)}
+                              >
+                                <Radio.Button value="register">以好友「注册成功」统计阶梯 (门槛低/拉新快)</Radio.Button>
+                                <Radio.Button value="order" disabled={!enableOrderReward}>
+                                  以好友「首单下单成功」统计阶梯 (门槛高/防刷单)
+                                </Radio.Button>
+                              </Radio.Group>
+                            </Form.Item>
+                          </Form>
                         </div>
 
                         {milestones.length === 0 ? (
