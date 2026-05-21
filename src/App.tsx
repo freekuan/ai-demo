@@ -71,6 +71,7 @@ import {
 } from 'antd'
 import type { ReactNode } from 'react'
 import { useCallback, useMemo, useState } from 'react'
+import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -126,6 +127,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-member-mkt', label: '会员营销' },
       { key: 'shop-member-center', label: '会员中心' },
       { key: 'shop-lottery-center', label: '抽奖中心' }, // 触发抽奖装修页面
+      { key: 'shop-golden-egg', label: '砸金蛋' },
       { key: 'shop-coupon-list', label: '卡券列表' },
       { key: 'shop-distributor', label: '分销商' },
     ],
@@ -1928,6 +1930,7 @@ export default function App() {
   // 决定当前使用何种色彩主题与面板内容
   const isMarketingToolsPage = railKey === 'shop' && secondaryKey === 'shop-mkt-tools-home'
   const isPointsMarketingPage = railKey === 'shop' && secondaryKey === 'shop-points-mkt'
+  const isGoldenEggPage = railKey === 'shop' && secondaryKey === 'shop-golden-egg'
   const isPointsLotteryPage = railKey === 'shop' && (secondaryKey === 'shop-points-lottery' || secondaryKey === 'shop-lottery-center')
   const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
   
@@ -2039,6 +2042,8 @@ export default function App() {
                   <ToolSection title="有礼营销" items={blueGiftTools} theme="blue" />
                   <ToolSection title="客群维护" items={blueMaintenanceTools} theme="blue" />
                 </div>
+              ) : isGoldenEggPage ? (
+                <SmashGoldenEgg />
               ) : isPointsLotteryPage ? (
                 <LotteryEditor />
               ) : isPointsTaskPage ? (
@@ -2054,9 +2059,11 @@ export default function App() {
                         <br />
                         2. <strong>客群运营 -&gt; 积分营销</strong> (积分营销面)
                         <br />
-                        3. <strong>客群运营 -&gt; 积分抽奖</strong> (大抽奖页面装修)
+                        3. <strong>营销工具 -&gt; 砸金蛋</strong> (砸金蛋 Demo)
                         <br />
-                        4. <strong>客群运营 -&gt; 积分任务</strong> (互动任务页面优化)
+                        4. <strong>客群运营 -&gt; 积分抽奖</strong> (大抽奖页面装修)
+                        <br />
+                        5. <strong>客群运营 -&gt; 积分任务</strong> (互动任务页面优化)
                       </span>
                     }
                   />

@@ -1,0 +1,379 @@
+/* 砸金蛋活动页 - 常见 H5 / 中台营销风格 */
+
+.egg-page {
+  --egg-gold-1: #ffe082;
+  --egg-gold-2: #ffc107;
+  --egg-gold-3: #ff8f00;
+  --egg-red: #e53935;
+  --egg-red-dark: #b71c1c;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.egg-hero {
+  border-radius: 12px;
+  padding: 28px 24px 32px;
+  background: linear-gradient(
+    165deg,
+    #ff6b6b 0%,
+    #e53935 35%,
+    #c62828 70%,
+    #8e0000 100%
+  );
+  color: #fff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(198, 40, 40, 0.35);
+}
+
+.egg-hero::before {
+  content: '';
+  position: absolute;
+  inset: -40% -20%;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 55%
+  );
+  pointer-events: none;
+}
+
+.egg-hero-badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  margin-bottom: 12px;
+  letter-spacing: 0.08em;
+}
+
+.egg-hero-title {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.egg-hero-sub {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.92;
+}
+
+.egg-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.egg-stat {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  padding: 10px 20px;
+  min-width: 120px;
+}
+
+.egg-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.egg-stat-label {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.egg-stage-wrap {
+  margin-top: -24px;
+  padding: 0 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.egg-stage {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 20px 36px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+
+.egg-stage-hint {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin: 0 0 24px;
+}
+
+.egg-stage-hint strong {
+  color: #e53935;
+  font-weight: 600;
+}
+
+.egg-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.egg-pedestal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.egg-shell {
+  position: relative;
+  width: 100px;
+  height: 124px;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  background: transparent;
+  transition: transform 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.egg-shell:hover:not(:disabled) .egg-body {
+  filter: brightness(1.05) drop-shadow(0 6px 12px rgba(255, 152, 0, 0.45));
+  transform: translateY(-4px);
+}
+
+.egg-shell:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.egg-body {
+  width: 100%;
+  height: 100%;
+  border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+  background: linear-gradient(
+    145deg,
+    var(--egg-gold-1) 0%,
+    var(--egg-gold-2) 45%,
+    var(--egg-gold-3) 100%
+  );
+  box-shadow:
+    inset 0 -12px 20px rgba(183, 28, 28, 0.15),
+    inset 0 8px 16px rgba(255, 255, 255, 0.35),
+    0 8px 20px rgba(255, 143, 0, 0.35);
+  position: relative;
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.2s,
+    opacity 0.4s;
+}
+
+.egg-shine {
+  position: absolute;
+  top: 14%;
+  left: 18%;
+  width: 42%;
+  height: 28%;
+  border-radius: 50%;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  pointer-events: none;
+}
+
+.egg-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* 破碎动效 */
+.egg-shell.slamming .egg-body {
+  animation: egg-slam 0.55s ease forwards;
+}
+
+.egg-shell.open .egg-body {
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+}
+
+.egg-crack-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.egg-shell.open .egg-crack-layer {
+  opacity: 1;
+}
+
+.egg-crack-layer svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes egg-slam {
+  0% {
+    transform: rotate(0deg) translateY(0);
+  }
+  20% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  40% {
+    transform: rotate(6deg) translateY(0);
+  }
+  60% {
+    transform: rotate(-4deg) translateY(4px);
+  }
+  80% {
+    transform: rotate(3deg) translateY(-2px);
+  }
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+}
+
+.egg-confetti {
+  position: absolute;
+  inset: -20px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.egg-confetti span {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  opacity: 0;
+}
+
+.egg-shell.open .egg-confetti span {
+  animation: confetti-fall 0.8s ease-out forwards;
+}
+
+.egg-confetti span:nth-child(1) {
+  left: 20%;
+  top: 10%;
+  background: #ffeb3b;
+  animation-delay: 0s;
+}
+.egg-confetti span:nth-child(2) {
+  left: 50%;
+  top: 5%;
+  background: #ff5722;
+  animation-delay: 0.05s;
+}
+.egg-confetti span:nth-child(3) {
+  left: 75%;
+  top: 15%;
+  background: #4caf50;
+  animation-delay: 0.1s;
+}
+.egg-confetti span:nth-child(4) {
+  left: 35%;
+  top: 20%;
+  background: #2196f3;
+  animation-delay: 0.08s;
+}
+.egg-confetti span:nth-child(5) {
+  left: 60%;
+  top: 8%;
+  background: #e91e63;
+  animation-delay: 0.12s;
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(48px) rotate(180deg);
+  }
+}
+
+.egg-open-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  opacity: 0;
+  transition: opacity 0.35s ease 0.1s;
+}
+
+.egg-shell.open .egg-open-placeholder {
+  opacity: 1;
+}
+
+.egg-rules {
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 20px 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.egg-rules h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.egg-rules ol {
+  margin: 0;
+  padding-left: 20px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.prize-modal .ant-modal-content {
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.prize-modal-inner {
+  text-align: center;
+  padding: 32px 24px 28px;
+  background: linear-gradient(180deg, #fff8e1 0%, #fff 55%);
+}
+
+.prize-modal-emoji {
+  font-size: 52px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.prize-modal-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.prize-modal-desc {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.prize-modal-footer {
+  padding: 0 24px 24px;
+}
