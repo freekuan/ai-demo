@@ -1009,7 +1009,22 @@
   display: flex;
   flex-direction: column;
   background: #f8f9fa;
-  min-height: 100%;
+  height: 648px;
+  overflow: hidden; /* 禁用外层滚动，由内层 task-scroll-body 滚动 */
+}
+
+.task-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none; /* Firefox */
+}
+
+.task-scroll-body::-webkit-scrollbar {
+  display: none; /* Safari/Chrome */
 }
 
 /* 顶部视觉 Banner 图片版 */

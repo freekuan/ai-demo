@@ -1436,7 +1436,9 @@ function TaskEditor() {
                 <span className="more-menu">•••</span>
               </div>
 
-              {/* 顶部海报 Banner */}
+              {/* 可滚动的主体区域 */}
+              <div className="task-scroll-body">
+                {/* 顶部海报 Banner */}
               {bannerType === 'image' ? (
                 <div className="task-preview-banner-img-wrap">
                   <img src={bannerImage} alt="活动介绍海报" className="task-preview-banner-img" />
@@ -1560,7 +1562,9 @@ function TaskEditor() {
                   </div>
                 </div>
 
-              </div>
+              </div> {/* 关闭 task-steps-container */}
+
+              </div> {/* 关闭 task-scroll-body */}
 
               {/* 底部浮动提交栏 */}
               <div className="task-bottom-action-bar">
