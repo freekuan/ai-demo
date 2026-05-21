@@ -41,6 +41,12 @@ import {
   InfoCircleOutlined,
   QuestionCircleOutlined,
   PlusOutlined,
+  CopyOutlined,
+  LikeOutlined,
+  CheckOutlined,
+  PictureOutlined,
+  DownloadOutlined,
+  ArrowLeftOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import {
@@ -59,6 +65,9 @@ import {
   Tooltip,
   Upload,
   Button,
+  Checkbox,
+  Input,
+  message,
 } from 'antd'
 import type { ReactNode } from 'react'
 import { useCallback, useMemo, useState } from 'react'
@@ -1279,6 +1288,622 @@ function LotteryEditor() {
   )
 }
 
+// ==========================================
+// 【新组件】TaskEditor：高画质、多端互动任务的保姆级引导编辑器与模拟器
+// ==========================================
+function TaskEditor() {
+  // 后台配置 State
+  const [platform, setPlatform] = useState<'xhs' | 'dy' | 'weibo' | 'wx'>('xhs')
+  const [rewardPoints, setRewardPoints] = useState<number>(100)
+  const [actions, setActions] = useState<string[]>(['like', 'collect', 'comment'])
+  const [commentKeyword, setCommentKeyword] = useState<string>('已种草，想试试')
+  const [postLink, setPostLink] = useState<string>('https://www.xiaohongshu.com/discovery/item/65d1a8b1000000000')
+  const [coverImage, setCoverImage] = useState<string>('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80')
+  const [qrCodeImage, setQrCodeImage] = useState<string>('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.xiaohongshu.com')
+  const [customGuideText, setCustomGuideText] = useState<string>('由于微信限制，请选择以下任一方式打开帖子完成任务：')
+  
+  // 头部海报配置
+  const [bannerType, setBannerType] = useState<'gradient' | 'image'>('image')
+  const [bannerImage, setBannerImage] = useState<string>('/task_banner_default.png')
+  const [bannerTitle, setBannerTitle] = useState<string>('互动宠粉')
+  const [bannerSubtitle, setBannerSubtitle] = useState<string>('这波福利直接拉满，完成指定互动即可领奖！')
+
+  // 前台模拟交互 State
+  const [uploadedScreenshot, setUploadedScreenshot] = useState<string>('')
+  const [showExampleModal, setShowExampleModal] = useState<boolean>(false)
+  const [isCopiedLink, setIsCopiedLink] = useState<boolean>(false)
+  const [isCopiedKeyword, setIsCopiedKeyword] = useState<boolean>(false)
+
+  // 重置默认属性
+  const resetTaskSettings = () => {
+    setPlatform('xhs')
+    setRewardPoints(100)
+    setActions(['like', 'collect', 'comment'])
+    setCommentKeyword('已种草，想试试')
+    setPostLink('https://www.xiaohongshu.com/discovery/item/65d1a8b1000000000')
+    setCoverImage('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80')
+    setQrCodeImage('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.xiaohongshu.com')
+    setCustomGuideText('由于微信限制，请选择以下任一方式打开帖子完成任务：')
+    
+    // 重置海报配置
+    setBannerType('image')
+    setBannerImage('/task_banner_default.png')
+    setBannerTitle('互动宠粉')
+    setBannerSubtitle('这波福利直接拉满，完成指定互动即可领奖！')
+    
+    // 重置交互状态
+    setUploadedScreenshot('')
+    setShowExampleModal(false)
+    setIsCopiedLink(false)
+    setIsCopiedKeyword(false)
+    message.success('已重置回系统初始模板数据')
+  }
+
+  // 模拟操作触发器
+  const handleCopyLink = () => {
+    try {
+      navigator.clipboard.writeText(postLink)
+    } catch (e) {
+      // 兼容非安全环境
+    }
+    setIsCopiedLink(true)
+    message.success('任务链接已成功复制！请打开浏览器或相应App完成跳转')
+    setTimeout(() => setIsCopiedLink(false), 2000)
+  }
+
+  const handleCopyKeyword = () => {
+    try {
+      navigator.clipboard.writeText(commentKeyword)
+    } catch (e) {
+      // 兼容非安全环境
+    }
+    setIsCopiedKeyword(true)
+    message.success('评论关键词已复制到剪切板，去发表吧！')
+    setTimeout(() => setIsCopiedKeyword(false), 2000)
+  }
+
+  const handleSaveQR = () => {
+    message.success('已模拟将帖子二维码保存至手机相册！')
+  }
+
+  const handleToggleUpload = () => {
+    if (uploadedScreenshot) {
+      setUploadedScreenshot('')
+      message.info('已移除上传的截图凭证')
+    } else {
+      setUploadedScreenshot('https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80')
+      message.success('截图凭证上传成功（已模拟填入示例图片）')
+    }
+  }
+
+  const handleSubmitTask = () => {
+    if (!uploadedScreenshot) {
+      message.warning('请先完成第三步，上传互动截图凭证后方可提交！')
+    } else {
+      message.success('凭证已提交成功！预计24小时内审核完毕发放积分奖励')
+    }
+  }
+
+  const platformName = {
+    xhs: '小红书',
+    dy: '抖音',
+    weibo: '微博',
+    wx: '微信视频号',
+  }[platform]
+
+  const platformColorClass = {
+    xhs: 'xhs',
+    dy: 'dy',
+    weibo: 'weibo',
+    wx: 'wx',
+  }[platform]
+
+  return (
+    <div className="lottery-editor-wrapper">
+      {/* 选项卡头部 */}
+      <div className="editor-tab-header">
+        <Tabs
+          activeKey="task-page"
+          items={[
+            { key: 'task-page', label: 'C端任务页面预览' },
+            { key: 'audit-panel', label: '商户审核列表', disabled: true },
+          ]}
+        />
+      </div>
+
+      <Row gutter={24} style={{ marginTop: 12 }}>
+        {/* 左侧：手机预览模拟器 */}
+        <Col xs={24} lg={9} xl={8} style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="mobile-phone-frame">
+            {/* 听筒和镜头 */}
+            <div className="phone-top-notch"></div>
+            
+            {/* 状态栏 */}
+            <div className="phone-status-bar" style={{ color: '#000' }}>
+              <span className="time">9:41</span>
+              <div className="icons">
+                <span className="cellular">📶</span>
+                <span className="wifi">🔋</span>
+              </div>
+            </div>
+
+            {/* 页面预览内容 */}
+            <div className="phone-screen-content task-detail-preview">
+              {/* 页面导航头 */}
+              <div className="phone-page-header" style={{ color: '#333', background: '#fff', borderBottom: '1px solid #f0f0f0', textShadow: 'none' }}>
+                <span className="back-arrow"><ArrowLeftOutlined style={{ fontSize: 13 }} /></span>
+                <span className="activity-title" style={{ fontWeight: 600 }}>任务详情</span>
+                <span className="more-menu">•••</span>
+              </div>
+
+              {/* 可滚动的主体区域 */}
+              <div className="task-scroll-body">
+                {/* 顶部海报 Banner */}
+              {bannerType === 'image' ? (
+                <div className="task-preview-banner-img-wrap">
+                  <img src={bannerImage} alt="活动介绍海报" className="task-preview-banner-img" />
+                </div>
+              ) : (
+                <div className="task-preview-banner">
+                  <h2 className="banner-main-title">{bannerTitle}</h2>
+                  <p className="banner-sub-title">{bannerSubtitle}</p>
+                </div>
+              )}
+
+              {/* 奖励积分卡片 */}
+              <div className="task-reward-card">
+                <div className="reward-left">
+                  <span className="reward-label">完成任务可得</span>
+                  <div className="reward-value">+{rewardPoints} <span>积分</span></div>
+                </div>
+                <div className="reward-badge">截图审核通过后发放</div>
+              </div>
+
+              {/* 步骤引导列表 */}
+              <div className="task-steps-container">
+                
+                {/* 步骤 1：去对应平台找到帖子 */}
+                <div className="task-step-card">
+                  <div className="step-header">
+                    <span className="step-number-badge">1</span>
+                    <span className="step-title">第一步：锁定目标帖子</span>
+                    <span className="step-desc">对照无误</span>
+                  </div>
+
+                  {/* 认准封面视觉区 */}
+                  <div className="post-target-visual">
+                    <img src={coverImage} alt="帖子封面" className="post-visual-img" />
+                    <div className="post-visual-info">
+                      <h4 className="post-visual-title">互动宠粉计划！双击点赞收藏，并在评论区分享你的看法。</h4>
+                      <div className="post-visual-author">
+                        <span className={`post-visual-platform-tag ${platformColorClass}`}>{platformName}</span>
+                        <span>官方推荐号</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p style={{ fontSize: 10.5, color: '#595959', margin: '4px 0 10px', lineHeight: 1.4 }}>
+                    {customGuideText}
+                  </p>
+
+                  <div className="step-actions-row">
+                    <button type="button" className="action-btn-pill filled" onClick={handleCopyLink}>
+                      {isCopiedLink ? <CheckOutlined /> : <CopyOutlined />} {isCopiedLink ? '复制成功' : '一键复制链接'}
+                    </button>
+                    <button type="button" className="action-btn-pill" onClick={handleSaveQR}>
+                      <DownloadOutlined /> 保存二维码
+                    </button>
+                  </div>
+                  <div className="action-btn-subtip">
+                    * 复制后打开【{platformName}】或浏览器访问；或者保存二维码在【{platformName}】扫一扫中打开
+                  </div>
+                </div>
+
+                {/* 步骤 2：完成互动动作 */}
+                <div className="task-step-card">
+                  <div className="step-header">
+                    <span className="step-number-badge">2</span>
+                    <span className="step-title">第二步：完成以下互动操作</span>
+                  </div>
+
+                  <div className="step-requirements-wrap">
+                    <div className="requirement-check-list">
+                      <span className={`requirement-check-item ${actions.includes('like') ? 'active' : ''}`}>
+                        {actions.includes('like') ? <><LikeOutlined style={{ marginRight: 2 }} />已要求点赞</> : <span style={{ opacity: 0.5 }}>点赞 (未要求)</span>}
+                      </span>
+                      <span className={`requirement-check-item ${actions.includes('collect') ? 'active' : ''}`}>
+                        {actions.includes('collect') ? <><StarOutlined style={{ marginRight: 2 }} />已要求收藏</> : <span style={{ opacity: 0.5 }}>收藏 (未要求)</span>}
+                      </span>
+                      <span className={`requirement-check-item ${actions.includes('comment') ? 'active' : ''}`}>
+                        {actions.includes('comment') ? <><MessageOutlined style={{ marginRight: 2 }} />已要求评论</> : <span style={{ opacity: 0.5 }}>评论 (未要求)</span>}
+                      </span>
+                    </div>
+
+                    {actions.includes('comment') && commentKeyword && (
+                      <div className="keyword-highlight-box">
+                        <div className="keyword-text-area">
+                          <span>评论必须包含以下词：</span>
+                          <strong>「 {commentKeyword} 」</strong>
+                        </div>
+                        <span className="keyword-copy-link" onClick={handleCopyKeyword}>
+                          {isCopiedKeyword ? <><CheckOutlined /> 已复制</> : '复制评论词'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 步骤 3：上传凭证 */}
+                <div className="task-step-card">
+                  <div className="step-header">
+                    <span className="step-number-badge">3</span>
+                    <span className="step-title">第三步：上传截图凭证</span>
+                  </div>
+
+                  <div className="screenshot-upload-container">
+                    <div className="screenshot-mock-box" onClick={handleToggleUpload}>
+                      {uploadedScreenshot ? (
+                        <img src={uploadedScreenshot} alt="用户上传的截图" />
+                      ) : (
+                        <>
+                          <PictureOutlined style={{ fontSize: 18 }} />
+                          <span style={{ fontSize: 9, marginTop: 4 }}>上传截图</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="screenshot-upload-tip">
+                      <span className="screenshot-upload-tip-text">
+                        请上传你在【{platformName}】完成 {actions.map(a => ({ like: '点赞', collect: '收藏', comment: '评论' }[a] || a)).join('、')} 的详情页截图，需露出当前账号信息。
+                      </span>
+                      <span className="view-example-trigger" onClick={() => setShowExampleModal(true)}>
+                        查看截图标准 ＞
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+              </div> {/* 关闭 task-steps-container */}
+
+              </div> {/* 关闭 task-scroll-body */}
+
+              {/* 底部浮动提交栏 */}
+              <div className="task-bottom-action-bar">
+                <button type="button" className="task-submit-btn-full" onClick={handleSubmitTask}>
+                  提交凭证
+                </button>
+              </div>
+
+              {/* 示例图 Modal 弹窗 */}
+              {showExampleModal && (
+                <div className="example-modal-overlay">
+                  <div className="example-modal-content">
+                    <span className="example-modal-close" onClick={() => setShowExampleModal(false)}>×</span>
+                    <div className="example-modal-title">截图审核标准示例</div>
+                    <img 
+                      src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80" 
+                      alt="示例截图" 
+                      className="example-modal-img" 
+                    />
+                    <div className="example-modal-tip">
+                      提示：上传的截图需包含清晰的帖子文案、亮起的点赞/收藏标志，以及您发表的含有「{commentKeyword}」的评论。
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </Col>
+
+        {/* 右侧：后台配置属性面板 */}
+        <Col xs={24} lg={15} xl={16}>
+          <div className="editor-properties-panel">
+            {/* 顶栏控制组 */}
+            <div className="panel-header-section">
+              <span className="title">互动任务属性配置</span>
+              <Button
+                type="text"
+                icon={<ReloadOutlined />}
+                onClick={resetTaskSettings}
+                style={{ color: '#8c8c8c' }}
+              >
+                重置默认配置
+              </Button>
+            </div>
+
+            {/* 配置表单 */}
+            <div className="task-properties-form">
+              
+              {/* 一、基础信息设置 */}
+              <div className="prop-group-card">
+                <h3 className="group-title">一、任务基础设置</h3>
+                
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>目标社媒平台</span>
+                    <Tooltip title="用户需要前往的社交媒体应用。前台会相应地改变文案与标识色。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <Radio.Group
+                      value={platform}
+                      onChange={(e) => setPlatform(e.target.value)}
+                      optionType="button"
+                      buttonStyle="solid"
+                    >
+                      <Radio.Button value="xhs">小红书</Radio.Button>
+                      <Radio.Button value="dy">抖音</Radio.Button>
+                      <Radio.Button value="weibo">微博</Radio.Button>
+                      <Radio.Button value="wx">微信视频号</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                </div>
+
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>任务奖励积分</span>
+                    <Tooltip title="审核通过后，C端用户将获得的会员积分额度。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <InputNumber
+                      min={1}
+                      max={10000}
+                      value={rewardPoints}
+                      onChange={(val) => val !== null && setRewardPoints(val)}
+                      addonAfter="积分"
+                      style={{ width: 140 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 二、头部海报设置 */}
+              <div className="prop-group-card">
+                <h3 className="group-title">二、头部海报设置</h3>
+                
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>头部海报类型</span>
+                    <Tooltip title="配置手机预览页面头部的海报样式，支持自定义设计大图或者经典的渐变色配标题。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <Radio.Group
+                      value={bannerType}
+                      onChange={(e) => setBannerType(e.target.value)}
+                      optionType="button"
+                      buttonStyle="solid"
+                    >
+                      <Radio.Button value="image">图片海报 (推荐)</Radio.Button>
+                      <Radio.Button value="gradient">渐变文字海报</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                </div>
+
+                {bannerType === 'image' ? (
+                  <div className="prop-row">
+                    <div className="prop-label">
+                      <span>活动介绍海报图</span>
+                      <Tooltip title="用户端小程序顶部的大型活动介绍海报。建议上传宽度: 100% 占比、高度适中的精美设计图（支持 PNG/JPG）。">
+                        <QuestionCircleOutlined className="label-help-icon" />
+                      </Tooltip>
+                    </div>
+                    <div className="prop-control">
+                      <div className="media-uploader-box">
+                        <img src={bannerImage} alt="海报预览" className="media-uploader-preview" style={{ height: 60, objectFit: 'cover' }} />
+                        <div className="media-uploader-actions">
+                          <div className="btn-row">
+                            <Upload maxCount={1} showUploadList={false}>
+                              <Button size="small" icon={<UploadOutlined />}>上传新海报</Button>
+                            </Upload>
+                            <Button 
+                              size="small" 
+                              type="text" 
+                              danger 
+                              onClick={() => setBannerImage('/task_banner_default.png')}
+                            >
+                              恢复默认海报
+                            </Button>
+                          </div>
+                          <span className="format-desc">支持 PNG/JPG，宽屏铺满，避免文字被折叠</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="prop-row">
+                      <div className="prop-label">
+                        <span>海报主标题</span>
+                      </div>
+                      <div className="prop-control">
+                        <Input
+                          value={bannerTitle}
+                          onChange={(e) => setBannerTitle(e.target.value)}
+                          placeholder="请输入海报主标题"
+                          style={{ maxWidth: 300 }}
+                        />
+                      </div>
+                    </div>
+                    <div className="prop-row">
+                      <div className="prop-label">
+                        <span>海报副标题</span>
+                      </div>
+                      <div className="prop-control">
+                        <Input
+                          value={bannerSubtitle}
+                          onChange={(e) => setBannerSubtitle(e.target.value)}
+                          placeholder="请输入海报副标题描述"
+                          style={{ maxWidth: 300 }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* 三、要求互动动作 */}
+              <div className="prop-group-card">
+                <h3 className="group-title">三、要求互动动作</h3>
+                
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>要求动作组合</span>
+                    <Tooltip title="勾选C端用户必须在目标帖子下完成的操作动作。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <Checkbox.Group
+                      options={[
+                        { label: '点赞', value: 'like' },
+                        { label: '收藏', value: 'collect' },
+                        { label: '评论', value: 'comment' },
+                      ]}
+                      value={actions}
+                      onChange={(checked) => setActions(checked as string[])}
+                    />
+                  </div>
+                </div>
+
+                {actions.includes('comment') && (
+                  <div className="prop-row">
+                    <div className="prop-label">
+                      <span>评论关键词</span>
+                      <Tooltip title="要求用户评论中必须包含的特定关键词（用于前台引导一键复制）。">
+                        <QuestionCircleOutlined className="label-help-icon" />
+                      </Tooltip>
+                    </div>
+                    <div className="prop-control">
+                      <Input
+                        value={commentKeyword}
+                        onChange={(e) => setCommentKeyword(e.target.value)}
+                        placeholder="例如：已种草，想试试"
+                        style={{ maxWidth: 300 }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 四、目标内容资源 */}
+              <div className="prop-group-card">
+                <h3 className="group-title">四、目标内容资产 (直接呈现给C端)</h3>
+                
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>目标帖子链接 (Link)</span>
+                    <Tooltip title="目标帖子的网络访问地址，用户可在C端一键复制。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <Input
+                      value={postLink}
+                      onChange={(e) => setPostLink(e.target.value)}
+                      placeholder="请输入完整的网页链接"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>目标帖子封面图 (内容展示图)</span>
+                    <Tooltip title="帖子的封面/素材预览图。此图将直接陈列于C端步骤一中，作为“锁定目标”的第一直观指示，用户可在小红书等平台中通过此图快速比对锁定正确内容。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <div className="media-uploader-box">
+                      <img src={coverImage} alt="封面" className="media-uploader-preview" />
+                      <div className="media-uploader-actions">
+                        <div className="btn-row">
+                          <Upload maxCount={1} showUploadList={false}>
+                            <Button size="small" icon={<UploadOutlined />}>上传新封面</Button>
+                          </Upload>
+                          <Button 
+                            size="small" 
+                            type="text" 
+                            danger 
+                            onClick={() => setCoverImage('https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80')}
+                          >
+                            重置
+                          </Button>
+                        </div>
+                        <span className="format-desc">支持 PNG/JPG，建议比例 3:4，直观呈现给C端用户</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>帖子二维码 (扫码直达渠道)</span>
+                    <Tooltip title="生成或上传该文章/视频的二维码图片，供C端保存并在微信外平台中进行扫一扫直接进入。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <div className="media-uploader-box">
+                      <img src={qrCodeImage} alt="二维码" className="media-uploader-preview" />
+                      <div className="media-uploader-actions">
+                        <div className="btn-row">
+                          <Upload maxCount={1} showUploadList={false}>
+                            <Button size="small" icon={<UploadOutlined />}>上传二维码</Button>
+                          </Upload>
+                          <Button 
+                            size="small" 
+                            type="text" 
+                            danger 
+                            onClick={() => setQrCodeImage('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.xiaohongshu.com')}
+                          >
+                            重置
+                          </Button>
+                        </div>
+                        <span className="format-desc">可直接用目标App扫码打开，跨越微信壁垒</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 五、文案引导自定义 */}
+              <div className="prop-group-card">
+                <h3 className="group-title">五、C端用户操作提示与引导语</h3>
+                
+                <div className="prop-row">
+                  <div className="prop-label">
+                    <span>跨平台跳转辅助文案</span>
+                    <Tooltip title="向C端用户解释为何需要复制链接或保存二维码的辅导文案。">
+                      <QuestionCircleOutlined className="label-help-icon" />
+                    </Tooltip>
+                  </div>
+                  <div className="prop-control">
+                    <Input.TextArea
+                      rows={3}
+                      value={customGuideText}
+                      onChange={(e) => setCustomGuideText(e.target.value)}
+                      placeholder="由于平台规则限制，无法直接从微信跳转至小红书，请选择..."
+                      maxLength={150}
+                    />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </Col>
+      </Row>
+    </div>
+  )
+}
+
 export default function App() {
   const [railKey, setRailKey] = useState<PrimaryKey>('shop')
   const [secondaryKey, setSecondaryKey] = useState<string>(
@@ -1304,9 +1929,10 @@ export default function App() {
   const isMarketingToolsPage = railKey === 'shop' && secondaryKey === 'shop-mkt-tools-home'
   const isPointsMarketingPage = railKey === 'shop' && secondaryKey === 'shop-points-mkt'
   const isPointsLotteryPage = railKey === 'shop' && (secondaryKey === 'shop-points-lottery' || secondaryKey === 'shop-lottery-center')
+  const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
   
   // 基础主题色
-  const activeTheme = isPointsMarketingPage ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -1415,6 +2041,8 @@ export default function App() {
                 </div>
               ) : isPointsLotteryPage ? (
                 <LotteryEditor />
+              ) : isPointsTaskPage ? (
+                <TaskEditor />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
@@ -1427,6 +2055,8 @@ export default function App() {
                         2. <strong>客群运营 -&gt; 积分营销</strong> (积分营销面)
                         <br />
                         3. <strong>客群运营 -&gt; 积分抽奖</strong> (大抽奖页面装修)
+                        <br />
+                        4. <strong>客群运营 -&gt; 积分任务</strong> (互动任务页面优化)
                       </span>
                     }
                   />
