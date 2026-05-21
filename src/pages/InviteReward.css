@@ -1,0 +1,504 @@
+/* ==========================================================================
+   邀请有礼 (InviteReward) 专属样式定义
+   ========================================================================== */
+
+/* 容器与双栏栅格 */
+.invite-reward-wrapper {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.invite-editor-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+}
+
+/* 手机预览端样式 */
+.invite-mobile-preview {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 10px;
+}
+
+.invite-phone-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #333333;
+}
+
+/* C端海报 Banner */
+.invite-preview-banner {
+  padding: 24px 16px 16px;
+  text-align: center;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 130px;
+}
+
+.invite-preview-banner.theme-red {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+}
+
+.invite-preview-banner.theme-gold {
+  background: linear-gradient(135deg, #fa8c16 0%, #ffc069 100%);
+}
+
+.invite-preview-banner.theme-blue {
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+}
+
+.invite-preview-banner.theme-purple {
+  background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);
+}
+
+.invite-banner-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+
+.invite-banner-subtitle {
+  font-size: 11px;
+  opacity: 0.95;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* C端小卡片容器 */
+.invite-preview-body {
+  padding: 12px;
+  background-color: #f7f8fa;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.invite-preview-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.invite-preview-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #222222;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.invite-preview-card-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+/* 基础奖励项预览 */
+.invite-basic-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.invite-basic-item {
+  background: #fffcf6;
+  border: 1px solid #ffe8cc;
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.invite-basic-item-label {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.invite-basic-item-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff8800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invite-basic-item-value span {
+  font-size: 16px;
+  margin-right: 2px;
+}
+
+/* 阶梯里程碑预览 */
+.invite-milestone-section {
+  position: relative;
+  padding: 10px 4px 6px;
+}
+
+.invite-progress-container {
+  position: relative;
+  height: 6px;
+  background: #e8e8e8;
+  border-radius: 3px;
+  margin: 32px 14px 18px; /* 给上方宝箱气泡留出空间 */
+}
+
+.invite-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ff4d4f 0%, #ff8800 100%);
+  transition: width 0.4s ease;
+}
+
+/* 阶梯节点 */
+.invite-milestone-node {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.invite-milestone-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid #d9d9d9;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 2;
+}
+
+.invite-milestone-node.active .invite-milestone-dot {
+  border-color: #ff8800;
+  transform: scale(1.15);
+}
+
+.invite-milestone-node.unlocked .invite-milestone-dot {
+  background: #ff8800;
+  border-color: #ffe8cc;
+}
+
+/* 宝箱容器 */
+.invite-chest-wrapper {
+  position: absolute;
+  bottom: 14px; /* 定位在进度条上方 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.invite-chest-bubble {
+  background: #ff4d4f;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 8px;
+  white-space: nowrap;
+  margin-bottom: 2px;
+  box-shadow: 0 2px 4px rgba(255, 77, 79, 0.3);
+  position: relative;
+  transform: scale(0.9);
+}
+
+.invite-chest-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 3px 3px 0;
+  border-style: solid;
+  border-color: #ff4d4f transparent transparent;
+}
+
+.invite-chest-emoji {
+  font-size: 18px;
+  line-height: 1;
+  animation: chestIdle 2.5s infinite ease-in-out;
+}
+
+.invite-milestone-node.unlocked .invite-chest-emoji {
+  animation: chestShake 0.8s infinite alternate ease-in-out;
+}
+
+.invite-milestone-node.claimed .invite-chest-emoji {
+  animation: none;
+  opacity: 0.8;
+}
+
+.invite-milestone-target {
+  position: absolute;
+  top: 12px;
+  font-size: 9px;
+  color: #8c8c8c;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.invite-milestone-node.active .invite-milestone-target {
+  color: #ff8800;
+  font-weight: 700;
+}
+
+/* 里程碑进度文字提示 */
+.invite-milestone-hint {
+  font-size: 10.5px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 4px;
+  background: #fdf5e6;
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px dashed #ffe8cc;
+}
+
+/* 立即邀请核心按钮 */
+.invite-action-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.invite-btn-primary {
+  width: 90%;
+  height: 38px;
+  border-radius: 19px;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.invite-btn-primary:active {
+  transform: translateY(1.5px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* 动效：脉冲效果 */
+.invite-btn-pulse {
+  animation: buttonPulse 2s infinite;
+}
+
+@keyframes buttonPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 77, 79, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
+  }
+}
+
+.invite-action-hint {
+  font-size: 9.5px;
+  color: #8c8c8c;
+}
+
+/* 邀请人列表预览 */
+.invite-list-container {
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.invite-list-container::-webkit-scrollbar {
+  display: none;
+}
+
+.invite-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444444;
+}
+
+.invite-list-row:last-child {
+  border-bottom: none;
+}
+
+.invite-list-user {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.invite-list-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #999;
+}
+
+.invite-list-reward {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+/* 规则预览 */
+.invite-rules-list {
+  padding-left: 14px;
+  margin: 0;
+  font-size: 10.5px;
+  color: #777777;
+  line-height: 1.5;
+}
+
+.invite-rules-list li {
+  margin-bottom: 4px;
+}
+
+/* 宝箱晃动动画 */
+@keyframes chestShake {
+  0% { transform: rotate(-8deg) scale(1.15); }
+  50% { transform: rotate(0deg) scale(1.2); }
+  100% { transform: rotate(8deg) scale(1.15); }
+}
+
+@keyframes chestIdle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.03); }
+}
+
+/* 右侧配置表单样式优化 */
+.invite-form-card {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+.invite-form-card:hover {
+  border-color: #d9d9d9;
+  background: #fcfcfc;
+}
+
+.invite-form-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 16px;
+  border-left: 3px solid #ff8800;
+  padding-left: 8px;
+  line-height: 1;
+}
+
+.invite-stage-form-item {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 14px 14px 0;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+.invite-stage-form-item:hover {
+  border-color: #1890ff;
+}
+
+.invite-stage-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+/* 选择色彩主题块 */
+.invite-theme-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.invite-theme-option {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 4px;
+  color: #fff;
+  font-size: 9px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.invite-theme-option.active {
+  border-color: #1890ff;
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(24, 144, 255, 0.2);
+}
+
+.invite-theme-option.theme-red {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+}
+
+.invite-theme-option.theme-gold {
+  background: linear-gradient(135deg, #fa8c16 0%, #ffc069 100%);
+}
+
+.invite-theme-option.theme-blue {
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+}
+
+.invite-theme-option.theme-purple {
+  background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);
+}

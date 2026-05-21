@@ -72,6 +72,7 @@ import {
 import type { ReactNode } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import SmashGoldenEgg from './pages/SmashGoldenEgg'
+import InviteReward from './pages/InviteReward'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -130,6 +131,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-golden-egg', label: '砸金蛋' },
       { key: 'shop-coupon-list', label: '卡券列表' },
       { key: 'shop-distributor', label: '分销商' },
+      { key: 'shop-invite-reward', label: '邀请有礼' },
     ],
   },
   {
@@ -1933,6 +1935,7 @@ export default function App() {
   const isGoldenEggPage = railKey === 'shop' && secondaryKey === 'shop-golden-egg'
   const isPointsLotteryPage = railKey === 'shop' && (secondaryKey === 'shop-points-lottery' || secondaryKey === 'shop-lottery-center')
   const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
+  const isInviteRewardPage = railKey === 'shop' && secondaryKey === 'shop-invite-reward'
   
   // 基础主题色
   const activeTheme = (isPointsMarketingPage || isPointsTaskPage) ? 'blue' : 'orange'
@@ -2048,6 +2051,8 @@ export default function App() {
                 <LotteryEditor />
               ) : isPointsTaskPage ? (
                 <TaskEditor />
+              ) : isInviteRewardPage ? (
+                <InviteReward />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
