@@ -675,6 +675,7 @@ function LotteryEditor() {
   const [btnTextColor, setBtnTextColor] = useState<string>('#E60B30') // 按钮红色文字
 
   // 6. 奖品格子样式设置
+  const [customPrizeStyle, setCustomPrizeStyle] = useState<boolean>(false)
   const [prizeBgType, setPrizeBgType] = useState<'color' | 'image'>('color')
   const [prizeBgColor, setPrizeBgColor] = useState<string>('#FFFFFF')
   const [prizeBgImage, setPrizeBgImage] = useState<string>('')
@@ -707,6 +708,7 @@ function LotteryEditor() {
     setEnableAd(false)
     setEnableRecharge(true)
     // 重置奖品格子属性
+    setCustomPrizeStyle(false)
     setPrizeBgType('color')
     setPrizeBgColor('#FFFFFF')
     setPrizeBgImage('')
@@ -818,20 +820,24 @@ function LotteryEditor() {
                             key={idx}
                             className="grid-prize-cell"
                             style={{
-                              backgroundColor: prizeBgType === 'color' ? prizeBgColor : 'transparent',
-                              backgroundImage: prizeBgType === 'image' && prizeBgImage ? `url(${prizeBgImage})` : 'none',
+                              backgroundColor: customPrizeStyle
+                                ? (prizeBgType === 'color' ? prizeBgColor : 'transparent')
+                                : '#FFFFFF',
+                              backgroundImage: customPrizeStyle && prizeBgType === 'image' && prizeBgImage
+                                ? `url(${prizeBgImage})`
+                                : 'none',
                               backgroundSize: 'cover',
                               backgroundPosition: 'center',
                               backgroundRepeat: 'no-repeat',
-                              color: prizeTextColor,
+                              color: customPrizeStyle ? prizeTextColor : '#333333',
                             }}
                           >
                             {p.icon && (
-                              <span className="prize-icon-wrap" style={{ color: prizeTextColor }}>
+                              <span className="prize-icon-wrap" style={{ color: customPrizeStyle ? prizeTextColor : '#333333' }}>
                                 {p.icon}
                               </span>
                             )}
-                            <span className="prize-name" style={{ color: prizeTextColor }}>{p.name}</span>
+                            <span className="prize-name" style={{ color: customPrizeStyle ? prizeTextColor : '#333333' }}>{p.name}</span>
                           </div>
                         )
                       })}
@@ -1358,85 +1364,101 @@ function LotteryEditor() {
               </div>
             </div>
 
-            {/* 五、奖品格子样式配置 */}
+            {/* 五、奖品格子样式自定义 */}
             <div className="prop-group-card">
-              <h3 className="group-title">五、奖品格子样式配置</h3>
+              <h3 className="group-title">五、奖品格子样式自定义</h3>
 
               <div className="prop-row">
                 <div className="prop-label">
-                  <span>奖品格子背景</span>
-                  <Tooltip title="配置抽奖机内8个奖品格子的背景底色或背景图案（统一配置）。">
+                  <span>自定义格子样式</span>
+                  <Tooltip title="开启后可个性化配置格子背景色、背景图及文字颜色；未开启则保持原有默认样式外观。">
                     <QuestionCircleOutlined className="label-help-icon" />
                   </Tooltip>
                 </div>
-                <div className="prop-control upload-control-group">
-                  <Radio.Group
-                    value={prizeBgType}
-                    onChange={(e) => setPrizeBgType(e.target.value)}
-                    style={{ marginBottom: 12, display: 'block' }}
-                  >
-                    <Radio value="color">纯色底色</Radio>
-                    <Radio value="image">图片背景</Radio>
-                  </Radio.Group>
+                <div className="prop-control">
+                  <Switch checked={customPrizeStyle} onChange={setCustomPrizeStyle} />
+                </div>
+              </div>
 
-                  {prizeBgType === 'color' ? (
-                    <div className="color-picker-group">
-                      <ColorPicker value={prizeBgColor} onChange={(c) => setPrizeBgColor(c.toHexString())} showText />
+              {customPrizeStyle && (
+                <>
+                  <div className="prop-row">
+                    <div className="prop-label">
+                      <span>奖品格子背景</span>
+                      <Tooltip title="配置抽奖机内8个奖品格子的背景底色或背景图案（统一配置）。">
+                        <QuestionCircleOutlined className="label-help-icon" />
+                      </Tooltip>
                     </div>
-                  ) : (
-                    <div className="image-uploader-block">
-                      {prizeBgImage ? (
-                        <img src={prizeBgImage} alt="格子背景预览" className="uploader-preview-img" style={{ maxHeight: 60, width: 60, objectFit: 'cover', borderRadius: 4 }} />
+                    <div className="prop-control upload-control-group">
+                      <Radio.Group
+                        value={prizeBgType}
+                        onChange={(e) => setPrizeBgType(e.target.value)}
+                        style={{ marginBottom: 12, display: 'block' }}
+                      >
+                        <Radio value="color">纯色底色</Radio>
+                        <Radio value="image">图片背景</Radio>
+                      </Radio.Group>
+
+                      {prizeBgType === 'color' ? (
+                        <div className="color-picker-group">
+                          <ColorPicker value={prizeBgColor} onChange={(c) => setPrizeBgColor(c.toHexString())} showText />
+                        </div>
                       ) : (
-                        <div className="uploader-box-placeholder" style={{ width: 60, height: 60, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', border: '1px dashed #d9d9d9', borderRadius: 4 }}>
-                          <PictureOutlined style={{ fontSize: 16, color: '#bfbfbf' }} />
-                          <span style={{ fontSize: 9, color: '#8c8c8c', marginTop: 4 }}>无图片</span>
+                        <div className="image-uploader-block">
+                          {prizeBgImage ? (
+                            <img src={prizeBgImage} alt="格子背景预览" className="uploader-preview-img" style={{ maxHeight: 60, width: 60, objectFit: 'cover', borderRadius: 4 }} />
+                          ) : (
+                            <div className="uploader-box-placeholder" style={{ width: 60, height: 60, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', border: '1px dashed #d9d9d9', borderRadius: 4 }}>
+                              <PictureOutlined style={{ fontSize: 16, color: '#bfbfbf' }} />
+                              <span style={{ fontSize: 9, color: '#8c8c8c', marginTop: 4 }}>无图片</span>
+                            </div>
+                          )}
+                          <div className="uploader-actions">
+                            <Upload
+                              maxCount={1}
+                              showUploadList={false}
+                              beforeUpload={(file) => handleLocalImageUpload(file, setPrizeBgImage)}
+                            >
+                              <Button size="small" icon={<UploadOutlined />}>上传背景图</Button>
+                            </Upload>
+                            <Button
+                              size="small"
+                              type="text"
+                              danger
+                              onClick={() => setPrizeBgImage('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&h=150&q=80')}
+                            >
+                              预设图
+                            </Button>
+                            {prizeBgImage && (
+                              <Button
+                                size="small"
+                                type="text"
+                                danger
+                                onClick={() => setPrizeBgImage('')}
+                              >
+                                清除
+                              </Button>
+                            )}
+                            <span className="file-format-spec">支持 PNG / JPG，推荐 1:1 比例的正方形透明/浅色背景图</span>
+                          </div>
                         </div>
                       )}
-                      <div className="uploader-actions">
-                        <Upload
-                          maxCount={1}
-                          showUploadList={false}
-                          beforeUpload={(file) => handleLocalImageUpload(file, setPrizeBgImage)}
-                        >
-                          <Button size="small" icon={<UploadOutlined />}>上传背景图</Button>
-                        </Upload>
-                        <Button
-                          size="small"
-                          type="text"
-                          danger
-                          onClick={() => setPrizeBgImage('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&h=150&q=80')}
-                        >
-                          预设图
-                        </Button>
-                        {prizeBgImage && (
-                          <Button
-                            size="small"
-                            type="text"
-                            danger
-                            onClick={() => setPrizeBgImage('')}
-                          >
-                            清除
-                          </Button>
-                        )}
-                        <span className="file-format-spec">支持 PNG / JPG，推荐 1:1 比例的正方形透明/浅色背景图</span>
-                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              <div className="prop-row">
-                <div className="prop-label">
-                  <span>奖品文字颜色</span>
-                  <Tooltip title="配置格子内奖品名称的字体颜色，建议根据格子底色调整，以保持良好的对比度和易读性。">
-                    <QuestionCircleOutlined className="label-help-icon" />
-                  </Tooltip>
-                </div>
-                <div className="prop-control color-picker-group">
-                  <ColorPicker value={prizeTextColor} onChange={(c) => setPrizeTextColor(c.toHexString())} showText />
-                </div>
-              </div>
+                  <div className="prop-row">
+                    <div className="prop-label">
+                      <span>奖品文字颜色</span>
+                      <Tooltip title="配置格子内奖品名称的字体颜色，建议根据格子底色调整，以保持良好的对比度和易读性。">
+                        <QuestionCircleOutlined className="label-help-icon" />
+                      </Tooltip>
+                    </div>
+                    <div className="prop-control color-picker-group">
+                      <ColorPicker value={prizeTextColor} onChange={(c) => setPrizeTextColor(c.toHexString())} showText />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
           </div>
