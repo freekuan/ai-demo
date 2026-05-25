@@ -629,6 +629,18 @@ function getParentMenuLabel(
   return ''
 }
 
+// Helper to read uploaded files as Base64 for instant preview
+const handleLocalImageUpload = (file: any, callback: (url: string) => void) => {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (e.target?.result) {
+      callback(e.target.result as string);
+    }
+  };
+  reader.readAsDataURL(file);
+  return false; // Prevent automatic upload by antd
+};
+
 // ==========================================
 // 【新组件】LotteryEditor：高体验的抽奖页面装修编辑器
 // ==========================================
@@ -662,7 +674,13 @@ function LotteryEditor() {
   const [btnBgColor, setBtnBgColor] = useState<string>('#FFAE00') // 按钮金黄色
   const [btnTextColor, setBtnTextColor] = useState<string>('#E60B30') // 按钮红色文字
 
-  // 6. 展示选项
+  // 6. 奖品格子样式设置
+  const [prizeBgType, setPrizeBgType] = useState<'color' | 'image'>('color')
+  const [prizeBgColor, setPrizeBgColor] = useState<string>('#FFFFFF')
+  const [prizeBgImage, setPrizeBgImage] = useState<string>('')
+  const [prizeTextColor, setPrizeTextColor] = useState<string>('#333333')
+
+  // 7. 展示选项
   const [showWinnerRecord, setShowWinnerRecord] = useState<boolean>(true)
   const [enableAd, setEnableAd] = useState<boolean>(false)
   const [enableRecharge, setEnableRecharge] = useState<boolean>(true)
@@ -688,19 +706,24 @@ function LotteryEditor() {
     setShowWinnerRecord(true)
     setEnableAd(false)
     setEnableRecharge(true)
+    // 重置奖品格子属性
+    setPrizeBgType('color')
+    setPrizeBgColor('#FFFFFF')
+    setPrizeBgImage('')
+    setPrizeTextColor('#333333')
   }
 
   // 模拟的 9 个格子奖品数据
   const mockPrizes = [
-    { id: 1, name: '1 积分', icon: <DatabaseOutlined style={{ color: '#FF9C1A' }} /> },
-    { id: 2, name: '1积分', icon: <DatabaseOutlined style={{ color: '#FF9C1A' }} /> },
-    { id: 3, name: '1 积分', icon: <DatabaseOutlined style={{ color: '#FF9C1A' }} /> },
-    { id: 4, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
+    { id: 1, name: '1 积分', icon: <DatabaseOutlined style={{ fontSize: '18px' }} /> },
+    { id: 2, name: '1积分', icon: <DatabaseOutlined style={{ fontSize: '18px' }} /> },
+    { id: 3, name: '1 积分', icon: <DatabaseOutlined style={{ fontSize: '18px' }} /> },
+    { id: 4, name: '谢谢参与', icon: <SmileOutlined style={{ fontSize: '18px' }} /> },
     { id: 5, action: true, name: '立即抽奖' }, // 中间按钮
-    { id: 6, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
-    { id: 7, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
-    { id: 8, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
-    { id: 9, name: '谢谢参与', icon: <SmileOutlined style={{ color: '#8c8c8c' }} /> },
+    { id: 6, name: '谢谢参与', icon: <SmileOutlined style={{ fontSize: '18px' }} /> },
+    { id: 7, name: '谢谢参与', icon: <SmileOutlined style={{ fontSize: '18px' }} /> },
+    { id: 8, name: '谢谢参与', icon: <SmileOutlined style={{ fontSize: '18px' }} /> },
+    { id: 9, name: '谢谢参与', icon: <SmileOutlined style={{ fontSize: '18px' }} /> },
   ]
 
   return (
@@ -791,9 +814,24 @@ function LotteryEditor() {
                           )
                         }
                         return (
-                          <div key={idx} className="grid-prize-cell">
-                            {p.icon}
-                            <span className="prize-name">{p.name}</span>
+                          <div
+                            key={idx}
+                            className="grid-prize-cell"
+                            style={{
+                              backgroundColor: prizeBgType === 'color' ? prizeBgColor : 'transparent',
+                              backgroundImage: prizeBgType === 'image' && prizeBgImage ? `url(${prizeBgImage})` : 'none',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              backgroundRepeat: 'no-repeat',
+                              color: prizeTextColor,
+                            }}
+                          >
+                            {p.icon && (
+                              <span className="prize-icon-wrap" style={{ color: prizeTextColor }}>
+                                {p.icon}
+                              </span>
+                            )}
+                            <span className="prize-name" style={{ color: prizeTextColor }}>{p.name}</span>
                           </div>
                         )
                       })}
@@ -1149,7 +1187,11 @@ function LotteryEditor() {
                     <div className="image-uploader-block">
                       <img src={bgImage} alt="背景缩略图" className="uploader-preview-img" />
                       <div className="uploader-actions">
-                        <Upload maxCount={1} showUploadList={false}>
+                        <Upload
+                          maxCount={1}
+                          showUploadList={false}
+                          beforeUpload={(file) => handleLocalImageUpload(file, setBgImage)}
+                        >
                           <Button size="small" icon={<UploadOutlined />}>上传新背景</Button>
                         </Upload>
                         <Button
@@ -1186,9 +1228,26 @@ function LotteryEditor() {
 
                   {machineBgType === 'custom' && (
                     <div className="image-uploader-block">
-                      <div className="uploader-box-placeholder">
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8, fontSize: 11 }}>上传透明图</div>
+                      <Upload
+                        maxCount={1}
+                        showUploadList={false}
+                        beforeUpload={(file) => handleLocalImageUpload(file, setCustomMachineImage)}
+                      >
+                        {customMachineImage ? (
+                          <img src={customMachineImage} alt="外壳预览" className="uploader-preview-img" style={{ maxHeight: 80, width: 80, objectFit: 'contain', borderRadius: 4 }} />
+                        ) : (
+                          <div className="uploader-box-placeholder">
+                            <PlusOutlined />
+                            <div style={{ marginTop: 8, fontSize: 11 }}>上传透明图</div>
+                          </div>
+                        )}
+                      </Upload>
+                      <div className="uploader-actions" style={{ marginLeft: 12 }}>
+                        {customMachineImage && (
+                          <Button size="small" type="text" danger onClick={() => setCustomMachineImage('')}>
+                            清除
+                          </Button>
+                        )}
                       </div>
                       <span className="file-format-spec">必须为带透明通道的 PNG 格式图片，推荐大小小于 800KB。</span>
                     </div>
@@ -1210,9 +1269,23 @@ function LotteryEditor() {
                   />
                   {showPedestal && (
                     <div className="image-uploader-block" style={{ marginTop: 8 }}>
-                      <Upload maxCount={1} showUploadList={false}>
+                      {customPedestalImage && (
+                        <img src={customPedestalImage} alt="底座预览" className="uploader-preview-img" style={{ maxHeight: 60, width: 60, objectFit: 'contain', marginRight: 12, borderRadius: 4 }} />
+                      )}
+                      <Upload
+                        maxCount={1}
+                        showUploadList={false}
+                        beforeUpload={(file) => handleLocalImageUpload(file, setCustomPedestalImage)}
+                      >
                         <Button size="small" icon={<UploadOutlined />}>上传专属底座图片</Button>
                       </Upload>
+                      <div className="uploader-actions" style={{ marginLeft: 12 }}>
+                        {customPedestalImage && (
+                          <Button size="small" type="text" danger onClick={() => setCustomPedestalImage('')}>
+                            清除
+                          </Button>
+                        )}
+                      </div>
                       <span className="file-format-spec">PNG 格式，让抽奖活动更具仪式感和高品质感。</span>
                     </div>
                   )}
@@ -1281,6 +1354,87 @@ function LotteryEditor() {
                 <div className="prop-control">
                   <Switch checked={enableRecharge} onChange={setEnableRecharge} />
                   <span className="side-switch-explain">若用户积分余额不足时，引导用户直接跳转至会员卡充值页面。</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 五、奖品格子样式配置 */}
+            <div className="prop-group-card">
+              <h3 className="group-title">五、奖品格子样式配置</h3>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>奖品格子背景</span>
+                  <Tooltip title="配置抽奖机内8个奖品格子的背景底色或背景图案（统一配置）。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control upload-control-group">
+                  <Radio.Group
+                    value={prizeBgType}
+                    onChange={(e) => setPrizeBgType(e.target.value)}
+                    style={{ marginBottom: 12, display: 'block' }}
+                  >
+                    <Radio value="color">纯色底色</Radio>
+                    <Radio value="image">图片背景</Radio>
+                  </Radio.Group>
+
+                  {prizeBgType === 'color' ? (
+                    <div className="color-picker-group">
+                      <ColorPicker value={prizeBgColor} onChange={(c) => setPrizeBgColor(c.toHexString())} showText />
+                    </div>
+                  ) : (
+                    <div className="image-uploader-block">
+                      {prizeBgImage ? (
+                        <img src={prizeBgImage} alt="格子背景预览" className="uploader-preview-img" style={{ maxHeight: 60, width: 60, objectFit: 'cover', borderRadius: 4 }} />
+                      ) : (
+                        <div className="uploader-box-placeholder" style={{ width: 60, height: 60, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', border: '1px dashed #d9d9d9', borderRadius: 4 }}>
+                          <PictureOutlined style={{ fontSize: 16, color: '#bfbfbf' }} />
+                          <span style={{ fontSize: 9, color: '#8c8c8c', marginTop: 4 }}>无图片</span>
+                        </div>
+                      )}
+                      <div className="uploader-actions">
+                        <Upload
+                          maxCount={1}
+                          showUploadList={false}
+                          beforeUpload={(file) => handleLocalImageUpload(file, setPrizeBgImage)}
+                        >
+                          <Button size="small" icon={<UploadOutlined />}>上传背景图</Button>
+                        </Upload>
+                        <Button
+                          size="small"
+                          type="text"
+                          danger
+                          onClick={() => setPrizeBgImage('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&h=150&q=80')}
+                        >
+                          预设图
+                        </Button>
+                        {prizeBgImage && (
+                          <Button
+                            size="small"
+                            type="text"
+                            danger
+                            onClick={() => setPrizeBgImage('')}
+                          >
+                            清除
+                          </Button>
+                        )}
+                        <span className="file-format-spec">支持 PNG / JPG，推荐 1:1 比例的正方形透明/浅色背景图</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="prop-row">
+                <div className="prop-label">
+                  <span>奖品文字颜色</span>
+                  <Tooltip title="配置格子内奖品名称的字体颜色，建议根据格子底色调整，以保持良好的对比度和易读性。">
+                    <QuestionCircleOutlined className="label-help-icon" />
+                  </Tooltip>
+                </div>
+                <div className="prop-control color-picker-group">
+                  <ColorPicker value={prizeTextColor} onChange={(c) => setPrizeTextColor(c.toHexString())} showText />
                 </div>
               </div>
             </div>
