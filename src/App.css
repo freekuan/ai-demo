@@ -1623,3 +1623,497 @@
   color: #1890ff;
 }
 
+/* -------------------------------------------------------------
+ * 6. KOC 种草大频道与二级导航样式
+ * ------------------------------------------------------------- */
+.koc-tab-container-bar {
+  background: #ffffff;
+  padding: 0 20px;
+  border-bottom: 1px solid #e8e8e8;
+  margin: -24px -24px 20px -24px;
+}
+
+.koc-tab-list {
+  display: flex;
+  gap: 32px;
+}
+
+.koc-tab-btn {
+  background: none;
+  border: none;
+  padding: 14px 4px;
+  font-size: 14px;
+  color: #595959;
+  cursor: pointer;
+  position: relative;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.koc-tab-btn:hover {
+  color: #1890ff;
+}
+
+.koc-tab-btn.active {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.koc-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #1890ff;
+}
+
+.koc-tab-badge {
+  background: #ff4d4f;
+  color: #ffffff;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  margin-left: 6px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 6.1 KocHub (玩转KOC种草主页) */
+.koc-hub-wrapper {
+  padding-bottom: 30px;
+}
+
+.koc-hub-banner {
+  background: linear-gradient(135deg, #1890ff 0%, #36cfc9 100%);
+  border-radius: 12px;
+  padding: 30px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+.koc-hub-banner-content {
+  flex: 1;
+  z-index: 2;
+  max-width: 65%;
+}
+
+.koc-badge-pill {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  display: inline-block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+
+.koc-hub-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.koc-hub-subtitle {
+  font-size: 13px;
+  opacity: 0.95;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.koc-hub-banner-graphics {
+  width: 200px;
+  height: 120px;
+  position: relative;
+  z-index: 1;
+}
+
+.graphics-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.graphics-circle.circle-1 {
+  width: 120px;
+  height: 120px;
+  top: -20px;
+  right: -20px;
+}
+
+.graphics-circle.circle-2 {
+  width: 80px;
+  height: 80px;
+  bottom: -20px;
+  right: 60px;
+}
+
+.graphics-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 10px;
+  width: 160px;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  animation: floatEffect 4s ease-in-out infinite alternate;
+}
+
+@keyframes floatEffect {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-8px); }
+}
+
+.graphics-card-header {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.graphics-card-header .dot {
+  font-size: 8px;
+  line-height: 1;
+}
+
+.text-red { color: #ff4d4f; }
+.text-yellow { color: #ffec3d; }
+.text-green { color: #73d13d; }
+
+.graphics-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.graphics-line {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* 6.2 Stats dashboard */
+.koc-hub-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.koc-hub-stat-card {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stat-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon-wrap.bg-blue-light { background: #e6f7ff; }
+.stat-icon-wrap.bg-purple-light { background: #f9f0ff; }
+.stat-icon-wrap.bg-orange-light { background: #fff7e6; }
+.stat-icon-wrap.bg-green-light { background: #f6ffed; }
+
+.stat-icon { font-size: 18px; }
+.stat-icon.text-blue { color: #1890ff; }
+.stat-icon.text-purple { color: #722ed1; }
+.stat-icon.text-orange { color: #fa8c16; }
+.stat-icon.text-green { color: #52c41a; }
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #8c8c8c;
+  margin-bottom: 2px;
+}
+
+.stat-value-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #262626;
+}
+
+.stat-trend {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.stat-trend.trend-up { color: #52c41a; }
+.stat-trend.trend-down { color: #ff4d4f; }
+
+/* 6.3 Flow Section */
+.koc-hub-flow-section {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+  position: relative;
+  padding-left: 10px;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 3px;
+  height: 12px;
+  background: #1890ff;
+  border-radius: 2px;
+}
+
+.koc-hub-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+}
+
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.pipeline-step:hover {
+  background: #f0f5ff;
+  border-color: #adc6ff;
+  transform: translateY(-1px);
+}
+
+.pipeline-number {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1890ff;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.pipeline-content h4 {
+  margin: 0 0 2px 0;
+  font-size: 12px;
+  color: #262626;
+  font-weight: 600;
+}
+
+.pipeline-content p {
+  margin: 0;
+  font-size: 10.5px;
+  color: #8c8c8c;
+}
+
+.pipeline-arrow {
+  color: #bfbfbf;
+  margin: 0 12px;
+  font-size: 14px;
+}
+
+/* 6.4 Cards Grid */
+.koc-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.koc-hub-card {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  transition: all 0.3s;
+}
+
+.koc-hub-card:hover {
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.08);
+  border-color: #bae7ff;
+}
+
+.koc-card-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.koc-card-badge.enabled {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.koc-card-badge.coming-soon {
+  background: #f5f5f5;
+  color: #8c8c8c;
+  border: 1px solid #d9d9d9;
+}
+
+.badge-dot {
+  font-size: 8px;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+.koc-card-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.koc-card-desc {
+  margin: 0 0 20px 0;
+  font-size: 12px;
+  color: #595959;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.koc-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f5f5f5;
+  padding-top: 12px;
+  margin-top: auto;
+}
+
+.koc-card-stat {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+/* 6.5 Why Section */
+.koc-hub-why-section {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.koc-hub-why-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.why-card {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.why-card:hover {
+  background: #ffffff;
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.05);
+}
+
+.why-card h4 {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.why-card p {
+  margin: 0;
+  font-size: 10px;
+  color: #8c8c8c;
+  line-height: 1.5;
+}
+
+/* 6.6 Follower task lists in preview */
+.follow-quick-tour {
+  display: flex;
+}
+.platform-tag-round {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.action-btn-pill-small {
+  outline: none;
+  font-size: 9px;
+  transition: all 0.2s;
+}
+.action-btn-pill-small:hover {
+  opacity: 0.85;
+}
+.action-btn-pill-small.uploaded {
+  opacity: 1;
+}
+
+.account-edit-row {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  padding: 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  text-align: left;
+}
+.account-edit-row:hover {
+  border-color: #d9d9d9;
+}
+
+
