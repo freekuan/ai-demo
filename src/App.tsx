@@ -1469,9 +1469,1350 @@ function LotteryEditor() {
 }
 
 // ==========================================
-// 【新组件】TaskEditor：高画质、多端互动任务的保姆级引导编辑器与模拟器
+// 【新组件】KocHub：玩转KOC种草主控制台页面
+// ==========================================
+interface KocHubProps {
+  setActiveSubTab: (tab: 'hub' | 'follow' | 'interactive' | 'audit') => void
+  followEnabled: boolean
+}
+
+function KocHub({ setActiveSubTab, followEnabled }: KocHubProps) {
+  const [guideModal, setGuideModal] = useState<string | null>(null)
+
+  return (
+    <div className="koc-hub-wrapper">
+      {/* 顶部高级感大 banner */}
+      <div className="koc-hub-banner">
+        <div className="koc-hub-banner-content" style={{ textAlign: 'left' }}>
+          <div className="koc-badge-pill">KOC 全域增长流量中心</div>
+          <h1 className="koc-hub-title">社交矩阵流量主航道 · 撬动品牌自然增长</h1>
+          <p className="koc-hub-subtitle">
+            打通「小红书/抖音/视频号/微博」全域社媒，通过低成本的任务驱动，实现私域快速爆发、爆款内容破圈、及高 ROI 转化闭环。
+          </p>
+        </div>
+        <div className="koc-hub-banner-graphics">
+          <div className="graphics-circle circle-1"></div>
+          <div className="graphics-circle circle-2"></div>
+          <div className="graphics-card">
+            <div className="graphics-card-header">
+              <span className="dot text-red">●</span>
+              <span className="dot text-yellow">●</span>
+              <span className="dot text-green">●</span>
+            </div>
+            <div className="graphics-card-body" style={{ textAlign: 'left' }}>
+              <div className="graphics-line" style={{ color: '#1890ff', background: '#e6f7ff' }}>🔍 搜索官方号...</div>
+              <div className="graphics-line" style={{ color: '#52c41a', background: '#f6ffed' }}>👍 点赞并收藏</div>
+              <div className="graphics-line" style={{ color: '#722ed1', background: '#f9f0ff' }}>💬 种草词复制</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 数据看板 */}
+      <div className="koc-hub-stats-row">
+        <div className="koc-hub-stat-card">
+          <div className="stat-icon-wrap bg-blue-light">
+            <TeamOutlined className="stat-icon text-blue" />
+          </div>
+          <div className="stat-info" style={{ textAlign: 'left' }}>
+            <span className="stat-label">累计私域蓄水粉丝</span>
+            <div className="stat-value-group">
+              <span className="stat-value">42.8 K</span>
+              <span className="stat-trend trend-up">较昨日 +1,250</span>
+            </div>
+          </div>
+        </div>
+        <div className="koc-hub-stat-card">
+          <div className="stat-icon-wrap bg-purple-light">
+            <ShareAltOutlined className="stat-icon text-purple" />
+          </div>
+          <div className="stat-info" style={{ textAlign: 'left' }}>
+            <span className="stat-label">平均 KOC 裂变系数</span>
+            <div className="stat-value-group">
+              <span className="stat-value">3.62x</span>
+              <span className="stat-trend trend-up">高于同行 85%</span>
+            </div>
+          </div>
+        </div>
+        <div className="koc-hub-stat-card">
+          <div className="stat-icon-wrap bg-orange-light">
+            <TrophyOutlined className="stat-icon text-orange" />
+          </div>
+          <div className="stat-info" style={{ textAlign: 'left' }}>
+            <span className="stat-label">互动触达转化率</span>
+            <div className="stat-value-group">
+              <span className="stat-value">24.8%</span>
+              <span className="stat-trend trend-up">ROI 提升 38.5%</span>
+            </div>
+          </div>
+        </div>
+        <div className="koc-hub-stat-card">
+          <div className="stat-icon-wrap bg-green-light">
+            <DollarOutlined className="stat-icon text-green" />
+          </div>
+          <div className="stat-info" style={{ textAlign: 'left' }}>
+            <span className="stat-label">获客成本 (CAC)</span>
+            <div className="stat-value-group">
+              <span className="stat-value">¥1.80</span>
+              <span className="stat-trend trend-down">成本降低 65%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 核心增长环流图 */}
+      <div className="koc-hub-flow-section" style={{ textAlign: 'left' }}>
+        <h3 className="section-title">KOC 全链路社交引流增长闭环</h3>
+        <div className="koc-hub-pipeline">
+          <div className="pipeline-step">
+            <div className="pipeline-number">01</div>
+            <div className="pipeline-content">
+              <h4>全域引流</h4>
+              <p>小红书/抖音/视频号/微博</p>
+            </div>
+          </div>
+          <div className="pipeline-arrow">➔</div>
+          <div className="pipeline-step">
+            <div className="pipeline-number">02</div>
+            <div className="pipeline-content">
+              <h4>任务激励</h4>
+              <p>加粉/互动任务，积分激发</p>
+            </div>
+          </div>
+          <div className="pipeline-arrow">➔</div>
+          <div className="pipeline-step">
+            <div className="pipeline-number">03</div>
+            <div className="pipeline-content">
+              <h4>私域沉淀</h4>
+              <p>关注官号、精细运营</p>
+            </div>
+          </div>
+          <div className="pipeline-arrow">➔</div>
+          <div className="pipeline-step">
+            <div className="pipeline-number">04</div>
+            <div className="pipeline-content">
+              <h4>口碑复购</h4>
+              <p>UGC裂变，实现爆款成交</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4个核心产品子功能入口 */}
+      <div className="koc-hub-grid">
+        {/* 卡片1: 账号加粉 */}
+        <div className="koc-hub-card" style={{ textAlign: 'left' }}>
+          <div className={`koc-card-badge ${followEnabled ? 'enabled' : 'coming-soon'}`}>
+            <span className="badge-dot">●</span> {followEnabled ? '运行中' : '已停用'}
+          </div>
+          <h3 className="koc-card-title">账号加粉</h3>
+          <p className="koc-card-desc">
+            <strong>全域账号裂变蓄水池 · 沉淀品牌私域核心资产</strong><br />
+            通过引导C端用户批量关注品牌官方账号矩阵并提交凭证，快速沉淀全网公域流量至私域蓄水池，为品牌二次触达与精准转化沉淀粉丝。
+          </p>
+          <div className="koc-card-footer">
+            <span className="koc-card-stat">已配置账号：2 个</span>
+            <Button type="primary" size="small" onClick={() => setActiveSubTab('follow')}>
+              去配置
+            </Button>
+          </div>
+        </div>
+
+        {/* 卡片2: 内容互动 */}
+        <div className="koc-hub-card" style={{ textAlign: 'left' }}>
+          <div className="koc-card-badge enabled">
+            <span className="badge-dot">●</span> 运行中
+          </div>
+          <h3 className="koc-card-title">内容互动</h3>
+          <p className="koc-card-desc">
+            <strong>智能帖子热度催化器 · 撬动社交平台算法推荐</strong><br />
+            通过点赞、收藏、评论等指定交互动作的引导与积分机制，激发真实社交裂变，引爆平台热门算法，实现品牌内容大范围出圈。
+          </p>
+          <div className="koc-card-footer">
+            <span className="koc-card-stat">进行中任务：1 个</span>
+            <Button type="primary" size="small" onClick={() => setActiveSubTab('interactive')}>
+              去配置
+            </Button>
+          </div>
+        </div>
+
+        {/* 卡片3: 内容种草 */}
+        <div className="koc-hub-card" style={{ textAlign: 'left' }}>
+          <div className="koc-card-badge coming-soon">规划中</div>
+          <h3 className="koc-card-title">内容种草</h3>
+          <p className="koc-card-desc">
+            <strong>UGC聚沙成塔裂变系统 · 真实口碑引爆全网声量</strong><br />
+            鼓励用户在社区制作和分享内容，让真实的用户反馈产生真实粘性，UGC聚沙成塔引流品牌店铺。
+          </p>
+          <div className="koc-card-footer">
+            <span className="koc-card-stat">推荐大促/拉新期使用</span>
+            <Button size="small" onClick={() => setGuideModal('seed')}>
+              搭建指南
+            </Button>
+          </div>
+        </div>
+
+        {/* 卡片4: 效果种草 */}
+        <div className="koc-hub-card" style={{ textAlign: 'left' }}>
+          <div className="koc-card-badge coming-soon">规划中</div>
+          <h3 className="koc-card-title">效果种草</h3>
+          <p className="koc-card-desc">
+            <strong>全链路追踪转化引擎 · KOC效果衡量与销量闭环</strong><br />
+            追踪并记录用户从种草到互动的全链路，通过行为和数据激活，通过数据精准赋能KOC表现，实现品效合一。
+          </p>
+          <div className="koc-card-footer">
+            <span className="koc-card-stat">支持全链路销量闭环追踪</span>
+            <Button size="small" onClick={() => setGuideModal('effect')}>
+              搭建指南
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* 为什么选择内容营销 */}
+      <div className="koc-hub-why-section" style={{ textAlign: 'left' }}>
+        <h3 className="section-title">为什么选择内容营销</h3>
+        <div className="koc-hub-why-grid">
+          <div className="why-card">
+            <h4>精准触达</h4>
+            <p>社交媒体平台海量人群精准画像，针对目标客群定向派发任务，确保存量与新增粉丝均为高价值用户。</p>
+          </div>
+          <div className="why-card">
+            <h4>内容联动</h4>
+            <p>账号关注与内容互动深度绑定，双管齐下提升社交矩阵热度，与品牌积分、卡券福利深度整合，实现完美留存闭环。</p>
+          </div>
+          <div className="why-card">
+            <h4>信任背书</h4>
+            <p>真实的普通人（KOC）完成点赞、发出真实好评，让新客进店无交易顾虑，构筑品牌口碑护城河。</p>
+          </div>
+          <div className="why-card">
+            <h4>低廉成本</h4>
+            <p>以极少的积分或积分奖品为杠杆，依靠用户社交裂变获客，获客成本（CAC）仅为传统硬广投放的 1/5。</p>
+          </div>
+          <div className="why-card">
+            <h4>私域筑底</h4>
+            <p>关注品牌官方号的用户，将沉淀为品牌可终身免费、多次触达、长效精细化运营的核心数字资产。</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 搭建指南 Modal */}
+      {guideModal && (
+        <div className="example-modal-overlay">
+          <div className="example-modal-content" style={{ width: '380px', padding: '24px' }}>
+            <span className="example-modal-close" onClick={() => setGuideModal(null)}>×</span>
+            <div className="example-modal-title" style={{ fontSize: '15px' }}>
+              {guideModal === 'seed' ? '🍀 内容种草功能搭建指南' : '📈 效果种草功能搭建指南'}
+            </div>
+            <div className="guide-modal-body" style={{ textAlign: 'left', fontSize: '12px', color: '#595959', lineHeight: '1.6' }}>
+              {guideModal === 'seed' ? (
+                <>
+                  <p><strong>第一步：定义种草任务规则</strong><br />在后台设置小红书发帖或抖音发视频任务，规定必须携带的品牌话题（如 #某某好物）及字数限制。</p>
+                  <p style={{ marginTop: '12px' }}><strong>第二步：配置 KOC 奖励机制</strong><br />提供丰厚的奖品（如新品试用装、高额会员积分、无门槛卡券），吸引用户在小红书发表真实体验反馈。</p>
+                  <p style={{ marginTop: '12px' }}><strong>第三步：C端发帖并提交链接</strong><br />用户完成发帖后，复制帖子链接并在小程序中提交。商家在后台审核后发放奖励，沉淀UGC内容资产。</p>
+                </>
+              ) : (
+                <>
+                  <p><strong>第一步：绑定销售商品或渠道</strong><br />为 KOC 生成专属的带货推广链接、二维码或抖音团购券，追踪用户通过该 KOC 产生的购买路径。</p>
+                  <p style={{ marginTop: '12px' }}><strong>第二步：实时追踪转化漏斗</strong><br />统计系统会自动生成报表：包含展示量、点击量、加购量以及最终成交订单（GMV），评估不同渠道 KOC 的带货能力。</p>
+                  <p style={{ marginTop: '12px' }}><strong>第三步：CPS佣金与效果结算</strong><br />根据 KOC 实际带来的订单量，自动折算为佣金、积分或现金返现，实现品效合一，实现销量爆发。</p>
+                </>
+              )}
+            </div>
+            <Button type="primary" onClick={() => setGuideModal(null)} style={{ marginTop: '20px', width: '100%' }}>
+              知道了
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ==========================================
+// 【新组件】KocFollowEditor：账号加粉编辑器与模拟器
+// ==========================================
+interface KocFollowEditorProps {
+  brandAccounts: any[]
+  setBrandAccounts: React.Dispatch<React.SetStateAction<any[]>>
+  taskAccounts: any[]
+  setTaskAccounts: React.Dispatch<React.SetStateAction<any[]>>
+  followPoints: number
+  setFollowPoints: React.Dispatch<React.SetStateAction<number>>
+  followRules: string
+  setFollowRules: React.Dispatch<React.SetStateAction<string>>
+  followAllowReSubmit: boolean
+  setFollowAllowReSubmit: React.Dispatch<React.SetStateAction<boolean>>
+  followEnabled: boolean
+  setFollowEnabled: React.Dispatch<React.SetStateAction<boolean>>
+  setActiveSubTab: (tab: 'hub' | 'follow' | 'interactive' | 'audit') => void
+}
+
+function KocFollowEditor({
+  brandAccounts,
+  setBrandAccounts,
+  taskAccounts,
+  setTaskAccounts,
+  followPoints,
+  setFollowPoints,
+  followRules,
+  setFollowRules,
+  followAllowReSubmit,
+  setFollowAllowReSubmit,
+  followEnabled,
+  setFollowEnabled,
+  setActiveSubTab,
+}: KocFollowEditorProps) {
+  const followBannerImage = 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=800&q=80'
+  const followBannerType = 'image'
+  const followBannerTitle = '官方账号加粉任务'
+  const followBannerSubtitle = '关注指定官方账号并提交关注凭证，即可获得积分奖励！'
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [showAccountModal, setShowAccountModal] = useState<boolean>(false)
+
+  // Local config inputs
+  const [tempEnabled, setTempEnabled] = useState<boolean>(followEnabled)
+  const [tempPoints, setTempPoints] = useState<number>(followPoints)
+  const [tempRules, setTempRules] = useState<string>(followRules)
+  const [tempAllowReSubmit, setTempAllowReSubmit] = useState<boolean>(followAllowReSubmit)
+  const [tempTaskAccounts, setTempTaskAccounts] = useState<any[]>(taskAccounts)
+
+  // Modal local state
+  const [modalBrandAccounts, setModalBrandAccounts] = useState<any[]>(brandAccounts)
+
+  // Simulator interactions
+  const [simulatorUploadedScreenshots, setSimulatorUploadedScreenshots] = useState<Record<string, string>>({})
+  const [isCopiedAccounts, setIsCopiedAccounts] = useState<Record<string, boolean>>({})
+  const [simulatorExampleImage, setSimulatorExampleImage] = useState<string | null>(null)
+
+  const enterEditMode = () => {
+    setTempEnabled(followEnabled)
+    setTempPoints(followPoints)
+    setTempRules(followRules)
+    setTempAllowReSubmit(followAllowReSubmit)
+    setTempTaskAccounts([...taskAccounts])
+    setIsEditing(true)
+  }
+
+  const cancelEdit = () => {
+    setIsEditing(false)
+  }
+
+  const saveEdit = () => {
+    if (tempTaskAccounts.length === 0) {
+      message.warning('请至少配置一个关注官方账号！')
+      return
+    }
+    setFollowEnabled(tempEnabled)
+    setFollowPoints(tempPoints)
+    setFollowRules(tempRules)
+    setFollowAllowReSubmit(tempAllowReSubmit)
+    setTaskAccounts(tempTaskAccounts)
+    setIsEditing(false)
+    message.success('规则配置保存成功！')
+  }
+
+  const openAccountModal = () => {
+    setModalBrandAccounts(brandAccounts.map(a => ({ ...a })))
+    setShowAccountModal(true)
+  }
+
+  const saveAccountModal = () => {
+    const invalid = modalBrandAccounts.some(a => !a.accountNo.trim() || !a.name.trim())
+    if (invalid) {
+      message.warning('请填写完整的账号与名称！')
+      return
+    }
+    setBrandAccounts(modalBrandAccounts)
+    setShowAccountModal(false)
+    message.success('品牌账户列表更新成功！')
+  }
+
+  const handleCopyAccount = (id: string, num: string) => {
+    try {
+      navigator.clipboard.writeText(num)
+    } catch (e) {}
+    setIsCopiedAccounts(prev => ({ ...prev, [id]: true }))
+    message.success(`已复制账号“${num}”到剪贴板，请前往平台搜索关注！`)
+    setTimeout(() => {
+      setIsCopiedAccounts(prev => ({ ...prev, [id]: false }))
+    }, 2000)
+  }
+
+  const handleToggleSimulatorUpload = (id: string) => {
+    if (simulatorUploadedScreenshots[id]) {
+      setSimulatorUploadedScreenshots(prev => {
+        const next = { ...prev }
+        delete next[id]
+        return next
+      })
+      message.info('已移除关注截图凭证')
+    } else {
+      const targetAcc = brandAccounts.find(a => a.id === id)
+      const mockImg = targetAcc?.exampleImage || 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80'
+      setSimulatorUploadedScreenshots(prev => ({ ...prev, [id]: mockImg }))
+      message.success('关注截图凭证上传成功（已模拟填入关注成功图）')
+    }
+  }
+
+  const handleSubmitSimulatorTask = () => {
+    const activeAccountsCount = isEditing ? tempTaskAccounts.length : taskAccounts.length
+    const uploadedCount = Object.keys(simulatorUploadedScreenshots).length
+    if (uploadedCount < activeAccountsCount) {
+      message.warning('请先完成所有账号的关注截图上传后再提交！')
+    } else {
+      message.success('您的关注凭证已成功提交！预计24小时内审核完毕发放积分奖励')
+    }
+  }
+
+  const handleShowExample = (img: string) => {
+    setSimulatorExampleImage(img)
+  }
+
+  const getAccountInfo = (id: string) => {
+    return brandAccounts.find(a => a.id === id) || {
+      name: '未知账号',
+      accountNo: '',
+      platform: 'xhs',
+      exampleImage: '',
+      logoImage: ''
+    }
+  }
+
+  return (
+    <div className="lottery-editor-wrapper">
+      {/* 选项卡头部 */}
+      <div className="editor-tab-header">
+        <Tabs
+          activeKey="task-page"
+          items={[
+            { key: 'task-page', label: 'C端关注页面预览' },
+            { key: 'audit-panel', label: '商户审核列表', disabled: true },
+          ]}
+        />
+      </div>
+
+      <Row gutter={24} style={{ marginTop: 12 }}>
+        {/* 左侧：手机预览模拟器 */}
+        <Col xs={24} lg={9} xl={8} style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="mobile-phone-frame">
+            <div className="phone-top-notch"></div>
+            <div className="phone-status-bar" style={{ color: '#000' }}>
+              <span className="time">9:41</span>
+              <div className="icons">
+                <span className="cellular">📶</span>
+                <span className="wifi">🔋</span>
+              </div>
+            </div>
+
+            <div className="phone-screen-content task-detail-preview">
+              <div className="phone-page-header" style={{ color: '#333', background: '#fff', borderBottom: '1px solid #f0f0f0', textShadow: 'none' }}>
+                <span className="back-arrow"><ArrowLeftOutlined style={{ fontSize: 13 }} /></span>
+                <span className="activity-title" style={{ fontWeight: 600 }}>官方账号加粉任务</span>
+                <span className="more-menu">•••</span>
+              </div>
+
+              <div className="task-scroll-body" style={{ paddingBottom: 60 }}>
+                {/* 顶部海报 */}
+                {followBannerType === 'image' ? (
+                  <div className="task-preview-banner-img-wrap" style={{ height: 110 }}>
+                    <img src={followBannerImage} alt="活动海报" className="task-preview-banner-img" />
+                  </div>
+                ) : (
+                  <div className="task-preview-banner" style={{ padding: '16px 12px' }}>
+                    <h2 className="banner-main-title">{followBannerTitle}</h2>
+                    <p className="banner-sub-title">{followBannerSubtitle}</p>
+                  </div>
+                )}
+
+                {/* 奖励积分卡片 */}
+                <div className="task-reward-card" style={{ padding: '12px 14px', margin: '10px' }}>
+                  <div className="reward-left">
+                    <span className="reward-label">关注全部账号可获得</span>
+                    <div className="reward-value">+{isEditing ? tempPoints : followPoints} <span>积分</span></div>
+                  </div>
+                  <div className="reward-badge" style={{ fontSize: 9 }}>截图审核通过后发放</div>
+                </div>
+
+                {/* 任务速览 */}
+                <div className="task-step-card" style={{ margin: '0 10px 10px', padding: '10px' }}>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: 11, fontWeight: 700, color: '#262626' }}>任务速览</h4>
+                  <div className="follow-quick-tour" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 9, color: '#595959' }}>
+                    <div style={{ textAlign: 'center', flex: 1 }}>
+                      <div className="tour-icon" style={{ background: '#e6f7ff', color: '#1890ff', width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 4px', fontWeight: 600 }}>1</div>
+                      <span>关注指定账号</span>
+                    </div>
+                    <div style={{ color: '#d9d9d9' }}>➔</div>
+                    <div style={{ textAlign: 'center', flex: 1 }}>
+                      <div className="tour-icon" style={{ background: '#e6f7ff', color: '#1890ff', width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 4px', fontWeight: 600 }}>2</div>
+                      <span>上传关注截图</span>
+                    </div>
+                    <div style={{ color: '#d9d9d9' }}>➔</div>
+                    <div style={{ textAlign: 'center', flex: 1 }}>
+                      <div className="tour-icon" style={{ background: '#e6f7ff', color: '#1890ff', width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 4px', fontWeight: 600 }}>3</div>
+                      <span>审核通过发奖</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 关注账号清单 */}
+                <div className="task-steps-container" style={{ padding: '0 10px' }}>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: 11, fontWeight: 700, color: '#262626' }}>关注账号清单</h4>
+                  
+                  {(isEditing ? tempTaskAccounts : taskAccounts).map((item, idx) => {
+                    const accInfo = getAccountInfo(item.accountId)
+                    const isUploaded = !!simulatorUploadedScreenshots[item.accountId]
+                    const isCopied = !!isCopiedAccounts[item.accountId]
+                    const platformLabel = { xhs: '小红书', dy: '抖音', weibo: '微博', wx: '视频号' }[accInfo.platform as 'xhs' | 'dy' | 'weibo' | 'wx']
+                    const platformColor = { xhs: '#ff2442', dy: '#000000', weibo: '#f5222d', wx: '#52c41a' }[accInfo.platform as 'xhs' | 'dy' | 'weibo' | 'wx']
+
+                    return (
+                      <div key={item.accountId || idx} className="follow-account-list-card" style={{ background: '#fff', borderRadius: 8, padding: 10, marginBottom: 8, border: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <div className="platform-tag-round" style={{ background: platformColor, color: '#fff', fontSize: 8, width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                              {platformLabel?.substring(0, 2)}
+                            </div>
+                            <div style={{ textAlign: 'left' }}>
+                              <div style={{ fontSize: 11, fontWeight: 600, color: '#262626', display: 'flex', gap: 4, alignItems: 'center' }}>
+                                {accInfo.name}
+                                <span className="copy-icon-btn" onClick={() => handleCopyAccount(accInfo.id, accInfo.accountNo)} style={{ fontSize: 10, cursor: 'pointer', color: '#8c8c8c' }}>
+                                  {isCopied ? <CheckOutlined style={{ color: '#52c41a' }} /> : <CopyOutlined />}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: 9, color: '#8c8c8c' }}>账号: {accInfo.accountNo}</div>
+                            </div>
+                          </div>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                            <button 
+                              type="button" 
+                              className={`action-btn-pill-small ${isUploaded ? 'uploaded' : ''}`}
+                              onClick={() => handleToggleSimulatorUpload(accInfo.id)}
+                              style={{ 
+                                fontSize: 9, 
+                                padding: '2px 8px', 
+                                borderRadius: 10, 
+                                border: isUploaded ? '1px solid #52c41a' : '1px solid #1890ff', 
+                                background: isUploaded ? '#f6ffed' : '#e6f7ff', 
+                                color: isUploaded ? '#52c41a' : '#1890ff',
+                                cursor: 'pointer',
+                                fontWeight: 500
+                              }}
+                            >
+                              {isUploaded ? '已传截图 ✓' : '上传截图'}
+                            </button>
+                            <span 
+                              onClick={() => handleShowExample(accInfo.exampleImage)} 
+                              style={{ fontSize: 8, color: '#ff4d4f', cursor: 'pointer', textDecoration: 'underline' }}
+                            >
+                              查看截图示例 ＞
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* 引导说明文案 */}
+                        <div style={{ fontSize: 9, color: '#595959', background: '#fafafa', borderRadius: 4, padding: '4px 8px', marginTop: 6, borderLeft: '2px solid #d9d9d9', textAlign: 'left' }}>
+                          指引: {item.guideText || '关注该官方账号'}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* 规则说明 */}
+                <div className="task-step-card" style={{ margin: '10px', padding: '10px' }}>
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: 11, fontWeight: 700, color: '#262626' }}>规则说明</h4>
+                  <div style={{ fontSize: 9, color: '#8c8c8c', whiteSpace: 'pre-line', lineHeight: 1.4, textAlign: 'left' }}>
+                    {isEditing ? tempRules : followRules}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 底部悬浮提交 */}
+              <div className="task-bottom-action-bar">
+                <button type="button" className="task-submit-btn-full blue-theme" onClick={handleSubmitSimulatorTask}>
+                  提交凭证
+                </button>
+              </div>
+
+              {/* 截图示例 Modal */}
+              {simulatorExampleImage && (
+                <div className="example-modal-overlay">
+                  <div className="example-modal-content">
+                    <span className="example-modal-close" onClick={() => setSimulatorExampleImage(null)}>×</span>
+                    <div className="example-modal-title">截图标准参考图</div>
+                    <img 
+                      src={simulatorExampleImage} 
+                      alt="关注截图示例" 
+                      className="example-modal-img" 
+                    />
+                    <div className="example-modal-tip blue-theme">
+                      注意：上传的凭证截图需包含清晰的账号名称、ID，并显示“已关注”或“互相关注”状态。
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </Col>
+
+        {/* 右侧：后台配置属性面板 */}
+        <Col xs={24} lg={15} xl={16}>
+          <div className="editor-properties-panel">
+            {!isEditing ? (
+              // 查看配置状态
+              <div className="follow-detail-container" style={{ textAlign: 'left' }}>
+                <div className="panel-header-section" style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 12, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span className="title" style={{ fontSize: 16, fontWeight: 600 }}>账号加粉功能</span>
+                    <p style={{ margin: 0, fontSize: 12, color: '#8c8c8c', lineHeight: '1.5' }}>
+                      打通小红书、抖音、视频号等多平台流量，通过积分/卡券奖励引导C端用户一键关注品牌官方账号矩阵。快速沉淀公域流量至私域蓄水池，为品牌二次触达、直播间引流与精准转化沉淀核心粉丝资产。
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rule-config-card" style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 8, padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f5f5f5', paddingBottom: 12, marginBottom: 16 }}>
+                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>规则配置</h3>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Button size="small" onClick={() => setActiveSubTab('audit')}>关注凭证</Button>
+                      <Button size="small" onClick={openAccountModal}>账号管理</Button>
+                      <Button size="small" type="primary" onClick={enterEditMode}>修改配置</Button>
+                    </div>
+                  </div>
+
+                  <div className="detail-rows" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <span style={{ width: 100, color: '#8c8c8c', fontSize: 13 }}>场景状态：</span>
+                      <span>
+                        {followEnabled ? (
+                          <span style={{ background: '#f6ffed', border: '1px solid #b7eb8f', color: '#52c41a', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>已开启</span>
+                        ) : (
+                          <span style={{ background: '#fff0f6', border: '1px solid #ffadd2', color: '#eb2f96', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>已关闭</span>
+                        )}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <span style={{ width: 100, color: '#8c8c8c', fontSize: 13 }}>关注账号：</span>
+                      <div style={{ flex: 1 }}>
+                        {taskAccounts.map((item, idx) => {
+                          const acc = getAccountInfo(item.accountId)
+                          const platformLabel = { xhs: '小红书', dy: '抖音', weibo: '微博', wx: '视频号' }[acc.platform as 'xhs' | 'dy' | 'weibo' | 'wx']
+                          return (
+                            <div key={item.accountId || idx} style={{ marginBottom: 6, fontSize: 13 }}>
+                              <strong>{acc.name} ({platformLabel})</strong> —— 引导语: <span style={{ color: '#1890ff' }}>{item.guideText}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <span style={{ width: 100, color: '#8c8c8c', fontSize: 13 }}>奖励配置：</span>
+                      <div style={{ background: '#fafafa', borderRadius: 6, padding: '10px 14px', border: '1px solid #f0f0f0', width: 220 }}>
+                        <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 4 }}>奖品类型: <span style={{ color: '#262626', fontWeight: 500 }}>积分</span></div>
+                        <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 4 }}>奖品名称: <span style={{ color: '#262626', fontWeight: 500 }}>{followPoints} 积分</span></div>
+                        <div style={{ fontSize: 12, color: '#8c8c8c' }}>奖励额度: <span style={{ color: '#262626', fontWeight: 500 }}>{followPoints} 积分</span></div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                      <span style={{ width: 100, color: '#8c8c8c', fontSize: 13 }}>规则说明：</span>
+                      <div style={{ whiteSpace: 'pre-line', fontSize: 13, color: '#595959', lineHeight: 1.5, background: '#fafafa', padding: 12, borderRadius: 6, border: '1px solid #f0f0f0', flex: 1 }}>
+                        {followRules}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ width: 100, color: '#8c8c8c', fontSize: 13 }}>拒绝后提交：</span>
+                      <span style={{ fontSize: 13 }}>{followAllowReSubmit ? '已开启' : '已关闭'} (若审核拒绝，用户修改后可再次提交)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // 修改配置状态
+              <div className="follow-edit-container" style={{ textAlign: 'left' }}>
+                <div className="panel-header-section" style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 12, marginBottom: 16 }}>
+                  <span className="title" style={{ fontSize: 16, fontWeight: 600 }}>修改规则配置</span>
+                </div>
+
+                <div className="task-properties-form">
+                  <div className="prop-group-card">
+                    <h3 className="group-title">一、场景状态与基础设置</h3>
+                    <div className="prop-row">
+                      <div className="prop-label">
+                        <span>场景状态</span>
+                        <Tooltip title="关闭后C端用户将无法在小程序参与该关注任务。">
+                          <QuestionCircleOutlined className="label-help-icon" />
+                        </Tooltip>
+                      </div>
+                      <div className="prop-control">
+                        <Switch checked={tempEnabled} onChange={setTempEnabled} />
+                        <span style={{ marginLeft: 8, fontSize: 12, color: '#8c8c8c' }}>启用后，用户可参与活动</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="prop-group-card">
+                    <h3 className="group-title">二、关注账号列表配置</h3>
+                    <div style={{ fontSize: 12, color: '#8c8c8c', marginBottom: 12 }}>
+                      配置该加粉任务中需要用户关注的社媒账号（最多20个）。您可以点击“账号管理”来新增或修改品牌名下的账号库。
+                    </div>
+
+                    {tempTaskAccounts.map((item, index) => {
+                      return (
+                        <div key={item.accountId || index} className="account-edit-row" style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 }}>
+                          <div style={{ width: 220 }}>
+                            <span style={{ fontSize: 12, color: '#595959', display: 'block', marginBottom: 4 }}>选择品牌账号:</span>
+                            <select 
+                              value={item.accountId} 
+                              onChange={(e) => {
+                                const newId = e.target.value
+                                setTempTaskAccounts(prev => {
+                                  const next = [...prev]
+                                  next[index] = { ...next[index], accountId: newId }
+                                  return next
+                                })
+                              }}
+                              style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #d9d9d9', padding: '0 8px', fontSize: 13 }}
+                            >
+                              {brandAccounts.map(ba => {
+                                const pltName = { xhs: '小红书', dy: '抖音', weibo: '微博', wx: '视频号' }[ba.platform as 'xhs' | 'dy' | 'weibo' | 'wx']
+                                return <option key={ba.id} value={ba.id}>{ba.name} ({pltName})</option>
+                              })}
+                            </select>
+                          </div>
+
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontSize: 12, color: '#595959', display: 'block', marginBottom: 4 }}>关注引导语:</span>
+                            <Input 
+                              value={item.guideText} 
+                              placeholder="引导语，如：关注这个账号" 
+                              onChange={(e) => {
+                                const val = e.target.value
+                                setTempTaskAccounts(prev => {
+                                  const next = [...prev]
+                                  next[index] = { ...next[index], guideText: val }
+                                  return next
+                                })
+                              }}
+                            />
+                          </div>
+
+                          <Button 
+                            type="text" 
+                            danger 
+                            onClick={() => {
+                              setTempTaskAccounts(prev => prev.filter((_, i) => i !== index))
+                            }}
+                            style={{ marginTop: 20 }}
+                          >
+                            删除
+                          </Button>
+                        </div>
+                      )
+                    })}
+
+                    <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                      <Button 
+                        size="small" 
+                        icon={<PlusOutlined />} 
+                        onClick={() => {
+                          if (tempTaskAccounts.length >= 20) {
+                            message.warning('最多只支持添加 20 个关注账号')
+                            return
+                          }
+                          const firstAvailable = brandAccounts[0]?.id || ''
+                          setTempTaskAccounts(prev => [...prev, { accountId: firstAvailable, guideText: '关注并截图上传' }])
+                        }}
+                      >
+                        添加账号 ({tempTaskAccounts.length}/20)
+                      </Button>
+                      <Button size="small" onClick={openAccountModal}>账号管理</Button>
+                    </div>
+                  </div>
+
+                  <div className="prop-group-card">
+                    <h3 className="group-title">三、奖励配置</h3>
+                    <div className="prop-row">
+                      <div className="prop-label">
+                        <span>完成奖励</span>
+                      </div>
+                      <div className="prop-control" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <InputNumber 
+                          min={1} 
+                          value={tempPoints} 
+                          onChange={(val) => val && setTempPoints(val)} 
+                          addonAfter="积分" 
+                          style={{ width: 140 }}
+                        />
+                        <Button size="small">挑选奖励</Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="prop-group-card">
+                    <h3 className="group-title">四、规则说明与提交设置</h3>
+                    <div className="prop-row">
+                      <div className="prop-label">
+                        <span>活动规则说明</span>
+                      </div>
+                      <div className="prop-control">
+                        <Input.TextArea 
+                          rows={4} 
+                          value={tempRules} 
+                          onChange={(e) => setTempRules(e.target.value)} 
+                          placeholder="请输入活动规则说明，换行排列"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="prop-row" style={{ marginTop: 16 }}>
+                      <div className="prop-label">
+                        <span>拒绝后再次提交</span>
+                        <Tooltip title="如果用户的审核被管理员拒绝，开启后用户可以在前台重新修改截图并提交。">
+                          <QuestionCircleOutlined className="label-help-icon" />
+                        </Tooltip>
+                      </div>
+                      <div className="prop-control">
+                        <Switch checked={tempAllowReSubmit} onChange={setTempAllowReSubmit} />
+                        <span style={{ marginLeft: 8, fontSize: 12, color: '#8c8c8c' }}>开启后，各审核拒绝，用户修改后可再次提交</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'flex-end' }}>
+                    <Button onClick={cancelEdit}>取消</Button>
+                    <Button type="primary" onClick={saveEdit}>保存</Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </Col>
+      </Row>
+
+      {/* 账号管理 Modal */}
+      {showAccountModal && (
+        <div className="example-modal-overlay" style={{ zIndex: 1000 }}>
+          <div className="example-modal-content" style={{ width: 720, padding: 24, borderRadius: 8, maxHeight: '85vh', overflow: 'auto' }}>
+            <span className="example-modal-close" onClick={() => setShowAccountModal(false)}>×</span>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: 16, fontWeight: 600, textAlign: 'left' }}>账号管理</h3>
+            <div style={{ marginBottom: 16, textAlign: 'left' }}>
+              <span onClick={() => message.info('正在打开平台主页截图标准图介绍...')} style={{ fontSize: 12, color: '#1890ff', cursor: 'pointer', textDecoration: 'underline' }}>
+                查看平台账号主页截图示例图
+              </span>
+            </div>
+
+            <div className="account-list-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', background: '#fafafa', padding: '8px 12px', fontWeight: 600, fontSize: 12, borderBottom: '1px solid #f0f0f0', textAlign: 'left' }}>
+                <div style={{ width: 120 }}>平台</div>
+                <div style={{ width: 140 }}>账号 (账号ID)</div>
+                <div style={{ width: 150 }}>名称 (商户显示)</div>
+                <div style={{ flex: 1 }}>C端关注截图示例图 (用户比对用)</div>
+                <div style={{ width: 60 }}>操作</div>
+              </div>
+
+              {modalBrandAccounts.map((acc, index) => {
+                return (
+                  <div key={acc.id || index} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid #f5f5f5' }}>
+                    {/* 平台选择 */}
+                    <div style={{ width: 120 }}>
+                      <select 
+                        value={acc.platform} 
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setModalBrandAccounts(prev => {
+                            const next = [...prev]
+                            next[index] = { ...next[index], platform: val }
+                            return next
+                          })
+                        }}
+                        style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #d9d9d9', fontSize: 12, padding: '0 4px' }}
+                      >
+                        <option value="xhs">小红书</option>
+                        <option value="dy">抖音</option>
+                        <option value="weibo">微博</option>
+                        <option value="wx">微信视频号</option>
+                      </select>
+                    </div>
+
+                    {/* 账号 */}
+                    <div style={{ width: 140 }}>
+                      <Input 
+                        value={acc.accountNo} 
+                        size="small" 
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setModalBrandAccounts(prev => {
+                            const next = [...prev]
+                            next[index] = { ...next[index], accountNo: val }
+                            return next
+                          })
+                        }}
+                      />
+                    </div>
+
+                    {/* 名称 */}
+                    <div style={{ width: 150 }}>
+                      <Input 
+                        value={acc.name} 
+                        size="small" 
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setModalBrandAccounts(prev => {
+                            const next = [...prev]
+                            next[index] = { ...next[index], name: val }
+                            return next
+                          })
+                        }}
+                      />
+                    </div>
+
+                    {/* C端关注截图示例图 */}
+                    <div style={{ flex: 1, display: 'flex', gap: 8, alignItems: 'center', textAlign: 'left' }}>
+                      <div style={{ position: 'relative', width: 36, height: 36, borderRadius: 4, overflow: 'hidden', border: '1px solid #d9d9d9', background: '#f5f5f5' }}>
+                        {acc.exampleImage ? (
+                          <img src={acc.exampleImage} alt="截图" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <PictureOutlined style={{ fontSize: 16, color: '#bfbfbf', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <Upload 
+                            showUploadList={false} 
+                            beforeUpload={(file) => {
+                              const reader = new FileReader()
+                              reader.onload = (e) => {
+                                if (e.target?.result) {
+                                  setModalBrandAccounts(prev => {
+                                    const next = [...prev]
+                                    next[index] = { ...next[index], exampleImage: e.target!.result as string }
+                                    return next
+                                  })
+                                  message.success('已更新关注成功示例图！')
+                                }
+                              }
+                              reader.readAsDataURL(file)
+                              return false
+                            }}
+                          >
+                            <span style={{ fontSize: 11, color: '#1890ff', cursor: 'pointer', textDecoration: 'underline' }}>
+                              上传示例图
+                            </span>
+                          </Upload>
+                          <span 
+                            onClick={() => {
+                              setModalBrandAccounts(prev => {
+                                const next = [...prev]
+                                next[index] = { ...next[index], exampleImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80' }
+                                return next
+                              })
+                              message.info('已重置回默认标准关注截图')
+                            }} 
+                            style={{ fontSize: 11, color: '#ff4d4f', cursor: 'pointer' }}
+                          >
+                            重置
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 9, color: '#bfbfbf', whiteSpace: 'nowrap' }}>*C端用户看到的主页关注成功标准截图</span>
+                      </div>
+                    </div>
+
+                    {/* 删除 */}
+                    <div style={{ width: 60 }}>
+                      <Button 
+                        type="text" 
+                        danger 
+                        size="small" 
+                        onClick={() => {
+                          if (modalBrandAccounts.length <= 1) {
+                            message.warning('必须保留至少一个品牌账户！')
+                            return
+                          }
+                          setModalBrandAccounts(prev => prev.filter((_, i) => i !== index))
+                        }}
+                      >
+                        删除
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
+              <Button 
+                icon={<PlusOutlined />} 
+                onClick={() => {
+                  if (modalBrandAccounts.length >= 20) {
+                    message.warning('最多只能维护 20 个品牌账户')
+                    return
+                  }
+                  setModalBrandAccounts(prev => [...prev, {
+                    id: String(prev.length + 1) + '-' + String(Date.now()).substring(8),
+                    platform: 'xhs',
+                    accountNo: 'new_acc',
+                    name: '新社交账号',
+                    exampleImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80',
+                    logoImage: ''
+                  }])
+                }}
+              >
+                新增账号 ({modalBrandAccounts.length}/20)
+              </Button>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <Button onClick={() => setShowAccountModal(false)}>取消</Button>
+                <Button type="primary" onClick={saveAccountModal}>确定</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ==========================================
+// 【新组件】KocAuditPanel：KOC任务验证审核中心
+// ==========================================
+interface KocAuditPanelProps {
+  submissions: any[]
+  setSubmissions: React.Dispatch<React.SetStateAction<any[]>>
+}
+
+function KocAuditPanel({ submissions, setSubmissions }: KocAuditPanelProps) {
+  const [selectedSub, setSelectedSub] = useState<any | null>(null)
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [rejectModalOpen, setRejectModalOpen] = useState<boolean>(false)
+  const [rejectReason, setRejectReason] = useState<string>('')
+  const [activeSubId, setActiveSubId] = useState<string | null>(null)
+
+  const handleApprove = (id: string) => {
+    setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status: 'approved' } : s))
+    message.success('审核已通过，奖励积分已发放给用户！')
+  }
+
+  const handleRejectClick = (id: string) => {
+    setActiveSubId(id)
+    setRejectReason('')
+    setRejectModalOpen(true)
+  }
+
+  const handleRejectConfirm = () => {
+    if (!rejectReason.trim()) {
+      message.warning('请选择或填写拒绝理由！')
+      return
+    }
+    setSubmissions(prev => prev.map(s => s.id === activeSubId ? { ...s, status: 'rejected', reason: rejectReason } : s))
+    setRejectModalOpen(false)
+    message.info('已拒绝该凭证，状态退回待修改状态')
+  }
+
+  const filteredList = submissions.filter(s => {
+    if (filterStatus === 'all') return true
+    return s.status === filterStatus
+  })
+
+  return (
+    <div className="audit-panel-wrapper" style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 8, padding: 20 }}>
+      <div style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: 12, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ textAlign: 'left' }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>KOC 任务凭证审核大厅</h3>
+          <p style={{ margin: '4px 0 0 0', fontSize: 12, color: '#8c8c8c' }}>审核C端用户提交的关注截图与点赞/评论/收藏截图，通过后奖励自动到账。</p>
+        </div>
+        <div className="audit-stats-summary" style={{ display: 'flex', gap: 16, fontSize: 12 }}>
+          <div>待审核: <strong style={{ color: '#fa8c16' }}>{submissions.filter(s => s.status === 'pending').length}</strong></div>
+          <div>已通过: <strong style={{ color: '#52c41a' }}>{submissions.filter(s => s.status === 'approved').length}</strong></div>
+          <div>已拒绝: <strong style={{ color: '#f5222d' }}>{submissions.filter(s => s.status === 'rejected').length}</strong></div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 16, textAlign: 'left' }}>
+        <Radio.Group value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} size="middle">
+          <Radio.Button value="all">全部</Radio.Button>
+          <Radio.Button value="pending">待审核</Radio.Button>
+          <Radio.Button value="approved">已通过</Radio.Button>
+          <Radio.Button value="rejected">已拒绝</Radio.Button>
+        </Radio.Group>
+      </div>
+
+      <div className="audit-table-container" style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
+              <th style={{ padding: 12, textAlign: 'left' }}>C端用户</th>
+              <th style={{ padding: 12, textAlign: 'left' }}>任务类型</th>
+              <th style={{ padding: 12, textAlign: 'left' }}>考核目标</th>
+              <th style={{ padding: 12, textAlign: 'center' }}>提交凭证 (点击放大)</th>
+              <th style={{ padding: 12, textAlign: 'left' }}>提交时间</th>
+              <th style={{ padding: 12, textAlign: 'left' }}>当前状态</th>
+              <th style={{ padding: 12, textAlign: 'center', width: 140 }}>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredList.length === 0 ? (
+              <tr>
+                <td colSpan={7} style={{ padding: 24, textAlign: 'center', color: '#bfbfbf' }}>暂无相关凭证数据</td>
+              </tr>
+            ) : (
+              filteredList.map(sub => {
+                const statusTag = {
+                  pending: <span style={{ color: '#fa8c16', background: '#fff7e6', border: '1px solid #ffd591', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>待审核</span>,
+                  approved: <span style={{ color: '#52c41a', background: '#f6ffed', border: '1px solid #b7eb8f', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>已通过</span>,
+                  rejected: <span style={{ color: '#f5222d', background: '#fff1f0', border: '1px solid #ffa39e', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>已拒绝</span>,
+                }[sub.status as 'pending' | 'approved' | 'rejected']
+
+                return (
+                  <tr key={sub.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                    <td style={{ padding: 12, textAlign: 'left' }}>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <img src={sub.avatar} alt="头像" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
+                        <span>{sub.nickname}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: 12, fontWeight: 500, textAlign: 'left' }}>
+                      {sub.taskType === 'follow' ? '账号加粉' : '内容互动'}
+                    </td>
+                    <td style={{ padding: 12, color: '#595959', textAlign: 'left' }}>{sub.target}</td>
+                    <td style={{ padding: 12, textAlign: 'center' }}>
+                      <div 
+                        onClick={() => setSelectedSub(sub.screenshot)} 
+                        style={{ cursor: 'pointer', display: 'inline-block', width: 36, height: 50, borderRadius: 4, overflow: 'hidden', border: '1px solid #d9d9d9', background: '#f5f5f5' }}
+                      >
+                        <img src={sub.screenshot} alt="截图" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    </td>
+                    <td style={{ padding: 12, color: '#8c8c8c', textAlign: 'left' }}>{sub.time}</td>
+                    <td style={{ padding: 12, textAlign: 'left' }}>
+                      {statusTag}
+                      {sub.status === 'rejected' && sub.reason && (
+                        <div style={{ color: '#f5222d', fontSize: 11, marginTop: 4 }}>理由: {sub.reason}</div>
+                      )}
+                    </td>
+                    <td style={{ padding: 12, textAlign: 'center' }}>
+                      {sub.status === 'pending' ? (
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                          <Button size="small" type="primary" onClick={() => handleApprove(sub.id)}>通过</Button>
+                          <Button size="small" danger onClick={() => handleRejectClick(sub.id)}>拒绝</Button>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#bfbfbf', fontSize: 12 }}>已审核</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 截图放大 Modal */}
+      {selectedSub && (
+        <div className="example-modal-overlay" style={{ zIndex: 2000 }} onClick={() => setSelectedSub(null)}>
+          <div className="example-modal-content" style={{ width: 300, padding: 12 }} onClick={e => e.stopPropagation()}>
+            <span className="example-modal-close" onClick={() => setSelectedSub(null)}>×</span>
+            <div className="example-modal-title" style={{ marginBottom: 8 }}>凭证原图</div>
+            <img src={selectedSub} alt="凭证原图" style={{ width: '100%', height: 'auto', maxHeight: '70vh', objectFit: 'contain', borderRadius: 4 }} />
+          </div>
+        </div>
+      )}
+
+      {/* 拒绝理由 Modal */}
+      {rejectModalOpen && (
+        <div className="example-modal-overlay" style={{ zIndex: 2001 }}>
+          <div className="example-modal-content" style={{ width: 320, padding: 20 }}>
+            <span className="example-modal-close" onClick={() => setRejectModalOpen(false)}>×</span>
+            <div className="example-modal-title" style={{ fontSize: 14 }}>填写拒绝理由</div>
+            <div style={{ margin: '12px 0', textAlign: 'left' }}>
+              <select 
+                value={rejectReason} 
+                onChange={(e) => setRejectReason(e.target.value)}
+                style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #d9d9d9', padding: '0 8px', fontSize: 12, marginBottom: 8 }}
+              >
+                <option value="">-- 选择快捷理由 --</option>
+                <option value="未关注该账号">未关注该账号</option>
+                <option value="上传的截图非关注成功页面">上传的截图非关注成功页面</option>
+                <option value="截图不清晰或非本人账号">截图不清晰或非本人账号</option>
+                <option value="重复提交相同截图">重复提交相同截图</option>
+              </select>
+              <Input.TextArea 
+                rows={3} 
+                value={rejectReason} 
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="或者输入自定义拒绝理由"
+                style={{ fontSize: 12 }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', width: '100%' }}>
+              <Button size="small" onClick={() => setRejectModalOpen(false)}>取消</Button>
+              <Button size="small" type="primary" danger onClick={handleRejectConfirm}>确认拒绝</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ==========================================
+// 【重构主入口】TaskEditor: KOC种草管理多签页控制器
 // ==========================================
 function TaskEditor() {
+  const [activeSubTab, setActiveSubTab] = useState<'hub' | 'follow' | 'interactive' | 'audit'>('hub')
+
+
+
+  // 2. 账号加粉 (Follow Task) States
+  const [followEnabled, setFollowEnabled] = useState<boolean>(true)
+  const [followPoints, setFollowPoints] = useState<number>(100)
+  const [followRules, setFollowRules] = useState<string>('1. 必须使用本人的真实社媒账号关注指定品牌账号。\n2. 关注成功后请前往个人中心截图，截图需包含清晰的账号信息与“已关注”状态。\n3. 请勿在获得奖励后立即取消关注，系统会定期复查，违规者将扣回奖励积分并限制后续参与。')
+  const [followAllowReSubmit, setFollowAllowReSubmit] = useState<boolean>(true)
+
+  const [brandAccounts, setBrandAccounts] = useState([
+    {
+      id: '1',
+      platform: 'xhs',
+      accountNo: '596245456',
+      name: '官方小红书账号 (示例红薯)',
+      exampleImage: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80',
+      logoImage: ''
+    },
+    {
+      id: '2',
+      platform: 'dy',
+      accountNo: 'doy',
+      name: '官方抖音号 (示例抖音)',
+      exampleImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+      logoImage: ''
+    }
+  ])
+
+  const [taskAccounts, setTaskAccounts] = useState([
+    { accountId: '1', guideText: '关注这个' },
+    { accountId: '2', guideText: '关注着' }
+  ])
+
+  // 3. 审核中心 (Audit List) Mock Data
+  const [auditSubmissions, setAuditSubmissions] = useState([
+    {
+      id: 'sub-1',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80',
+      nickname: '微信用户_A2',
+      taskType: 'follow',
+      target: '账号加粉 (小红书/抖音)',
+      screenshot: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=400&q=80',
+      time: '5分钟前',
+      status: 'pending',
+      reason: ''
+    },
+    {
+      id: 'sub-2',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80',
+      nickname: 'Momo酱',
+      taskType: 'interactive',
+      target: '内容互动 (点赞/收藏/评论)',
+      screenshot: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
+      time: '23分钟前',
+      status: 'pending',
+      reason: ''
+    },
+    {
+      id: 'sub-3',
+      avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=80&q=80',
+      nickname: '极客小徐',
+      taskType: 'follow',
+      target: '账号加粉 (抖音号)',
+      screenshot: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+      time: '1小时前',
+      status: 'approved',
+      reason: ''
+    }
+  ])
+
+  return (
+    <div style={{ background: '#f5f7fa', minHeight: 'calc(100vh - 120px)' }}>
+      {/* 玩转KOC种草专属头部页签 */}
+      <div className="koc-tab-container-bar">
+        <div className="koc-tab-list">
+          <button 
+            className={`koc-tab-btn ${activeSubTab === 'hub' ? 'active' : ''}`}
+            onClick={() => setActiveSubTab('hub')}
+          >
+            玩转KOC种草
+          </button>
+          <button 
+            className={`koc-tab-btn ${activeSubTab === 'follow' ? 'active' : ''}`}
+            onClick={() => setActiveSubTab('follow')}
+          >
+            账号加粉
+          </button>
+          <button 
+            className={`koc-tab-btn ${activeSubTab === 'interactive' ? 'active' : ''}`}
+            onClick={() => setActiveSubTab('interactive')}
+          >
+            内容互动
+          </button>
+          <button 
+            className={`koc-tab-btn ${activeSubTab === 'audit' ? 'active' : ''}`}
+            onClick={() => setActiveSubTab('audit')}
+          >
+            内容审核
+            {auditSubmissions.filter(s => s.status === 'pending').length > 0 && (
+              <span className="koc-tab-badge">
+                {auditSubmissions.filter(s => s.status === 'pending').length}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* 条件页签内容渲染 */}
+      <div style={{ marginTop: 20 }}>
+        {activeSubTab === 'hub' && (
+          <KocHub 
+            setActiveSubTab={setActiveSubTab} 
+            followEnabled={followEnabled} 
+          />
+        )}
+        {activeSubTab === 'follow' && (
+          <KocFollowEditor 
+            brandAccounts={brandAccounts}
+            setBrandAccounts={setBrandAccounts}
+            taskAccounts={taskAccounts}
+            setTaskAccounts={setTaskAccounts}
+            followPoints={followPoints}
+            setFollowPoints={setFollowPoints}
+            followRules={followRules}
+            setFollowRules={setFollowRules}
+            followAllowReSubmit={followAllowReSubmit}
+            setFollowAllowReSubmit={setFollowAllowReSubmit}
+            followEnabled={followEnabled}
+            setFollowEnabled={setFollowEnabled}
+            setActiveSubTab={setActiveSubTab}
+          />
+        )}
+        <div style={{ display: activeSubTab === 'interactive' ? 'block' : 'none' }}>
+          <KocInteractiveEditor />
+        </div>
+        {activeSubTab === 'audit' && (
+          <KocAuditPanel 
+            submissions={auditSubmissions}
+            setSubmissions={setAuditSubmissions}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+function KocInteractiveEditor() {
   // 后台配置 State
   const [platform, setPlatform] = useState<'xhs' | 'dy' | 'weibo' | 'wx'>('xhs')
   const [rewardPoints, setRewardPoints] = useState<number>(100)
