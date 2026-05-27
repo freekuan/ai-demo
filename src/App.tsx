@@ -47,6 +47,7 @@ import {
   PictureOutlined,
   DownloadOutlined,
   ArrowLeftOutlined,
+  RobotOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import {
@@ -1474,9 +1475,12 @@ function LotteryEditor() {
 interface KocHubProps {
   setActiveSubTab: (tab: 'hub' | 'follow' | 'interactive' | 'audit') => void
   followEnabled: boolean
+  aiFollowEnabled: boolean
+  aiInteractiveEnabled: boolean
+  openAiAuditModal: () => void
 }
 
-function KocHub({ setActiveSubTab, followEnabled }: KocHubProps) {
+function KocHub({ setActiveSubTab, followEnabled, aiFollowEnabled, aiInteractiveEnabled, openAiAuditModal }: KocHubProps) {
   const [guideModal, setGuideModal] = useState<string | null>(null)
 
   return (
@@ -1486,9 +1490,19 @@ function KocHub({ setActiveSubTab, followEnabled }: KocHubProps) {
         <div className="koc-hub-banner-content" style={{ textAlign: 'left' }}>
           <div className="koc-badge-pill">KOC 全域增长流量中心</div>
           <h1 className="koc-hub-title">社交矩阵流量主航道 · 撬动品牌自然增长</h1>
-          <p className="koc-hub-subtitle">
+          <p className="koc-hub-subtitle" style={{ marginBottom: 12 }}>
             打通「小红书/抖音/视频号/微博」全域社媒，通过低成本的任务驱动，实现私域快速爆发、爆款内容破圈、及高 ROI 转化闭环。
           </p>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Button 
+              type="primary" 
+              icon={<RobotOutlined />} 
+              style={{ background: '#52c41a', borderColor: '#52c41a', borderRadius: 4, height: 32, fontSize: 12, fontWeight: 500 }} 
+              onClick={openAiAuditModal}
+            >
+              🤖 配置 AI 自动审核 (限时免费)
+            </Button>
+          </div>
         </div>
         <div className="koc-hub-banner-graphics">
           <div className="graphics-circle circle-1"></div>
@@ -1610,11 +1624,24 @@ function KocHub({ setActiveSubTab, followEnabled }: KocHubProps) {
             <strong>全域账号裂变蓄水池 · 沉淀品牌私域核心资产</strong><br />
             通过引导C端用户批量关注品牌官方账号矩阵并提交凭证，快速沉淀全网公域流量至私域蓄水池，为品牌二次触达与精准转化沉淀粉丝。
           </p>
-          <div className="koc-card-footer">
-            <span className="koc-card-stat">已配置账号：2 个</span>
-            <Button type="primary" size="small" onClick={() => setActiveSubTab('follow')}>
-              去配置
-            </Button>
+          <div className="koc-card-footer" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="koc-card-stat">已配置账号：2 个</span>
+              {followEnabled && (
+                <div 
+                  className={`ai-audit-status-pill ${aiFollowEnabled ? 'active' : 'disabled'}`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => { e.stopPropagation(); openAiAuditModal(); }}
+                >
+                  {aiFollowEnabled ? '🤖 AI自动过审已开启' : '🤖 AI自动过审已禁用'}
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button type="primary" size="small" onClick={() => setActiveSubTab('follow')}>
+                去配置
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -1628,11 +1655,22 @@ function KocHub({ setActiveSubTab, followEnabled }: KocHubProps) {
             <strong>智能帖子热度催化器 · 撬动社交平台算法推荐</strong><br />
             通过点赞、收藏、评论等指定交互动作的引导与积分机制，激发真实社交裂变，引爆平台热门算法，实现品牌内容大范围出圈。
           </p>
-          <div className="koc-card-footer">
-            <span className="koc-card-stat">进行中任务：1 个</span>
-            <Button type="primary" size="small" onClick={() => setActiveSubTab('interactive')}>
-              去配置
-            </Button>
+          <div className="koc-card-footer" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'stretch' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span className="koc-card-stat">进行中任务：1 个</span>
+              <div 
+                className={`ai-audit-status-pill ${aiInteractiveEnabled ? 'active' : 'disabled'}`}
+                style={{ cursor: 'pointer' }}
+                onClick={(e) => { e.stopPropagation(); openAiAuditModal(); }}
+              >
+                {aiInteractiveEnabled ? '🤖 AI自动过审已开启' : '🤖 AI自动过审已禁用'}
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button type="primary" size="small" onClick={() => setActiveSubTab('interactive')}>
+                去配置
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -1746,6 +1784,8 @@ interface KocFollowEditorProps {
   followEnabled: boolean
   setFollowEnabled: React.Dispatch<React.SetStateAction<boolean>>
   setActiveSubTab: (tab: 'hub' | 'follow' | 'interactive' | 'audit') => void
+  aiFollowEnabled: boolean
+  openAiAuditModal: () => void
 }
 
 function KocFollowEditor({
@@ -1762,6 +1802,8 @@ function KocFollowEditor({
   followEnabled,
   setFollowEnabled,
   setActiveSubTab,
+  aiFollowEnabled,
+  openAiAuditModal
 }: KocFollowEditorProps) {
   const followBannerImage = 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=800&q=80'
   const followBannerType = 'image'
@@ -2080,18 +2122,30 @@ function KocFollowEditor({
                     <div style={{ display: 'flex', gap: 8 }}>
                       <Button size="small" onClick={() => setActiveSubTab('audit')}>关注凭证</Button>
                       <Button size="small" onClick={openAccountModal}>账号管理</Button>
+                      <Button size="small" icon={<RobotOutlined />} onClick={openAiAuditModal}>AI审核配置</Button>
                       <Button size="small" type="primary" onClick={enterEditMode}>修改配置</Button>
                     </div>
                   </div>
 
                   <div className="detail-rows" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                       <span style={{ width: 100, color: '#8c8c8c', fontSize: 13 }}>场景状态：</span>
                       <span>
                         {followEnabled ? (
                           <span style={{ background: '#f6ffed', border: '1px solid #b7eb8f', color: '#52c41a', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>已开启</span>
                         ) : (
                           <span style={{ background: '#fff0f6', border: '1px solid #ffadd2', color: '#eb2f96', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>已关闭</span>
+                        )}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ width: 100, color: '#8c8c8c', fontSize: 13 }}>AI 自动审核：</span>
+                      <span>
+                        {aiFollowEnabled ? (
+                          <span className="ai-audit-status-pill active" style={{ fontSize: 12, display: 'inline-flex', verticalAlign: 'middle' }}>🤖 已启用 (公测限免)</span>
+                        ) : (
+                          <span className="ai-audit-status-pill disabled" style={{ fontSize: 12, display: 'inline-flex', verticalAlign: 'middle' }}>🤖 已关闭</span>
                         )}
                       </span>
                     </div>
@@ -2485,9 +2539,12 @@ function KocFollowEditor({
 interface KocAuditPanelProps {
   submissions: any[]
   setSubmissions: React.Dispatch<React.SetStateAction<any[]>>
+  aiFollowEnabled: boolean
+  aiInteractiveEnabled: boolean
+  openAiAuditModal: () => void
 }
 
-function KocAuditPanel({ submissions, setSubmissions }: KocAuditPanelProps) {
+function KocAuditPanel({ submissions, setSubmissions, aiFollowEnabled, aiInteractiveEnabled, openAiAuditModal }: KocAuditPanelProps) {
   const [selectedSub, setSelectedSub] = useState<any | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [rejectModalOpen, setRejectModalOpen] = useState<boolean>(false)
@@ -2527,10 +2584,22 @@ function KocAuditPanel({ submissions, setSubmissions }: KocAuditPanelProps) {
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>KOC 任务凭证审核大厅</h3>
           <p style={{ margin: '4px 0 0 0', fontSize: 12, color: '#8c8c8c' }}>审核C端用户提交的关注截图与点赞/评论/收藏截图，通过后奖励自动到账。</p>
         </div>
-        <div className="audit-stats-summary" style={{ display: 'flex', gap: 16, fontSize: 12 }}>
-          <div>待审核: <strong style={{ color: '#fa8c16' }}>{submissions.filter(s => s.status === 'pending').length}</strong></div>
-          <div>已通过: <strong style={{ color: '#52c41a' }}>{submissions.filter(s => s.status === 'approved').length}</strong></div>
-          <div>已拒绝: <strong style={{ color: '#f5222d' }}>{submissions.filter(s => s.status === 'rejected').length}</strong></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div className="audit-stats-summary" style={{ display: 'flex', gap: 16, fontSize: 12 }}>
+            <div>待审核: <strong style={{ color: '#fa8c16' }}>{submissions.filter(s => s.status === 'pending').length}</strong></div>
+            <div>已通过: <strong style={{ color: '#52c41a' }}>{submissions.filter(s => s.status === 'approved').length}</strong></div>
+            <div>已拒绝: <strong style={{ color: '#f5222d' }}>{submissions.filter(s => s.status === 'rejected').length}</strong></div>
+          </div>
+          <Button 
+            type="primary" 
+            ghost 
+            icon={<RobotOutlined />} 
+            size="small" 
+            style={{ borderRadius: 4, height: 28, fontSize: 12 }}
+            onClick={openAiAuditModal}
+          >
+            AI自动审核配置
+          </Button>
         </div>
       </div>
 
@@ -2565,7 +2634,14 @@ function KocAuditPanel({ submissions, setSubmissions }: KocAuditPanelProps) {
               filteredList.map(sub => {
                 const statusTag = {
                   pending: <span style={{ color: '#fa8c16', background: '#fff7e6', border: '1px solid #ffd591', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>待审核</span>,
-                  approved: <span style={{ color: '#52c41a', background: '#f6ffed', border: '1px solid #b7eb8f', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>已通过</span>,
+                  approved: (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
+                      <span style={{ color: '#52c41a', background: '#f6ffed', border: '1px solid #b7eb8f', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>已通过</span>
+                      {((sub.taskType === 'follow' && aiFollowEnabled) || (sub.taskType === 'interactive' && aiInteractiveEnabled)) && (
+                        <span style={{ fontSize: 10, color: '#1890ff', background: '#e6f7ff', border: '1px solid #91d5ff', padding: '0px 4px', borderRadius: 2 }}>🤖 AI自动过审</span>
+                      )}
+                    </div>
+                  ),
                   rejected: <span style={{ color: '#f5222d', background: '#fff1f0', border: '1px solid #ffa39e', padding: '1px 6px', borderRadius: 4, fontSize: 11 }}>已拒绝</span>,
                 }[sub.status as 'pending' | 'approved' | 'rejected']
 
@@ -2668,7 +2744,10 @@ function KocAuditPanel({ submissions, setSubmissions }: KocAuditPanelProps) {
 function TaskEditor() {
   const [activeSubTab, setActiveSubTab] = useState<'hub' | 'follow' | 'interactive' | 'audit'>('hub')
 
-
+  // AI 自动审核 States
+  const [aiFollowEnabled, setAiFollowEnabled] = useState<boolean>(true)
+  const [aiInteractiveEnabled, setAiInteractiveEnabled] = useState<boolean>(false)
+  const [showAiAuditModal, setShowAiAuditModal] = useState<boolean>(false)
 
   // 2. 账号加粉 (Follow Task) States
   const [followEnabled, setFollowEnabled] = useState<boolean>(true)
@@ -2780,6 +2859,9 @@ function TaskEditor() {
           <KocHub 
             setActiveSubTab={setActiveSubTab} 
             followEnabled={followEnabled} 
+            aiFollowEnabled={aiFollowEnabled}
+            aiInteractiveEnabled={aiInteractiveEnabled}
+            openAiAuditModal={() => setShowAiAuditModal(true)}
           />
         )}
         {activeSubTab === 'follow' && (
@@ -2797,22 +2879,165 @@ function TaskEditor() {
             followEnabled={followEnabled}
             setFollowEnabled={setFollowEnabled}
             setActiveSubTab={setActiveSubTab}
+            aiFollowEnabled={aiFollowEnabled}
+            openAiAuditModal={() => setShowAiAuditModal(true)}
           />
         )}
         <div style={{ display: activeSubTab === 'interactive' ? 'block' : 'none' }}>
-          <KocInteractiveEditor />
+          <KocInteractiveEditor 
+            aiInteractiveEnabled={aiInteractiveEnabled}
+            openAiAuditModal={() => setShowAiAuditModal(true)}
+          />
         </div>
         {activeSubTab === 'audit' && (
           <KocAuditPanel 
             submissions={auditSubmissions}
             setSubmissions={setAuditSubmissions}
+            aiFollowEnabled={aiFollowEnabled}
+            aiInteractiveEnabled={aiInteractiveEnabled}
+            openAiAuditModal={() => setShowAiAuditModal(true)}
           />
         )}
       </div>
+
+      {/* 🤖 AI自动审核配置弹出 Modal */}
+      {showAiAuditModal && (
+        <div className="ai-audit-modal-overlay" onClick={() => setShowAiAuditModal(false)}>
+          <div className="ai-audit-modal-content" onClick={e => e.stopPropagation()}>
+            <span className="ai-audit-modal-close" onClick={() => setShowAiAuditModal(false)}>×</span>
+            
+            <div className="ai-audit-header-banner">
+              <div className="ai-audit-header-text">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h2 className="ai-audit-modal-title">🤖 AI 智能截图自动审核配置</h2>
+                  <span className="ai-audit-status-badge beta">Beta · 限时免费</span>
+                </div>
+                <p className="ai-audit-modal-subtitle">
+                  利用多模态视觉大模型（Vision LLM）对用户上传的截图执行 OCR 解析与像素比对，秒级核实任务合规性并自动发放奖励。
+                </p>
+              </div>
+            </div>
+
+            <div className="ai-audit-modal-body" style={{ padding: '24px 32px' }}>
+              
+              {/* 风控安全警告 Banner */}
+              <div className="ai-audit-risk-warning">
+                <div className="warning-icon-wrapper">
+                  <span className="warning-icon">⚠️</span>
+                </div>
+                <div className="warning-content">
+                  <h4>风控与资金安全提示</h4>
+                  <p>
+                    AI 智能审核受截屏分辨率、黑暗模式、手机排版影响，存在 <strong>2% ~ 5%</strong> 的识别误差。
+                    <strong>如果当前任务发放的单次奖励较高（如大额现金红包、大面值实物券等），强烈建议使用“人工审核”以防范恶意作弊，确保资金安全。</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* 核心配置区域：分别启动 */}
+              <div style={{ marginTop: 24 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, color: '#262626', marginBottom: 12, textAlign: 'left' }}>场景审核启动状态</h3>
+                <div className="ai-audit-switch-grid">
+                  {/* 卡片 1: 账号加粉 */}
+                  <div className={`ai-audit-switch-card ${aiFollowEnabled ? 'active' : ''}`}>
+                    <div className="card-header-row">
+                      <div className="card-title-group">
+                        <span className="platform-tag follow">场景一</span>
+                        <h4 className="card-title">账号加粉任务 AI 审核</h4>
+                      </div>
+                      <Switch 
+                        checked={aiFollowEnabled} 
+                        onChange={(checked) => setAiFollowEnabled(checked)} 
+                        size="small"
+                      />
+                    </div>
+                    <p className="card-desc">
+                      自动对用户提交的小红书、抖音、视频号、微博关注截图进行识别，核实截图是否包含“已关注”、“关注中”及官方账号名称。
+                    </p>
+                    <div className="card-status-info">
+                      状态：{aiFollowEnabled ? <span className="status-dot-on">已启用 (公测免费)</span> : <span className="status-dot-off">已关闭</span>}
+                    </div>
+                  </div>
+
+                  {/* 卡片 2: 内容互动 */}
+                  <div className={`ai-audit-switch-card ${aiInteractiveEnabled ? 'active' : ''}`}>
+                    <div className="card-header-row">
+                      <div className="card-title-group">
+                        <span className="platform-tag interactive">场景二</span>
+                        <h4 className="card-title">内容互动任务 AI 审核</h4>
+                      </div>
+                      <Switch 
+                        checked={aiInteractiveEnabled} 
+                        onChange={(checked) => setAiInteractiveEnabled(checked)} 
+                        size="small"
+                      />
+                    </div>
+                    <p className="card-desc">
+                      自动对用户提交的点赞、收藏、评论特定词截图进行多模态及像素比对，自动识别交互合规性。
+                    </p>
+                    <div className="card-status-info">
+                      状态：{aiInteractiveEnabled ? <span className="status-dot-on">已启用 (公测免费)</span> : <span className="status-dot-off">已关闭</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 三大核心价值 */}
+              <div style={{ marginTop: 24 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, color: '#262626', marginBottom: 12, textAlign: 'left' }}>核心功能与价值优势</h3>
+                <div className="ai-audit-values-grid">
+                  <div className="value-item">
+                    <div className="value-icon">🔍</div>
+                    <div className="value-text">
+                      <h5>多模态 OCR 识别与像素对比</h5>
+                      <p>提取并匹配图片中的文字（如商户号、按钮文案、交互标识），与标准配置参考图深度校验，拦截拼接、篡改、旧图重复提交等薅羊毛作弊。</p>
+                    </div>
+                  </div>
+                  <div className="value-item">
+                    <div className="value-icon">⚡</div>
+                    <div className="value-text">
+                      <h5>24H 秒级自动发奖</h5>
+                      <p>用户前台小程序上传凭证后，系统在3秒内智能审核发放奖励积分，C端体验即时极佳，快速激发社交关注裂变热潮。</p>
+                    </div>
+                  </div>
+                  <div className="value-item">
+                    <div className="value-icon">📈</div>
+                    <div className="value-text">
+                      <h5>节省 95% 人工负荷</h5>
+                      <p>系统过滤绝大多数常规过审件。仅对模糊、异常、置信度低或涉嫌作弊的上传件标记为“待复审”，商户只需进行少量抽查即可。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 增值付费说明 */}
+              <div className="ai-audit-pricing-info" style={{ marginTop: 24 }}>
+                <span className="pricing-icon">💎</span>
+                <div className="pricing-text">
+                  <strong>付费说明：</strong>当前功能处于 <span>限时公测期免费</span> 阶段。正式版上线后将升级为增值服务，按判定次数计费（预计单次判定扣除 ¥0.02），开启扣费前将提前进行通知授权。
+                </div>
+              </div>
+            </div>
+
+            <div className="ai-audit-modal-footer" style={{ padding: '16px 32px 24px 32px', borderTop: '1px solid #f0f0f0', display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+              <Button onClick={() => setShowAiAuditModal(false)}>取消</Button>
+              <Button type="primary" onClick={() => {
+                setShowAiAuditModal(false)
+                message.success('AI 截图自动审核配置已成功保存！')
+              }}>保存配置</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-function KocInteractiveEditor() {
+interface KocInteractiveEditorProps {
+  aiInteractiveEnabled: boolean
+  openAiAuditModal: () => void
+}
+
+function KocInteractiveEditor({ aiInteractiveEnabled, openAiAuditModal }: KocInteractiveEditorProps) {
   // 后台配置 State
   const [platform, setPlatform] = useState<'xhs' | 'dy' | 'weibo' | 'wx'>('xhs')
   const [rewardPoints, setRewardPoints] = useState<number>(100)
@@ -3120,16 +3345,26 @@ function KocInteractiveEditor() {
         <Col xs={24} lg={15} xl={16}>
           <div className="editor-properties-panel">
             {/* 顶栏控制组 */}
-            <div className="panel-header-section">
+            <div className="panel-header-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span className="title">互动任务属性配置</span>
-              <Button
-                type="text"
-                icon={<ReloadOutlined />}
-                onClick={resetTaskSettings}
-                style={{ color: '#8c8c8c' }}
-              >
-                重置默认配置
-              </Button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Button
+                  size="small"
+                  icon={<RobotOutlined />}
+                  onClick={openAiAuditModal}
+                  style={{ fontSize: 12 }}
+                >
+                  AI自动审核: {aiInteractiveEnabled ? '已启用 (限免)' : '已禁用'}
+                </Button>
+                <Button
+                  type="text"
+                  icon={<ReloadOutlined />}
+                  onClick={resetTaskSettings}
+                  style={{ color: '#8c8c8c' }}
+                >
+                  重置
+                </Button>
+              </div>
             </div>
 
             {/* 配置表单 */}
@@ -3412,6 +3647,25 @@ function KocInteractiveEditor() {
                       placeholder="由于平台规则限制，无法直接从微信跳转至小红书，请选择..."
                       maxLength={150}
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* 六、AI自动审核设置 */}
+              <div className="prop-group-card">
+                <h3 className="group-title">六、AI 自动审核设置</h3>
+                <div style={{ background: '#fafafa', padding: '14px 18px', borderRadius: 8, border: '1px solid #f0f0f0', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong style={{ fontSize: 13, display: 'block', color: '#262626', marginBottom: 4 }}>内容互动 AI 自动审核</strong>
+                    <span style={{ fontSize: 11.5, color: '#8c8c8c' }}>智能判定用户上传的点赞/收藏/评论截图</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                    {aiInteractiveEnabled ? (
+                      <span className="ai-audit-status-pill active" style={{ fontSize: 11 }}>🤖 自动过审已开启</span>
+                    ) : (
+                      <span className="ai-audit-status-pill disabled" style={{ fontSize: 11 }}>🤖 自动过审已禁用</span>
+                    )}
+                    <Button size="small" icon={<RobotOutlined />} onClick={openAiAuditModal}>配置 AI 审核</Button>
                   </div>
                 </div>
               </div>
