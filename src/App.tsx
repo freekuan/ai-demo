@@ -2913,7 +2913,7 @@ function TaskEditor() {
                   <span className="ai-audit-status-badge beta">Beta · 限时免费</span>
                 </div>
                 <p className="ai-audit-modal-subtitle">
-                  利用多模态视觉大模型（Vision LLM）对用户上传的截图执行 OCR 解析与像素比对，秒级核实任务合规性并自动发放奖励。
+                  利用多模态视觉大模型（Vision LLM）对用户上传的截图执行 OCR 解析与像素比对，7*24小时核实任务合规性并自动发放奖励。
                 </p>
               </div>
             </div>
@@ -2928,8 +2928,8 @@ function TaskEditor() {
                 <div className="warning-content">
                   <h4>风控与资金安全提示</h4>
                   <p>
-                    AI 智能审核受截屏分辨率、黑暗模式、手机排版影响，存在 <strong>2% ~ 5%</strong> 的识别误差。
-                    <strong>如果当前任务发放的单次奖励较高（如大额现金红包、大面值实物券等），强烈建议使用“人工审核”以防范恶意作弊，确保资金安全。</strong>
+                    AI 智能审核受截屏分辨率、黑暗模式、手机排版影响，存在一定的识别误差。
+                    <strong>如果当前任务发放的单次奖励较高（如大额现金红包、大面值实物赠品等），强烈建议使用“人工审核”以防范恶意作弊，确保资金安全。</strong>
                   </p>
                 </div>
               </div>
@@ -2952,7 +2952,7 @@ function TaskEditor() {
                       />
                     </div>
                     <p className="card-desc">
-                      自动对用户提交的小红书、抖音、视频号、微博关注截图进行识别，核实截图是否包含“已关注”、“关注中”及官方账号名称。
+                      自动对用户提交的小红书、抖音、视频号关注截图进行识别，核实截图是否包含“已关注”、“关注中”及官方账号名称。
                     </p>
                     <div className="card-status-info">
                       状态：{aiFollowEnabled ? <span className="status-dot-on">已启用 (公测免费)</span> : <span className="status-dot-off">已关闭</span>}
@@ -2973,7 +2973,7 @@ function TaskEditor() {
                       />
                     </div>
                     <p className="card-desc">
-                      自动对用户提交的点赞、收藏、评论特定词截图进行多模态及像素比对，自动识别交互合规性。
+                      自动对用户提交的点赞、收藏、评论截图进行多模态及像素比对，自动识别交互合规性。
                     </p>
                     <div className="card-status-info">
                       状态：{aiInteractiveEnabled ? <span className="status-dot-on">已启用 (公测免费)</span> : <span className="status-dot-off">已关闭</span>}
@@ -2990,21 +2990,21 @@ function TaskEditor() {
                     <div className="value-icon">🔍</div>
                     <div className="value-text">
                       <h5>多模态 OCR 识别与像素对比</h5>
-                      <p>提取并匹配图片中的文字（如商户号、按钮文案、交互标识），与标准配置参考图深度校验，拦截拼接、篡改、旧图重复提交等薅羊毛作弊。</p>
+                      <p>提取并匹配图片中的文字（如账号、按钮文案、交互标识），与标准配置参考图深度校验，拦截拼接、篡改等薅羊毛作弊。</p>
                     </div>
                   </div>
                   <div className="value-item">
                     <div className="value-icon">⚡</div>
                     <div className="value-text">
-                      <h5>24H 秒级自动发奖</h5>
-                      <p>用户前台小程序上传凭证后，系统在3秒内智能审核发放奖励积分，C端体验即时极佳，快速激发社交关注裂变热潮。</p>
+                      <h5>24H不间断自动发奖</h5>
+                      <p>用户前台小程序上传凭证后，系统会分钟级自动审核发放奖励，C端体验较好，可以快速激发社交关注。</p>
                     </div>
                   </div>
                   <div className="value-item">
                     <div className="value-icon">📈</div>
                     <div className="value-text">
                       <h5>节省 95% 人工负荷</h5>
-                      <p>系统过滤绝大多数常规过审件。仅对模糊、异常、置信度低或涉嫌作弊的上传件标记为“待复审”，商户只需进行少量抽查即可。</p>
+                      <p>系统过滤绝大多数常规过审件。仅对模糊、异常、置信度低或涉嫌作弊的上传件标记为“待复审”，只需进行少量抽查即可。</p>
                     </div>
                   </div>
                 </div>
@@ -3014,7 +3014,7 @@ function TaskEditor() {
               <div className="ai-audit-pricing-info" style={{ marginTop: 24 }}>
                 <span className="pricing-icon">💎</span>
                 <div className="pricing-text">
-                  <strong>付费说明：</strong>当前功能处于 <span>限时公测期免费</span> 阶段。正式版上线后将升级为增值服务，按判定次数计费（预计单次判定扣除 ¥0.02），开启扣费前将提前进行通知授权。
+                  <strong>付费说明：</strong>当前功能处于 <span>限时公测期免费</span> 阶段。正式版上线后将升级为增值服务，按判定次数计费，开启扣费前将提前进行通知。
                 </div>
               </div>
             </div>
