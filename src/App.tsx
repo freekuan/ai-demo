@@ -74,6 +74,7 @@ import type { ReactNode } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import InviteReward from './pages/InviteReward'
+import NavigationEditor from './pages/NavigationEditor'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -155,6 +156,9 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
   {
     key: 'shop-decoration',
     label: '店铺设置',
+    children: [
+      { key: 'shop-navigation', label: '店铺导航' },
+    ],
   },
 ]
 
@@ -165,6 +169,7 @@ export const shopMenuDefaultOpenKeys = [
   'shop-mkt-tools',
   'shop-other-store',
   'shop-member-group',
+  'shop-decoration',
 ]
 
 const placeholderMenus: Record<PrimaryKey, MenuProps['items']> = {
@@ -3707,9 +3712,10 @@ export default function App() {
   const isPointsLotteryPage = railKey === 'shop' && (secondaryKey === 'shop-points-lottery' || secondaryKey === 'shop-lottery-center')
   const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
   const isInviteRewardPage = railKey === 'shop' && secondaryKey === 'shop-invite-reward'
+  const isNavigationPage = railKey === 'shop' && secondaryKey === 'shop-navigation'
   
   // 基础主题色
-  const activeTheme = (isPointsMarketingPage || isPointsTaskPage) ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -3824,6 +3830,8 @@ export default function App() {
                 <TaskEditor />
               ) : isInviteRewardPage ? (
                 <InviteReward />
+              ) : isNavigationPage ? (
+                <NavigationEditor />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
