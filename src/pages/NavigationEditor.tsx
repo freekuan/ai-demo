@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react'
 import {
   SettingOutlined,
   MobileOutlined,
-  WarningOutlined,
   UploadOutlined,
   ReloadOutlined,
   SaveOutlined,
@@ -18,7 +17,6 @@ import {
   Radio,
   Button,
   message,
-  Modal,
   Alert,
   Tooltip
 } from 'antd'
@@ -131,7 +129,10 @@ export default function NavigationEditor() {
     { id: 5, name: '我的', link: 'user', iconSelected: 'user_filled', iconUnselected: 'user_outline', enabled: true },
   ])
 
-  // Style customization state
+  // Custom Tabbar Enabled control Switch (Issue 2: Simplification)
+  const [customTabbarEnabled, setCustomTabbarEnabled] = useState<boolean>(false)
+  
+  // Custom Tabbar detailed style configuration
   const [navStyle, setNavStyle] = useState<'default' | 'raised' | 'floating' | 'helm'>('default')
   const [raisedPosition, setRaisedPosition] = useState<'middle' | 'custom'>('middle')
   const [customRaisedIndex, setCustomRaisedIndex] = useState<number>(2) // Index (0-indexed). 2 is the 3rd item "分类"
@@ -149,15 +150,16 @@ export default function NavigationEditor() {
   // Phone preview active tab
   const [previewActiveTab, setPreviewActiveTab] = useState<number>(0)
 
-  // Mini-program versions
-  const [currentVersion, setCurrentVersion] = useState<string>('3.40.0')
-  const requiredVersion = '3.42.0'
+  // Mini-program version constraints
+  const [currentVersion, setCurrentVersion] = useState<string>('2.3.0')
+  const requiredVersion = '2.3.3'
 
-  // Modal for version upgrade reminder
-  const [versionModalVisible, setVersionModalVisible] = useState<boolean>(false)
-  const [pendingStyle, setPendingStyle] = useState<'default' | 'raised' | 'floating' | 'helm' | null>(null)
+  // Computed checks
+  const isVersionTooLow = useMemo(() => {
+    const parseVer = (v: string) => parseFloat(v.replace(/\./g, ''))
+    return parseVer(currentVersion) < parseVer(requiredVersion)
+  }, [currentVersion])
 
-  // Count active nav items
   const activeNavsCount = useMemo(() => navItems.filter(i => i.enabled).length, [navItems])
 
   // Get index of the raised item
@@ -201,44 +203,17 @@ export default function NavigationEditor() {
     updateNavItem(id, 'enabled', checked)
   }
 
-  // Handle click style cards with version restrictions
+  // Change style options directly (no modal popup needed, Switch handles state)
   const handleSelectStyle = (style: 'default' | 'raised' | 'floating' | 'helm') => {
-    if (style === 'default') {
-      setNavStyle(style)
-      return
-    }
-
-    // Version restriction check
-    const currentNum = parseFloat(currentVersion.replace(/\./g, ''))
-    const requiredNum = parseFloat(requiredVersion.replace(/\./g, ''))
-
-    if (currentNum < requiredNum) {
-      // Pop up upgrade warning
-      setPendingStyle(style)
-      setVersionModalVisible(true)
-    } else {
-      setNavStyle(style)
-    }
+    setNavStyle(style)
   }
 
-  // Confirm using new style despite version gap (allows development setup)
-  const confirmUpgradeAndSelect = () => {
-    if (pendingStyle) {
-      setNavStyle(pendingStyle)
-      setPendingStyle(null)
-    }
-    setVersionModalVisible(false)
-  }
-
-  // Upgrade mini program to 3.42.0 (simulated)
+  // Upgrade mini program to 2.3.3 (simulated)
   const simulateUpgrade = () => {
-    setCurrentVersion('3.42.0')
-    message.success('🎉 小程序线上版本已成功模拟升级至 v3.42.0！新导航样式已全部解锁。')
-    if (pendingStyle) {
-      setNavStyle(pendingStyle)
-      setPendingStyle(null)
-    }
-    setVersionModalVisible(false)
+    setCurrentVersion('2.3.3')
+    setCustomTabbarEnabled(true)
+    setNavStyle('raised') // Auto-select raised style for demonstration when upgrading
+    message.success('🎉 小程序线上版本已成功模拟升级至 v2.3.3！已自动开启“自定义 Tabbar”功能。')
   }
 
   // Reset to default settings
@@ -250,6 +225,7 @@ export default function NavigationEditor() {
       { id: 4, name: '购物车', link: 'cart', iconSelected: 'cart_filled', iconUnselected: 'cart_outline', enabled: true },
       { id: 5, name: '我的', link: 'user', iconSelected: 'user_filled', iconUnselected: 'user_outline', enabled: true },
     ])
+    setCustomTabbarEnabled(false)
     setNavStyle('default')
     setRaisedPosition('middle')
     setCustomRaisedIndex(2)
@@ -257,7 +233,7 @@ export default function NavigationEditor() {
     setBgColor('#FFFFFF')
     setSelectedColor('#FF5E29')
     setUnselectedColor('#8C8C8C')
-    setCurrentVersion('3.40.0')
+    setCurrentVersion('2.3.0')
     setPreviewActiveTab(0)
     message.success('已恢复系统导航的初始配置数据')
   }
@@ -266,21 +242,15 @@ export default function NavigationEditor() {
   const handleSave = () => {
     message.loading({ content: '正在同步导航配置...', key: 'save_nav' })
     setTimeout(() => {
-      const isCustomStyle = navStyle !== 'default'
-      const versionNum = parseFloat(currentVersion.replace(/\./g, ''))
-      const reqNum = parseFloat(requiredVersion.replace(/\./g, ''))
-
-      if (isCustomStyle && versionNum < reqNum) {
-        message.warning({
-          content: '导航配置保存成功，但由于当前小程序线上版本较低，客户端将回退显示默认系统导航样式，请尽快提审或升级版本！',
+      if (customTabbarEnabled) {
+        message.success({
+          content: '自定义导航发布成功！已通过热更新实时生效到小程序，无需微信审核。',
           key: 'save_nav',
-          duration: 5
+          duration: 3
         })
       } else {
         message.success({
-          content: isCustomStyle 
-            ? '自定义导航发布成功！已实时热更新到线上小程序，无需审核生效。'
-            : '系统导航配置保存成功！请前往“开发管理”提交版本审核发布以生效修改。',
+          content: '系统默认导航配置保存成功！请前往“开发管理”提交版本审核发布以生效修改。',
           key: 'save_nav',
           duration: 3
         })
@@ -288,26 +258,42 @@ export default function NavigationEditor() {
     }, 1000)
   }
 
+  // Computed layout state for phone mockup tabbar
+  const previewTabbarStyle = useMemo(() => {
+    return customTabbarEnabled ? navStyle : 'default'
+  }, [customTabbarEnabled, navStyle])
+
   return (
     <div className="navigation-editor-container">
       {/* 顶部动态兼容方案 Banner */}
       <div className="navigation-banner-alert">
-        {navStyle === 'default' ? (
+        {!customTabbarEnabled ? (
           <Alert
             message="当前为系统导航模式"
             description={
               <span>
-                系统导航受微信底层机制限制：
+                系统导航受微信底层限制：
                 <strong>增加或减少导航数量、开启或关闭导航、修改导航标题</strong>
-                这三类修改需<strong>提交小程序发布审核（提审）</strong>才能在线上对顾客生效。
-                如需实时生效，请在下方【样式设置】中升级为【凸起】、【悬浮】或【舵式】等自定义导航。
+                这三类修改需<strong>提交小程序发布审核（提审）</strong>才能对线上生效。
+                如需免审热更新生效，请在下方【样式设置】中开启【自定义 Tabbar】开关。
               </span>
             }
             type="warning"
             showIcon
             action={
-              <Button size="small" type="primary" onClick={() => handleSelectStyle('raised')}>
-                一键升级自定义
+              <Button 
+                size="small" 
+                type="primary" 
+                onClick={() => {
+                  if (isVersionTooLow) {
+                    simulateUpgrade()
+                  } else {
+                    setCustomTabbarEnabled(true)
+                    setNavStyle('raised')
+                  }
+                }}
+              >
+                一键开启自定义
               </Button>
             }
           />
@@ -317,13 +303,16 @@ export default function NavigationEditor() {
             description={
               <span>
                 微信无需提审模式：系统已激活<strong>自定义 Tabbar（热更新技术）</strong>。
-                此处对导航名称、开关、链接、自定义图标或配色的所有修改，在点击保存后将<strong>立刻对所有新老版本用户实时生效</strong>，无需任何微信团队人工审核。
+                此处对导航名称、开关、链接、自定义图标或配色的所有修改，在点击保存后将<strong>立刻对所有新老版本用户实时生效</strong>，无需提交微信审核。
               </span>
             }
             type="success"
             showIcon
             action={
-              <Button size="small" ghost onClick={() => handleSelectStyle('default')} style={{ color: '#52c41a', borderColor: '#52c41a' }}>
+              <Button size="small" ghost onClick={() => {
+                setCustomTabbarEnabled(false)
+                setNavStyle('default')
+              }} style={{ color: '#52c41a', borderColor: '#52c41a' }}>
                 切换回系统导航
               </Button>
             }
@@ -343,7 +332,7 @@ export default function NavigationEditor() {
             
             <div className="nav-items-grid">
               {navItems.map((item, index) => {
-                const isItemRaised = (navStyle === 'raised' || navStyle === 'helm') && index === actualRaisedIndex
+                const isItemRaised = customTabbarEnabled && (navStyle === 'raised' || navStyle === 'helm') && index === actualRaisedIndex
                 
                 return (
                   <div key={item.id} className={`nav-item-config-box ${item.enabled ? '' : 'disabled'} ${isItemRaised ? 'is-raised-item' : ''}`}>
@@ -437,198 +426,228 @@ export default function NavigationEditor() {
           <div className="editor-card" style={{ marginTop: 16 }}>
             <div className="card-header">
               <span className="card-title"><SettingOutlined /> 样式设置</span>
-              <span className="card-subtitle">升级自定义 Tabbar，选择更具张力与引导性的视觉交互布局。</span>
+              <span className="card-subtitle">开启自定义配置后，选择更具张力与引导性的视觉交互布局。</span>
             </div>
 
             <div className="style-config-body">
-              {/* Style selection */}
-              <div className="form-item-wrap">
-                <span className="form-item-label">导航样式</span>
-                <div className="style-cards-row">
-                  {[
-                    { key: 'default', name: '默认样式', desc: '系统默认扁平Tab', ver: '无限制' },
-                    { key: 'raised', name: '凸起样式', desc: '中心项隆起圆弧', ver: 'v3.42.0+' },
-                    { key: 'floating', name: '悬浮样式', desc: '浮空圆角卡片感', ver: 'v3.42.0+' },
-                    { key: 'helm', name: '舵式样式', desc: '中置圆形大功能', ver: 'v3.42.0+' },
-                  ].map((s) => (
-                    <div 
-                      key={s.key} 
-                      className={`style-option-card ${navStyle === s.key ? 'active' : ''}`}
-                      onClick={() => handleSelectStyle(s.key as any)}
-                    >
-                      <div className="style-mini-icon">
-                        <div className={`tabbar-stub ${s.key}`}>
-                          {s.key === 'default' && <div className="stub-default" />}
-                          {s.key === 'raised' && <div className="stub-raised" />}
-                          {s.key === 'floating' && <div className="stub-floating" />}
-                          {s.key === 'helm' && <div className="stub-helm" />}
-                        </div>
-                      </div>
-                      <span className="style-name">
-                        {s.name}
-                        {s.key !== 'default' && (
-                          <span className={`version-badge ${parseFloat(currentVersion.replace(/\./g, '')) >= 3420 ? 'unlocked' : 'locked'}`}>
-                            {s.ver}
-                          </span>
-                        )}
-                      </span>
-                      <span className="style-desc">{s.desc}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Special options for Raised / Helm */}
-              {(navStyle === 'raised' || navStyle === 'helm') && (
-                <div className="raised-options-area animate-fade-in">
-                  <div className="form-item-wrap inline">
-                    <span className="form-item-label">
-                      凸起导航项 
-                      <Tooltip title="指定哪一个导航菜单项需要以凸起/舵式大圆圈显示。">
-                        <QuestionCircleOutlined className="label-help-icon" />
-                      </Tooltip>
+              {/* ISSUE 2: Version Control Switch Toggle */}
+              <div className="form-item-wrap inline" style={{ marginBottom: 20 }}>
+                <span className="form-item-label" style={{ minWidth: 120 }}>自定义 Tabbar</span>
+                <div className="form-item-control" style={{ display: 'flex', alignItems: 'center' }}>
+                  <Switch
+                    checked={customTabbarEnabled}
+                    disabled={isVersionTooLow}
+                    onChange={(val) => {
+                      setCustomTabbarEnabled(val)
+                      if (val) {
+                        setNavStyle('raised') // Default to raised for better visual presentation
+                      } else {
+                        setNavStyle('default')
+                      }
+                    }}
+                  />
+                  {isVersionTooLow ? (
+                    <span style={{ color: '#ff4d4f', fontSize: 12, marginLeft: 12, fontWeight: 500 }}>
+                      ⚠️ {requiredVersion} 版本支持自定义 Tabbar，当前小程序版本为 v{currentVersion}，暂不可用
                     </span>
-                    <div className="form-item-control">
-                      <Radio.Group 
-                        value={raisedPosition} 
-                        onChange={(e) => setRaisedPosition(e.target.value)}
-                        size="small"
-                      >
-                        <Radio.Button value="middle">系统居中项</Radio.Button>
-                        <Radio.Button value="custom">指定导航项</Radio.Button>
-                      </Radio.Group>
-                      
-                      {raisedPosition === 'custom' && (
-                        <Select
-                          value={customRaisedIndex}
-                          onChange={setCustomRaisedIndex}
-                          size="small"
-                          style={{ width: 140, marginLeft: 12 }}
-                          options={navItems.filter(i => i.enabled).map((item) => ({
-                            value: navItems.indexOf(item),
-                            label: `${item.name} (导航 ${navItems.indexOf(item) + 1})`
-                          }))}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* ISSUE 1: Custom Raised Icon Upload Settings */}
-                  <div className="form-item-wrap inline">
-                    <span className="form-item-label">
-                      凸起图标配置
-                      <Tooltip title="您可以继续使用本项已配置的普通图标，或者单独为该隆起按钮上传更大尺寸、特殊视觉的设计图。">
-                        <QuestionCircleOutlined className="label-help-icon" />
-                      </Tooltip>
+                  ) : (
+                    <span style={{ color: '#8c8c8c', fontSize: 12, marginLeft: 12 }}>
+                      {requiredVersion} 版本支持自定义 Tabbar，可以选择更具张力与引导性的视觉交互布局。
                     </span>
-                    <div className="form-item-control">
-                      <Radio.Group 
-                        value={raisedIconConfig} 
-                        onChange={(e) => setRaisedIconConfig(e.target.value)}
-                        size="small"
-                      >
-                        <Radio.Button value="follow">跟随原导航图标</Radio.Button>
-                        <Radio.Button value="custom">单独配置凸起图 (建议)</Radio.Button>
-                      </Radio.Group>
-                    </div>
-                  </div>
-
-                  {raisedIconConfig === 'custom' && (
-                    <div className="custom-raised-upload-panel animate-fade-in">
-                      <div className="upload-header-tip">
-                        <InfoCircleOutlined /> <b>凸起大图上传：</b> 建议使用 80x80px 的 PNG 透明背景图片，能够溢出贴合圆弧，效果更震撼。
-                      </div>
-                      <div className="upload-fields-row">
-                        <div className="upload-field-item">
-                          <span className="upload-label">未选中态大图</span>
-                          <div className="avatar-uploader-mock">
-                            <img src={customRaisedUnselected} alt="unselected custom" />
-                            <div className="uploader-overlay">
-                              <UploadOutlined /> <span>更换</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="upload-field-item">
-                          <span className="upload-label">选中态大图 (溢出发光)</span>
-                          <div className="avatar-uploader-mock glow">
-                            <img src={customRaisedSelected} alt="selected custom" />
-                            <div className="uploader-overlay">
-                              <UploadOutlined /> <span>更换</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="preset-custom-icons">
-                          <span className="presets-title">备选精致大图：</span>
-                          <div className="preset-icons-row">
-                            {[
-                              { label: '潮流酷炫星', unselected: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=80&q=80', selected: 'https://images.unsplash.com/photo-1543508282-6319a3e2621d?auto=format&fit=crop&w=80&q=80' },
-                              { label: '惊喜礼包袋', unselected: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=80&q=80', selected: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=80&q=80' },
-                              { label: '发布中心加', unselected: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=80&q=80', selected: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=80&q=80' },
-                            ].map((preset, pIdx) => (
-                              <button
-                                key={pIdx}
-                                type="button"
-                                className="preset-img-btn"
-                                onClick={() => {
-                                  setCustomRaisedUnselected(preset.unselected)
-                                  setCustomRaisedSelected(preset.selected)
-                                  message.info(`已应用备选图: ${preset.label}`)
-                                }}
-                              >
-                                <img src={preset.unselected} alt={preset.label} title={preset.label} />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   )}
                 </div>
+              </div>
+
+              {/* Show styling sub-configs only when customTabbarEnabled is turned ON */}
+              {customTabbarEnabled ? (
+                <div className="animate-fade-in" style={{ width: '100%' }}>
+                  {/* Style selection cards */}
+                  <div className="form-item-wrap">
+                    <span className="form-item-label">导航样式</span>
+                    <div className="style-cards-row">
+                      {[
+                        { key: 'default', name: '默认样式', desc: '扁平贴合设计' },
+                        { key: 'raised', name: '凸起样式', desc: '中心项隆起圆弧' },
+                        { key: 'floating', name: '悬浮样式', desc: '浮空圆角卡片感' },
+                        { key: 'helm', name: '舵式样式', desc: '中置圆形大功能' },
+                      ].map((s) => (
+                        <div 
+                          key={s.key} 
+                          className={`style-option-card ${navStyle === s.key ? 'active' : ''}`}
+                          onClick={() => handleSelectStyle(s.key as any)}
+                        >
+                          <div className="style-mini-icon">
+                            <div className={`tabbar-stub ${s.key}`}>
+                              {s.key === 'default' && <div className="stub-default" />}
+                              {s.key === 'raised' && <div className="stub-raised" />}
+                              {s.key === 'floating' && <div className="stub-floating" />}
+                              {s.key === 'helm' && <div className="stub-helm" />}
+                            </div>
+                          </div>
+                          <span className="style-name">{s.name}</span>
+                          <span className="style-desc">{s.desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Special options for Raised / Helm */}
+                  {(navStyle === 'raised' || navStyle === 'helm') && (
+                    <div className="raised-options-area animate-fade-in">
+                      <div className="form-item-wrap inline">
+                        <span className="form-item-label">
+                          凸起导航项 
+                          <Tooltip title="指定哪一个导航菜单项需要以凸起/舵式大圆圈显示。">
+                            <QuestionCircleOutlined className="label-help-icon" />
+                          </Tooltip>
+                        </span>
+                        <div className="form-item-control">
+                          <Radio.Group 
+                            value={raisedPosition} 
+                            onChange={(e) => setRaisedPosition(e.target.value)}
+                            size="small"
+                          >
+                            <Radio.Button value="middle">系统居中项</Radio.Button>
+                            <Radio.Button value="custom">指定导航项</Radio.Button>
+                          </Radio.Group>
+                          
+                          {raisedPosition === 'custom' && (
+                            <Select
+                              value={customRaisedIndex}
+                              onChange={setCustomRaisedIndex}
+                              size="small"
+                              style={{ width: 140, marginLeft: 12 }}
+                              options={navItems.filter(i => i.enabled).map((item) => ({
+                                value: navItems.indexOf(item),
+                                label: `${item.name} (导航 ${navItems.indexOf(item) + 1})`
+                              }))}
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* ISSUE 1: Custom Raised Icon Upload Settings */}
+                      <div className="form-item-wrap inline">
+                        <span className="form-item-label">
+                          凸起图标配置
+                          <Tooltip title="您可以继续使用本项已配置的普通图标，或者单独为该隆起按钮上传更大尺寸、特殊视觉的设计图。">
+                            <QuestionCircleOutlined className="label-help-icon" />
+                          </Tooltip>
+                        </span>
+                        <div className="form-item-control">
+                          <Radio.Group 
+                            value={raisedIconConfig} 
+                            onChange={(e) => setRaisedIconConfig(e.target.value)}
+                            size="small"
+                          >
+                            <Radio.Button value="follow">跟随原导航图标</Radio.Button>
+                            <Radio.Button value="custom">单独配置凸起图 (建议)</Radio.Button>
+                          </Radio.Group>
+                        </div>
+                      </div>
+
+                      {raisedIconConfig === 'custom' && (
+                        <div className="custom-raised-upload-panel animate-fade-in">
+                          <div className="upload-header-tip">
+                            <InfoCircleOutlined /> <b>凸起大图上传：</b> 建议使用 80x80px 的 PNG 透明背景图片，能够溢出贴合圆弧，效果更震撼。
+                          </div>
+                          <div className="upload-fields-row">
+                            <div className="upload-field-item">
+                              <span className="upload-label">未选中态大图</span>
+                              <div className="avatar-uploader-mock">
+                                <img src={customRaisedUnselected} alt="unselected custom" />
+                                <div className="uploader-overlay">
+                                  <UploadOutlined /> <span>更换</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="upload-field-item">
+                              <span className="upload-label">选中态大图 (溢出发光)</span>
+                              <div className="avatar-uploader-mock glow">
+                                <img src={customRaisedSelected} alt="selected custom" />
+                                <div className="uploader-overlay">
+                                  <UploadOutlined /> <span>更换</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="preset-custom-icons">
+                              <span className="presets-title">备选精致大图：</span>
+                              <div className="preset-icons-row">
+                                {[
+                                  { label: '潮流酷炫星', unselected: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=80&q=80', selected: 'https://images.unsplash.com/photo-1543508282-6319a3e2621d?auto=format&fit=crop&w=80&q=80' },
+                                  { label: '惊喜礼包袋', unselected: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=80&q=80', selected: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=80&q=80' },
+                                  { label: '发布中心加', unselected: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=80&q=80', selected: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=80&q=80' },
+                                ].map((preset, pIdx) => (
+                                  <button
+                                    key={pIdx}
+                                    type="button"
+                                    className="preset-img-btn"
+                                    onClick={() => {
+                                      setCustomRaisedUnselected(preset.unselected)
+                                      setCustomRaisedSelected(preset.selected)
+                                      message.info(`已应用备选图: ${preset.label}`)
+                                    }}
+                                  >
+                                    <img src={preset.unselected} alt={preset.label} title={preset.label} />
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Color configurations */}
+                  <div className="form-item-wrap inline">
+                    <span className="form-item-label">配色方案</span>
+                    <div className="colors-picker-row">
+                      <div className="color-picker-item">
+                        <span>背景颜色</span>
+                        <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} />
+                        <span className="color-hex">{bgColor.toUpperCase()}</span>
+                      </div>
+
+                      <div className="color-picker-item">
+                        <span>未选中文字/图标</span>
+                        <input type="color" value={unselectedColor} onChange={(e) => setUnselectedColor(e.target.value)} />
+                        <span className="color-hex">{unselectedColor.toUpperCase()}</span>
+                      </div>
+
+                      <div className="color-picker-item">
+                        <span>选中激活态颜色</span>
+                        <input type="color" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} />
+                        <span className="color-hex">{selectedColor.toUpperCase()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Preset quick colors */}
+                  <div className="form-item-wrap inline">
+                    <span className="form-item-label">快速预设配色</span>
+                    <div className="preset-colors-row">
+                      {COLOR_PRESETS.map((preset, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          className="preset-color-pill"
+                          onClick={() => applyColorPreset(preset)}
+                        >
+                          <span className="pill-dot" style={{ backgroundColor: preset.selected }} />
+                          <span className="pill-name">{preset.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ padding: '16px 8px', background: '#f5f5f5', border: '1px dashed #d9d9d9', borderRadius: 6, color: '#8c8c8c', fontSize: 12 }}>
+                  💡 请开启上方“自定义 Tabbar”开关，解锁导航样式、配色自定义和图标单独配置功能。
+                </div>
               )}
-
-              {/* Color configurations */}
-              <div className="form-item-wrap inline">
-                <span className="form-item-label">配色方案</span>
-                <div className="colors-picker-row">
-                  <div className="color-picker-item">
-                    <span>背景颜色</span>
-                    <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} />
-                    <span className="color-hex">{bgColor.toUpperCase()}</span>
-                  </div>
-
-                  <div className="color-picker-item">
-                    <span>未选中文字/图标</span>
-                    <input type="color" value={unselectedColor} onChange={(e) => setUnselectedColor(e.target.value)} />
-                    <span className="color-hex">{unselectedColor.toUpperCase()}</span>
-                  </div>
-
-                  <div className="color-picker-item">
-                    <span>选中激活态颜色</span>
-                    <input type="color" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} />
-                    <span className="color-hex">{selectedColor.toUpperCase()}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Preset quick colors */}
-              <div className="form-item-wrap inline">
-                <span className="form-item-label">快速预设配色</span>
-                <div className="preset-colors-row">
-                  {COLOR_PRESETS.map((preset, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      className="preset-color-pill"
-                      onClick={() => applyColorPreset(preset)}
-                    >
-                      <span className="pill-dot" style={{ backgroundColor: preset.selected }} />
-                      <span className="pill-name">{preset.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
 
@@ -812,17 +831,17 @@ export default function NavigationEditor() {
 
               {/* Bottom Custom Tabbar Mockup */}
               <div 
-                className={`phone-tabbar-mock ${navStyle}`}
+                className={`phone-tabbar-mock ${previewTabbarStyle}`}
                 style={{ 
                   backgroundColor: bgColor,
-                  borderColor: navStyle === 'floating' ? 'transparent' : 'rgba(0,0,0,0.06)'
+                  borderColor: previewTabbarStyle === 'floating' ? 'transparent' : 'rgba(0,0,0,0.06)'
                 }}
               >
                 {navItems.map((item, index) => {
                   if (!item.enabled) return null
 
                   const isSelected = previewActiveTab === index
-                  const isRaised = (navStyle === 'raised' || navStyle === 'helm') && index === actualRaisedIndex
+                  const isRaised = customTabbarEnabled && (navStyle === 'raised' || navStyle === 'helm') && index === actualRaisedIndex
                   
                   // Active icon rendering logic
                   let iconElement = SVG_ICONS[isSelected ? item.iconSelected : item.iconUnselected]
@@ -874,19 +893,19 @@ export default function NavigationEditor() {
             {/* Version control debug bar below mockup */}
             <div className="version-debug-card">
               <div className="ver-row">
-                <span className="lbl"><MobileOutlined /> 当前小程序基础库线上版本:</span>
-                <span className={`val ${parseFloat(currentVersion.replace(/\./g, '')) >= 3420 ? 'valid' : 'invalid'}`}>
+                <span className="lbl"><MobileOutlined /> 当前店铺小程序线上版本:</span>
+                <span className={`val ${!isVersionTooLow ? 'valid' : 'invalid'}`}>
                   v{currentVersion}
                 </span>
               </div>
               
-              {parseFloat(currentVersion.replace(/\./g, '')) < 3420 ? (
+              {isVersionTooLow ? (
                 <div className="ver-tip-info animate-pulse">
-                  ⚠️ 基础库版本较低，新功能仅默认样式可用，点击下方按钮模拟升级体验新功能。
+                  ⚠️ 当前小程序线上版本较低，自定义 Tabbar 开关已被禁用锁定。
                 </div>
               ) : (
                 <div className="ver-tip-info success">
-                  ✅ 基础库版本已满足，所有自定义样式已解锁生效。
+                  ✅ 小程序版本已满足，自定义 Tabbar 开关已解锁，支持编辑。
                 </div>
               )}
 
@@ -894,19 +913,20 @@ export default function NavigationEditor() {
                 <Button 
                   size="small" 
                   onClick={simulateUpgrade}
-                  disabled={parseFloat(currentVersion.replace(/\./g, '')) >= 3420}
+                  disabled={!isVersionTooLow}
                 >
-                  模拟升级基础库 (v3.42.0)
+                  模拟升级版本 (v2.3.3)
                 </Button>
                 <Button 
                   size="small" 
                   type="text" 
                   onClick={() => {
-                    setCurrentVersion('3.40.0')
+                    setCurrentVersion('2.3.0')
+                    setCustomTabbarEnabled(false)
                     setNavStyle('default')
-                    message.info('基础库版本已重置至 v3.40.0')
+                    message.info('基础库版本已重置至 v2.3.0')
                   }}
-                  disabled={parseFloat(currentVersion.replace(/\./g, '')) < 3420}
+                  disabled={isVersionTooLow}
                 >
                   重置版本
                 </Button>
@@ -915,50 +935,6 @@ export default function NavigationEditor() {
           </div>
         </Col>
       </Row>
-
-      {/* ISSUE 2: Version Upgrade Alert Modal */}
-      <Modal
-        title={
-          <span style={{ color: '#faad14' }}>
-            <WarningOutlined /> 小程序版本升级提示
-          </span>
-        }
-        open={versionModalVisible}
-        onCancel={() => {
-          setVersionModalVisible(false)
-          setPendingStyle(null)
-        }}
-        footer={[
-          <Button key="back" onClick={() => {
-            setVersionModalVisible(false)
-            setPendingStyle(null)
-          }}>
-            留在低版本 (降级默认导航)
-          </Button>,
-          <Button key="confirm" type="primary" onClick={confirmUpgradeAndSelect}>
-            保存并强制发布
-          </Button>,
-          <Button key="upgrade" type="primary" style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} onClick={simulateUpgrade}>
-            一键升级小程序版本
-          </Button>
-        ]}
-      >
-        <div style={{ padding: '8px 0' }}>
-          <p>
-            您选择的自定义导航样式需要小程序的客户端基础库版本升级到 
-            <strong> v3.42.0 </strong> 或更高版本方可正常解析。
-          </p>
-          <p>
-            当前店铺在线的小程序版本检测为：
-            <strong style={{ color: '#ff4d4f' }}> v{currentVersion} </strong>。
-          </p>
-          <div style={{ background: '#fffbe6', border: '1px solid #ffe58f', padding: '10px 14px', borderRadius: 4, marginTop: 12 }}>
-            <strong>💡 注意：</strong> 如果您坚持保存发布，微信老版本客户端在加载时，
-            将**自动降级**使用扁平的「默认样式」作为兼容垫片，新版微信客户端将完美呈现新样式。
-            建议您点击 <b>一键升级小程序版本</b> 发布最新小程序版本！
-          </div>
-        </div>
-      </Modal>
     </div>
   )
 }
