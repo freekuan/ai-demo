@@ -75,6 +75,7 @@ import { useCallback, useMemo, useState } from 'react'
 import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import InviteReward from './pages/InviteReward'
 import NavigationEditor from './pages/NavigationEditor'
+import PointsGoodsLimit from './pages/PointsGoodsLimit'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -3713,9 +3714,10 @@ export default function App() {
   const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
   const isInviteRewardPage = railKey === 'shop' && secondaryKey === 'shop-invite-reward'
   const isNavigationPage = railKey === 'shop' && secondaryKey === 'shop-navigation'
+  const isPointsProdPage = railKey === 'shop' && secondaryKey === 'shop-points-prod'
   
   // 基础主题色
-  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage) ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -3832,6 +3834,8 @@ export default function App() {
                 <InviteReward />
               ) : isNavigationPage ? (
                 <NavigationEditor />
+              ) : isPointsProdPage ? (
+                <PointsGoodsLimit />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
