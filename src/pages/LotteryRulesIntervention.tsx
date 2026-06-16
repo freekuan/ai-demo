@@ -95,7 +95,7 @@ export default function LotteryRulesIntervention() {
   const [prizes, setPrizes] = useState<Prize[]>(INITIAL_PRIZES)
   // 规则启用开关
   const [globalEnableIntervention, setGlobalEnableIntervention] = useState<boolean>(false)
-  // 规则一配置 (非酋保底机制)
+  // 规则一配置 (抽奖保底机制)
   const [enableRule1, setEnableRule1] = useState<boolean>(true)
   const [rule1N, setRule1N] = useState<number>(5) // 连续未中 N 次
   const [rule1X, setRule1X] = useState<number>(2) // 未中概率最低的前 X 顺位奖品
@@ -498,12 +498,12 @@ export default function LotteryRulesIntervention() {
           />
         </div>
 
-        {/* 规则一：非酋防连续空车保底机制 */}
+        {/* 规则一：抽奖保底机制（防连续落空） */}
         <div className={`drawer-rule-card-wrap ${!globalEnableIntervention ? 'disabled-section' : ''}`}>
           <div className="rule-card-header">
             <div className="title-area">
               <GiftOutlined className="icon-blue" />
-              <span className="title-text">二、规则一：非酋防连续空车保底机制</span>
+              <span className="title-text">二、规则一：抽奖保底机制（防连续落空）</span>
             </div>
             <Switch
               checked={enableRule1}
@@ -569,12 +569,12 @@ export default function LotteryRulesIntervention() {
           )}
         </div>
 
-        {/* 规则二：大奖出货上限限制 */}
+        {/* 规则二：大奖防刷限制（防重复中奖） */}
         <div className={`drawer-rule-card-wrap ${!globalEnableIntervention ? 'disabled-section' : ''}`}>
           <div className="rule-card-header">
             <div className="title-area">
               <WarningOutlined className="icon-orange" />
-              <span className="title-text">三、规则二：大奖出货上限限制（防刷/防薅羊毛）</span>
+              <span className="title-text">三、规则二：大奖防刷限制（防重复中奖）</span>
             </div>
             <Switch
               checked={enableRule2}
