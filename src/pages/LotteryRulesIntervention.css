@@ -1,0 +1,353 @@
+/* ==========================================================================
+   抽奖概率干预 (LotteryRulesIntervention) 专属样式定义
+   ========================================================================== */
+
+.lottery-intervention-container {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.intervention-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+}
+
+.intervention-header .header-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #8c8c8c;
+}
+
+/* ==========================================================================
+   一、数据看板仪表盘
+   ========================================================================== */
+.metrics-dashboard-row {
+  margin-bottom: 20px;
+}
+
+.metric-card {
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #d9d9d9;
+}
+
+.metric-card .card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metric-card .metric-label {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.metric-card .metric-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #262626;
+  margin: 0;
+  line-height: 1;
+}
+
+.metric-card .metric-icon {
+  font-size: 26px;
+  padding: 10px;
+  border-radius: 50%;
+  background: #fafafa;
+}
+
+.metric-card .metric-icon.blue { color: #1890ff; background: #e6f7ff; }
+.metric-card .metric-icon.orange { color: #fa8c16; background: #fff7e6; }
+.metric-card .metric-icon.red { color: #ff4d4f; background: #fff1f0; }
+
+/* ==========================================================================
+   二、列表查询过滤栏
+   ========================================================================== */
+.list-search-bar {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.act-action-link {
+  font-size: 12.5px;
+  color: #1890ff;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.act-action-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+.stat-text-link {
+  color: #1890ff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.stat-text-link:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   三、配置抽屉样式
+   ========================================================================== */
+.intervention-config-drawer .ant-drawer-header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.drawer-header-title {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 14.5px;
+}
+
+.drawer-global-toggle-box {
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.drawer-global-toggle-box .toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drawer-global-toggle-box .toggle-title {
+  font-size: 14px;
+  color: #d46b08;
+}
+
+.drawer-global-toggle-box .toggle-desc {
+  font-size: 11.5px;
+  color: #fa8c16;
+}
+
+/* 未启用规则的锁定状态 */
+.disabled-section {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(0.8);
+  transition: all 0.3s;
+}
+
+/* 抽屉子板块标题 */
+.section-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #262626;
+  margin: 0;
+}
+
+/* 抽屉规则卡片 */
+.drawer-rule-card-wrap {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.rule-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.rule-card-header .title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rule-card-header .title-text {
+  font-weight: bold;
+  font-size: 13px;
+  color: #262626;
+}
+
+.rule-card-header .icon-blue { color: #1890ff; font-size: 15px; }
+.rule-card-header .icon-orange { color: #fa8c16; font-size: 15px; }
+
+/* 规则填充句配置：文本流排版而非 flex 块，以防换行突兀 */
+.sentence-config-row {
+  font-size: 13px;
+  line-height: 2.4;
+  color: #262626;
+  white-space: normal;
+  word-break: break-all;
+}
+
+.sentence-config-row > span {
+  display: inline;
+  margin: 0 2px;
+}
+
+.inline-number-input {
+  width: 70px;
+  margin: 0 4px;
+  vertical-align: middle;
+}
+
+/* 规则解释说明框 */
+.explain-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.explain-box.success {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: #237804;
+}
+
+.explain-box.error {
+  background: #fff2e8;
+  border: 1px solid #ffbb96;
+  color: #ad4e00;
+}
+
+.explain-box strong {
+  font-size: 12px;
+}
+
+/* ==========================================================================
+   库存与规则判定异常声明栏
+   ========================================================================== */
+.drawer-inventory-fallback-notice {
+  background: #fff1f0;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 20px;
+  box-shadow: 0 2px 10px rgba(255, 77, 79, 0.05);
+}
+
+.drawer-inventory-fallback-notice .notice-title {
+  color: #cf1322;
+  font-weight: bold;
+  font-size: 13px;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+}
+
+.drawer-inventory-fallback-notice .notice-text {
+  font-size: 12px;
+  color: #a8071a;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* 顺位表样式 */
+.prize-rank-table {
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+}
+
+.prize-rank-table .ant-table-thead > tr > th {
+  background: #f5f5f5 !important;
+  font-weight: bold;
+  font-size: 12px;
+  color: #262626;
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+
+.prize-rank-table .ant-table-cell {
+  padding: 6px 10px !important;
+  font-size: 12px;
+  white-space: nowrap !important; /* 禁止换行以节省纵向空间 */
+}
+
+.rank-badge-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rank-number-badge {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  color: #ffffff;
+  background: #bfbfbf;
+}
+
+.rank-number-badge.rank-1 { background: #ff4d4f; box-shadow: 0 2px 4px rgba(255,77,79,0.3); }
+.rank-number-badge.rank-2 { background: #fa8c16; box-shadow: 0 2px 4px rgba(250,140,22,0.3); }
+.rank-number-badge.rank-3 { background: #ffc53d; box-shadow: 0 2px 4px rgba(255,197,61,0.3); }
+.rank-number-badge.rank-4 { background: #40a9ff; }
+.rank-number-badge.rank-5 { background: #52c41a; }
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.flex-align-center-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
