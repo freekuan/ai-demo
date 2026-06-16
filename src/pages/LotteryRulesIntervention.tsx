@@ -172,7 +172,7 @@ export default function LotteryRulesIntervention() {
             </Paragraph>
           </div>
         ),
-        okText: '确认开启 (仅内部测试可用)',
+        okText: '确认开启 (仅用于内部测试)',
         cancelText: '取消',
         onOk: () => {
           setGlobalEnableIntervention(true)
