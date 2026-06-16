@@ -4,8 +4,6 @@ import {
   Radio,
   Switch,
   Button,
-  Slider,
-  message,
   Tag,
   Typography,
   Space,
@@ -13,7 +11,13 @@ import {
   Col,
   Table,
   Alert,
-  Modal
+  Modal,
+  Drawer,
+  Input,
+  Select,
+  Form,
+  message,
+  Slider
 } from 'antd'
 import {
   ReloadOutlined,
@@ -22,15 +26,18 @@ import {
   TrophyOutlined,
   WarningOutlined,
   SafetyCertificateOutlined,
-  LockOutlined,
   GiftOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  SearchOutlined,
+  PlusOutlined,
+  LineChartOutlined,
+  ControlOutlined
 } from '@ant-design/icons'
 import './LotteryRulesIntervention.css'
 
-const { Title, Text } = Typography
+const { Title, Text, Paragraph } = Typography
 
-// 初始奖品定义 (包含名字、默认概率、图标)
+// 初始奖品定义
 interface Prize {
   id: number
   name: string
@@ -50,15 +57,48 @@ const INITIAL_PRIZES: Prize[] = [
   { id: 7, name: '1 会员积分', prob: 42.00, quantity: 20000, type: 'points', color: '#40a9ff' },
 ]
 
+// 模拟抽奖活动对象
+interface Activity {
+  key: string
+  name: string
+  type: string
+  status: 'running' | 'waiting' | 'ended'
+  duration: string
+  usersCount: number
+  winnersCount: number
+  createdAt: string
+  syncStatus: boolean
+  enableIntervention: boolean // 该活动是否已开启概率干预
+}
+
+const INITIAL_ACTIVITIES: Activity[] = [
+  { key: '1', name: '特步会员惊喜大抽奖', type: '积分抽奖', status: 'running', duration: '永久', usersCount: 3, winnersCount: 1, createdAt: '2026-06-16 10:03:22', syncStatus: true, enableIntervention: false },
+  { key: '2', name: '许愿抽抽乐·抢新品跑鞋', type: '转盘抽奖', status: 'running', duration: '永久', usersCount: 1, winnersCount: 1, createdAt: '2026-06-15 18:19:05', syncStatus: false, enableIntervention: true },
+  { key: '3', name: '端午答题领红包活动', type: '积分抽奖', status: 'running', duration: '永久', usersCount: 1, winnersCount: 1, createdAt: '2026-06-15 17:20:42', syncStatus: true, enableIntervention: false },
+  { key: '4', name: '618狂欢宠粉派发', type: '转盘抽奖', status: 'running', duration: '永久', usersCount: 1, winnersCount: 1, createdAt: '2026-06-15 09:47:22', syncStatus: false, enableIntervention: false },
+  { key: '5', name: '常规会员裂变测试抽奖', type: '积分抽奖', status: 'running', duration: '永久', usersCount: 1, winnersCount: 1, createdAt: '2026-06-15 09:40:44', syncStatus: true, enableIntervention: false },
+  { key: '6', name: '特步俱乐部线下抽大奖', type: '积分抽奖', status: 'ended', duration: '2026-02-03 至 2026-03-31', usersCount: 1, winnersCount: 1, createdAt: '2026-02-03 15:39:01', syncStatus: true, enableIntervention: false },
+]
+
 export default function LotteryRulesIntervention() {
   // ==========================================
-  // B端：整体属性状态
+  // 活动列表与基础状态
   // ==========================================
-  // 活动发布性质: 'internal' (内部测试) | 'public' (外部公开商业)
-  const [activityType, setActivityType] = useState<'internal' | 'public'>('internal')
-  const [showLegalConfirm, setShowLegalConfirm] = useState<boolean>(false)
-  const [prizes, setPrizes] = useState<Prize[]>(INITIAL_PRIZES)
+  const [activities, setActivities] = useState<Activity[]>(INITIAL_ACTIVITIES)
+  const [searchName, setSearchName] = useState<string>('')
+  const [searchStatus, setSearchStatus] = useState<string>('all')
+  const [searchType, setSearchType] = useState<string>('all')
 
+  // 当前编辑的活动及抽屉控制
+  const [currentAct, setCurrentAct] = useState<Activity | null>(null)
+  const [drawerVisible, setDrawerVisible] = useState<boolean>(false)
+
+  // ==========================================
+  // B端：干预配置属性状态 (基于当前编辑的活动)
+  // ==========================================
+  const [prizes, setPrizes] = useState<Prize[]>(INITIAL_PRIZES)
+  // 规则启用开关
+  const [globalEnableIntervention, setGlobalEnableIntervention] = useState<boolean>(false)
   // 规则一配置 (非酋保底机制)
   const [enableRule1, setEnableRule1] = useState<boolean>(true)
   const [rule1N, setRule1N] = useState<number>(5) // 连续未中 N 次
@@ -71,34 +111,40 @@ export default function LotteryRulesIntervention() {
   const [rule2Y, setRule2Y] = useState<number>(3) // 后续屏蔽前 Y 顺位奖品
 
   // ==========================================
-  // C端：模拟器用户状态
+  // C端：沙盒模拟器状态
   // ==========================================
-  const [simConsecutiveLosses, setSimConsecutiveLosses] = useState<number>(0) // 连续未中大奖次数
-  const [simHasWonGrand, setSimHasWonGrand] = useState<boolean>(false)       // 是否已抽中过大奖
-  const [simAccountType, setSimAccountType] = useState<'test' | 'visitor'>('test') // 用户身份 (测试账号/普通账号)
-
-  // 模拟抽奖动画状态
+  const [simModalVisible, setSimModalVisible] = useState<boolean>(false)
+  const [simConsecutiveLosses, setSimConsecutiveLosses] = useState<number>(0)
+  const [simHasWonGrand, setSimHasWonGrand] = useState<boolean>(false)
+  const [simAccountType, setSimAccountType] = useState<'test' | 'visitor'>('test')
   const [isDrawing, setIsDrawing] = useState<boolean>(false)
-  const [activeIndex, setActiveIndex] = useState<number>(0) // 当前高亮的九宫格索引
-  const [modalVisible, setModalVisible] = useState<boolean>(false)
-  const [drawResult, setDrawResult] = useState<{ prize: Prize;干预类型: 'none' | 'rule1' | 'rule2' } | null>(null)
+  const [activeIndex, setActiveIndex] = useState<number>(0)
+  const [drawResultModalVisible, setDrawResultModalVisible] = useState<boolean>(false)
+  const [drawResult, setDrawResult] = useState<{ prize: Prize; 干预类型: 'none' | 'rule1' | 'rule2' } | null>(null)
 
   // ==========================================
-  // 动态数据计算 (中奖概率顺位排序)
+  // 顺位消重与排序计算 (中奖概率相同排序处理)
   // ==========================================
-  // 按照概率升序排列，生成顺位 (概率相同按ID排，保证顺序唯一)
+  // 核心逻辑：按概率升序排列。如果概率完全相同，则增加副排序条件 (按 id 升序)
+  // 这样每个奖品在数学上和系统处理上都有一个唯一不重合的“概率顺位”
   const sortedPrizes = useMemo(() => {
     return [...prizes].sort((a, b) => {
       if (a.prob !== b.prob) {
-        return a.prob - b.prob // 升序
+        return a.prob - b.prob // 概率低排在前面（即顺位1、2等大奖）
       }
+      // 概率相同时，以 id 降序或升序作为明确的第二顺位排序规则
       return a.id - b.id
     })
   }, [prizes])
 
+  // 检测是否存在中奖概率完全一致的奖品
+  const hasDuplicateProbabilities = useMemo(() => {
+    const probs = prizes.map(p => p.prob)
+    const uniqueProbs = new Set(probs)
+    return uniqueProbs.size !== probs.length
+  }, [prizes])
+
   // 九宫格的8个奖品排列位置顺序 (外圈顺时针，中间是开始抽奖)
-  // 格子序号对应：0 1 2, 7 Start 3, 6 5 4
-  // 我们的奖品只有7个，为了铺满8个格子加一个“谢谢参与”（概率0%或补差额，此处设为差额或0%）
   const gridPrizes = useMemo(() => {
     const totalProb = prizes.reduce((sum, p) => sum + p.prob, 0)
     const noneProb = Math.max(0, 100 - totalProb)
@@ -110,12 +156,10 @@ export default function LotteryRulesIntervention() {
       type: 'none',
       color: '#bfbfbf'
     }
-    // 排列8个格子
     const items = [...prizes]
     if (items.length < 8) {
       items.push(nonePrize)
     }
-    // 补齐 8 个奖品以放入九宫格边缘
     while (items.length < 8) {
       items.push({
         id: 100 + items.length,
@@ -129,38 +173,84 @@ export default function LotteryRulesIntervention() {
     return items
   }, [prizes])
 
-  // 规则一：概率最低的前 X 顺位奖品列表
-  const rule1TargetPrizes = useMemo(() => {
-    return sortedPrizes.slice(0, rule1X)
-  }, [sortedPrizes, rule1X])
+  // 规则一/二关联顺位奖品范围计算
+  const rule1TargetPrizes = useMemo(() => sortedPrizes.slice(0, rule1X), [sortedPrizes, rule1X])
+  const rule1RewardPrizes = useMemo(() => sortedPrizes.slice(0, rule1Y), [sortedPrizes, rule1Y])
+  const rule2TriggerPrizes = useMemo(() => sortedPrizes.slice(0, rule2X), [sortedPrizes, rule2X])
+  const rule2BlockPrizes = useMemo(() => sortedPrizes.slice(0, rule2Y), [sortedPrizes, rule2Y])
 
-  // 规则一：强制派发的前 Y 顺位奖品列表
-  const rule1RewardPrizes = useMemo(() => {
-    return sortedPrizes.slice(0, rule1Y)
-  }, [sortedPrizes, rule1Y])
-
-  // 规则二：触发限制的前 X 顺位奖品列表
-  const rule2TriggerPrizes = useMemo(() => {
-    return sortedPrizes.slice(0, rule2X)
-  }, [sortedPrizes, rule2X])
-
-  // 规则二：被屏蔽的前 Y 顺位奖品列表
-  const rule2BlockPrizes = useMemo(() => {
-    return sortedPrizes.slice(0, rule2Y)
-  }, [sortedPrizes, rule2Y])
-
-  // 合规控制：如果是公开活动，强行关闭并屏蔽规则
-  const finalEnableRule1 = activityType === 'internal' && enableRule1
-  const finalEnableRule2 = activityType === 'internal' && enableRule2
-
-  // 联动概率检查
   const totalProbability = useMemo(() => {
     return prizes.reduce((sum, p) => sum + p.prob, 0)
   }, [prizes])
 
   // ==========================================
-  // B端交互逻辑
+  // 活动列表页逻辑
   // ==========================================
+  const filteredActivities = useMemo(() => {
+    return activities.filter(act => {
+      const matchName = act.name.toLowerCase().includes(searchName.toLowerCase())
+      const matchStatus = searchStatus === 'all' || act.status === searchStatus
+      const matchType = searchType === 'all' || act.type === searchType
+      return matchName && matchStatus && matchType
+    })
+  }, [activities, searchName, searchStatus, searchType])
+
+  const handleOpenIntervention = (act: Activity) => {
+    setCurrentAct(act)
+    setGlobalEnableIntervention(act.enableIntervention)
+    // 模拟针对不同活动加载不同的概率设置，这里加载默认奖品数据
+    setPrizes(INITIAL_PRIZES)
+    setDrawerVisible(true)
+  }
+
+  // ==========================================
+  // 全局干预启用开关与强合规警告弹窗
+  // ==========================================
+  const handleGlobalSwitchChange = (checked: boolean) => {
+    if (checked) {
+      // 开启开关时触发强模态弹窗说明
+      Modal.confirm({
+        title: '⚠️ 法律合规与安全风险提示',
+        icon: <WarningOutlined style={{ color: '#ff4d4f', fontSize: 22 }} />,
+        width: 520,
+        centered: true,
+        content: (
+          <div style={{ marginTop: 10, fontSize: 13, lineHeight: 1.6 }}>
+            <p style={{ color: '#ff4d4f', fontWeight: 'bold', fontSize: 14 }}>
+              仅允许在 [内部员工测试] 或 [内测沙盒活动] 中启用概率干预规则！
+            </p>
+            <Paragraph style={{ color: '#595959' }}>
+              根据中国<strong>《反不正当竞争法》</strong>第十条及<strong>《规范促销行为暂行规定》</strong>第十五条，公开的商业性抽奖活动<strong>明确禁止欺骗性有奖销售</strong>，包括但不限于以下行为：
+            </Paragraph>
+            <ul style={{ paddingLeft: 18, color: '#ff4d4f', margin: '8px 0' }}>
+              <li><strong>人为操纵、内定中奖人员；</strong></li>
+              <li><strong>中途故意修改公开宣称的中奖概率；</strong></li>
+              <li><strong>恶意屏蔽、剔除已公示的大奖；</strong></li>
+            </ul>
+            <Paragraph style={{ color: '#595959' }}>
+              外部公开的商业活动必须保持纯粹、客观、完全随机抽奖。本系统的概率干预功能仅供内部测试账号在沙盒环境下进行防空车与极限出货测试。开启后请勿将活动直接公开对外！
+            </Paragraph>
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              系统将自动为本活动打上 [内部沙盒内测] 的标签隔离标识，仅对测试白名单账号生效。
+            </Text>
+          </div>
+        ),
+        okText: '已悉知法条，确认仅用于内部测试',
+        cancelText: '取消开启',
+        onOk: () => {
+          setGlobalEnableIntervention(true)
+          message.success('已开启干预规则配置。当前活动已被标记为 [内部测试沙盒] 模式。')
+        },
+        onCancel: () => {
+          setGlobalEnableIntervention(false)
+        }
+      })
+    } else {
+      setGlobalEnableIntervention(false)
+      message.info('已停用本活动的概率干预，活动恢复纯客观随机率。')
+    }
+  }
+
   const handleProbabilityChange = (id: number, val: number | null) => {
     if (val === null) return
     setPrizes(prev => prev.map(p => {
@@ -171,93 +261,68 @@ export default function LotteryRulesIntervention() {
     }))
   }
 
-  const handleResetSettings = () => {
-    setPrizes(INITIAL_PRIZES)
-    setActivityType('internal')
-    setEnableRule1(true)
-    setRule1N(5)
-    setRule1X(2)
-    setRule1Y(3)
-    setEnableRule2(true)
-    setRule2X(2)
-    setRule2Y(3)
-    message.success('配置已重置为初始状态')
-  }
-
-  const handleSaveSettings = () => {
+  const handleSaveDrawerSettings = () => {
     if (totalProbability > 100) {
-      message.error(`保存失败：中奖概率之和 (${totalProbability}%) 超过 100%，请调整各奖品概率！`)
+      message.error(`保存失败：中奖概率之和 (${totalProbability}%) 超过 100%，请调整！`)
       return
     }
 
-    if (activityType === 'public') {
-      message.success('保存成功：外部公开活动发布成功，规则干预已处于锁定停用状态。')
-    } else {
-      setShowLegalConfirm(true)
+    // 更新列表里的活动干预状态
+    if (currentAct) {
+      setActivities(prev => prev.map(act => {
+        if (act.key === currentAct.key) {
+          return { ...act, enableIntervention: globalEnableIntervention }
+        }
+        return act
+      }))
     }
-  }
 
-  const handleConfirmInternalSave = () => {
-    setShowLegalConfirm(false)
-    message.loading({ content: '正在保存内部概率干预规则...', key: 'save_rules' })
+    message.loading({ content: '正在保存概率干预配置...', key: 'save_act_rules' })
     setTimeout(() => {
-      message.success({ content: '内部规则保存成功！干预配置仅在“内部测试”账户或“沙盒”环境下生效。', key: 'save_rules', duration: 3 })
-    }, 1000)
+      message.success({ content: '保存配置成功！干预配置已被应用至该抽奖活动中。', key: 'save_act_rules', duration: 2.5 })
+      setDrawerVisible(false)
+    }, 800)
   }
 
   // ==========================================
-  // C端模拟抽奖核心干预逻辑
+  // C端模拟抽奖核心逻辑
   // ==========================================
   const executeMockDraw = () => {
     if (isDrawing) return
-    
-    // 如果中奖率之和大于 100%
-    if (totalProbability > 100) {
-      message.error('抽奖盘配置异常：概率之和超过 100%')
-      return
-    }
-
     setIsDrawing(true)
     setDrawResult(null)
 
-    // 执行后台抽奖算法并进行概率干预
     let selectedPrize: Prize
     let 干预类型: 'none' | 'rule1' | 'rule2' = 'none'
 
-    // 默认备选池包含谢谢参与
     const totalProb = prizes.reduce((sum, p) => sum + p.prob, 0)
     const noneProb = Math.max(0, 100 - totalProb)
     const nonePrize: Prize = { id: 99, name: '谢谢参与', prob: noneProb, quantity: 99999, type: 'none', color: '#bfbfbf' }
-    
-    // 只有在【内部测试账号】或当前环境为【内部测试】且规则启用时，才进行干预
-    const isInterventionApplicable = activityType === 'internal' && simAccountType === 'test'
+
+    // 只有在【内测账号】且全局干预开启时，才执行干预
+    const isInterventionApplicable = globalEnableIntervention && simAccountType === 'test'
 
     // 规则 2 优先级校验：屏蔽前 Y 顺位奖品
     let activePrizePool = [...prizes]
     if (isInterventionApplicable && enableRule2 && simHasWonGrand) {
-      // 找到被屏蔽的前 Y 顺位 ID
       const blockedIds = rule2BlockPrizes.map(bp => bp.id)
       activePrizePool = activePrizePool.filter(p => !blockedIds.includes(p.id))
       干预类型 = 'rule2'
     }
 
-    // 计算当前奖池的总权重与各个区段
     let activeTotalProb = activePrizePool.reduce((sum, p) => sum + p.prob, 0) + (activePrizePool.length === prizes.length ? noneProb : 0)
-    
-    // 规则 1 校验：连续 N 次未抽中概率最低的前 X 顺位奖品，强制从前 Y 顺位中派发一个
+
+    // 规则 1 校验：连续 N 次未中，保底发放
     if (isInterventionApplicable && enableRule1 && simConsecutiveLosses >= rule1N) {
-      // 强制从前 Y 顺位 (rule1RewardPrizes) 中派发
-      // 必须确保 Y 顺位里包含当前可得的奖品（如果由于规则2已被屏蔽，则取交集，若无交集，取规则1的派发池）
       let rewardPool = rule1RewardPrizes.filter(rp => activePrizePool.some(ap => ap.id === rp.id))
       if (rewardPool.length === 0) {
-        rewardPool = rule1RewardPrizes // 兜底
+        rewardPool = rule1RewardPrizes
       }
 
-      // 在保底池中按权重比例随机抽取一个
       const poolWeight = rewardPool.reduce((sum, p) => sum + p.prob, 0)
       const rand = Math.random() * poolWeight
       let accumulated = 0
-      selectedPrize = rewardPool[rewardPool.length - 1] // 默认最后一个
+      selectedPrize = rewardPool[rewardPool.length - 1]
       for (const p of rewardPool) {
         accumulated += p.prob
         if (rand <= accumulated) {
@@ -267,12 +332,11 @@ export default function LotteryRulesIntervention() {
       }
       干预类型 = 'rule1'
     } else {
-      // 正常抽奖逻辑 (或者规则2干预后的奖池)
+      // 正常抽奖
       const rand = Math.random() * 100
       let accumulated = 0
-      selectedPrize = nonePrize // 默认谢谢参与
+      selectedPrize = nonePrize
 
-      // 把 activePrizePool 按当前概率比例放大到 100 权重，或者剩余部分归谢谢参与
       for (const p of activePrizePool) {
         accumulated += p.prob
         if (rand <= accumulated) {
@@ -280,10 +344,8 @@ export default function LotteryRulesIntervention() {
           break
         }
       }
-      
-      // 如果没有在 activePrizePool 中抽中，且原先有谢谢参与概率
+
       if (selectedPrize.id === 99 && noneProb === 0 && activeTotalProb > 0) {
-        // 由于屏蔽导致的溢出重新分配
         const innerRand = Math.random() * activeTotalProb
         let innerAccum = 0
         for (const p of activePrizePool) {
@@ -296,21 +358,17 @@ export default function LotteryRulesIntervention() {
       }
     }
 
-    // 模拟九宫格顺时针旋转动画
-    // 对应的外圈格子索引排布：0, 1, 2, 3, 4, 5, 6, 7
-    // 我们的 gridPrizes 存有 8 个奖品，对应索引就是旋转定位
     const winIdInGrid = gridPrizes.findIndex(gp => gp.id === selectedPrize.id)
-    const targetCellIndex = winIdInGrid !== -1 ? winIdInGrid : 7 // 兜底谢谢参与
+    const targetCellIndex = winIdInGrid !== -1 ? winIdInGrid : 7
 
     let currentSpeed = 60
     let step = 0
-    const totalSteps = 24 + targetCellIndex // 旋转3圈多再停下
+    const totalSteps = 24 + targetCellIndex
 
     const spin = () => {
       setActiveIndex(step % 8)
       step++
       if (step < totalSteps) {
-        // 慢起 -> 快 -> 慢落
         if (step > totalSteps - 8) {
           currentSpeed += 40
         } else if (currentSpeed > 50) {
@@ -318,29 +376,26 @@ export default function LotteryRulesIntervention() {
         }
         setTimeout(spin, currentSpeed)
       } else {
-        // 动画结束，展示中奖结果并更新 C 端用户状态
         setTimeout(() => {
           setIsDrawing(false)
           setDrawResult({ prize: selectedPrize, 干预类型 })
-          setModalVisible(true)
+          setDrawResultModalVisible(true)
 
-          // 更新模拟统计值
-          // 判定抽中的是否是规则一/二的大奖范围 (X 顺位)
           const isRule1BigPrize = rule1TargetPrizes.some(rp => rp.id === selectedPrize.id)
           const isRule2BigPrize = rule2TriggerPrizes.some(rp => rp.id === selectedPrize.id)
 
           if (selectedPrize.type !== 'none') {
             if (isRule1BigPrize) {
-              setSimConsecutiveLosses(0) // 中了大奖，清空连续未中计数
+              setSimConsecutiveLosses(0)
             } else {
-              setSimConsecutiveLosses(prev => prev + 1) // 未中大奖，计数 +1
+              setSimConsecutiveLosses(prev => prev + 1)
             }
 
             if (isRule2BigPrize) {
-              setSimHasWonGrand(true) // 中了大奖，触发防刷机制标识
+              setSimHasWonGrand(true)
             }
           } else {
-            setSimConsecutiveLosses(prev => prev + 1) // 谢谢参与，计数 +1
+            setSimConsecutiveLosses(prev => prev + 1)
           }
         }, 300)
       }
@@ -350,14 +405,98 @@ export default function LotteryRulesIntervention() {
   }
 
   // ==========================================
-  // 表单顺位列定义
+  // 表格列配置
   // ==========================================
-  const columns = [
+  // 1. 活动列表列
+  const activityColumns = [
+    {
+      title: '活动名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string, record: Activity) => (
+        <Space direction="vertical" size={2}>
+          <strong style={{ color: '#262626' }}>{text}</strong>
+          {record.enableIntervention && (
+            <Tag color="orange" style={{ fontSize: 10, scale: 0.9, transformOrigin: 'left' }}>
+              ⚠️ 概率干预已启用 (内部测试模式)
+            </Tag>
+          )}
+        </Space>
+      )
+    },
+    {
+      title: '抽奖类型',
+      dataIndex: 'type',
+      key: 'type',
+      width: 110,
+    },
+    {
+      title: '活动状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 100,
+      render: (status: string) => {
+        if (status === 'running') return <Tag color="success">进行中</Tag>
+        if (status === 'waiting') return <Tag color="processing">未开始</Tag>
+        return <Tag color="default">已结束</Tag>
+      }
+    },
+    {
+      title: '活动有效期',
+      dataIndex: 'duration',
+      key: 'duration',
+    },
+    {
+      title: '抽奖人数',
+      dataIndex: 'usersCount',
+      key: 'usersCount',
+      width: 100,
+      render: (val: number) => <span className="stat-text-link">{val}</span>
+    },
+    {
+      title: '中奖人数',
+      dataIndex: 'winnersCount',
+      key: 'winnersCount',
+      width: 100,
+      render: (val: number) => <span className="stat-text-link">{val}</span>
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: 160,
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 220,
+      render: (_: any, record: Activity) => (
+        <Space size={12}>
+          <a className="act-action-link">编辑</a>
+          <a className="act-action-link">数据</a>
+          <a className="act-action-link">推广</a>
+          <Button
+            size="small"
+            type={record.enableIntervention ? 'default' : 'primary'}
+            ghost={!record.enableIntervention}
+            icon={<ControlOutlined />}
+            onClick={() => handleOpenIntervention(record)}
+            style={{ fontSize: 12, borderRadius: 4 }}
+          >
+            概率干预
+          </Button>
+        </Space>
+      )
+    }
+  ]
+
+  // 2. 顺位对照表列
+  const prizeColumns = [
     {
       title: '概率顺位',
       dataIndex: 'rank',
       key: 'rank',
-      width: 85,
+      width: 90,
       render: (_: any, record: Prize) => {
         const sortedIndex = sortedPrizes.findIndex(sp => sp.id === record.id) + 1
         return (
@@ -373,27 +512,20 @@ export default function LotteryRulesIntervention() {
       title: '奖品名称',
       dataIndex: 'name',
       key: 'name',
-      render: (text: string, record: Prize) => {
-        let tagColor = 'blue'
-        if (record.type === 'real') tagColor = 'magenta'
-        if (record.type === 'redpacket') tagColor = 'volcano'
-        if (record.type === 'points') tagColor = 'orange'
-        
-        return (
-          <Space>
-            <span>{text}</span>
-            <Tag color={tagColor} style={{ fontSize: 10, scale: 0.9 }}>
-              {record.type === 'real' ? '实物' : record.type === 'points' ? '积分' : '红包'}
-            </Tag>
-          </Space>
-        )
-      }
+      render: (text: string, record: Prize) => (
+        <Space>
+          <span>{text}</span>
+          <Tag color={record.type === 'real' ? 'magenta' : record.type === 'points' ? 'orange' : 'volcano'} style={{ fontSize: 9 }}>
+            {record.type === 'real' ? '实物' : record.type === 'points' ? '积分' : '红包'}
+          </Tag>
+        </Space>
+      )
     },
     {
       title: '中奖概率 (%)',
       dataIndex: 'prob',
       key: 'prob',
-      width: 140,
+      width: 130,
       render: (prob: number, record: Prize) => (
         <InputNumber
           min={0.01}
@@ -404,12 +536,12 @@ export default function LotteryRulesIntervention() {
           onChange={(val) => handleProbabilityChange(record.id, val)}
           addonAfter="%"
           size="small"
-          style={{ width: 110 }}
+          style={{ width: 105 }}
         />
       )
     },
     {
-      title: '奖品状态与干预关联',
+      title: '干预关联状态',
       key: 'status',
       render: (_: any, record: Prize) => {
         const sortedIndex = sortedPrizes.findIndex(sp => sp.id === record.id) + 1
@@ -420,20 +552,20 @@ export default function LotteryRulesIntervention() {
 
         return (
           <div className="intervention-assoc-tags">
-            {finalEnableRule1 && inRule1X && (
-              <Tag color="error" style={{ fontSize: 10 }}>规则1: 兜底大奖</Tag>
+            {globalEnableIntervention && inRule1X && (
+              <Tag color="error" style={{ fontSize: 9 }}>规则1: 兜底大奖</Tag>
             )}
-            {finalEnableRule1 && inRule1Y && (
-              <Tag color="success" style={{ fontSize: 10 }}>规则1: 保底发放</Tag>
+            {globalEnableIntervention && inRule1Y && (
+              <Tag color="success" style={{ fontSize: 9 }}>规则1: 保底派发</Tag>
             )}
-            {finalEnableRule2 && inRule2X && (
-              <Tag color="purple" style={{ fontSize: 10 }}>规则2: 触发大奖</Tag>
+            {globalEnableIntervention && inRule2X && (
+              <Tag color="purple" style={{ fontSize: 9 }}>规则2: 触发大奖</Tag>
             )}
-            {finalEnableRule2 && inRule2Y && (
-              <Tag color="default" style={{ fontSize: 10 }}>规则2: 后续屏蔽</Tag>
+            {globalEnableIntervention && inRule2Y && (
+              <Tag color="default" style={{ fontSize: 9 }}>规则2: 屏蔽大奖</Tag>
             )}
-            {!finalEnableRule1 && !finalEnableRule2 && (
-              <span style={{ fontSize: 11, color: '#bfbfbf' }}>未绑定干预</span>
+            {!globalEnableIntervention && (
+              <span style={{ fontSize: 11, color: '#bfbfbf' }}>干预未开启</span>
             )}
           </div>
         )
@@ -443,71 +575,393 @@ export default function LotteryRulesIntervention() {
 
   return (
     <div className="lottery-intervention-container">
-      {/* 头部说明 */}
+      
+      {/* 头部导航/运营面包屑 */}
       <div className="intervention-header">
         <Space size={8} align="center">
           <TrophyOutlined style={{ color: '#1890ff', fontSize: 20 }} />
           <Title level={4} style={{ margin: 0 }}>
-            抽奖概率干预及内部控制面板
+            抽奖活动概率干预设置
           </Title>
         </Space>
         <Text type="secondary" className="header-desc">
-          为内部员工测试、沙盒活动设计。支持配置非酋兜底、大奖限制等高级干预规则，可动态调节概率顺位及干预区间。
+          在这里可以浏览店铺内的全部抽奖活动。通过配置概率干预规则（保底规则与屏蔽规则），在内部测试和沙盒验证期间调试出奖逻辑。
         </Text>
       </div>
 
-      {/* 合规警示横幅 (直接贴在头部，确保一眼看出是非公开) */}
-      <div className="sandbox-notice-banner">
-        <div className="banner-content">
-          <SafetyCertificateOutlined className="notice-icon animate-pulse" />
-          <div className="notice-text">
-            <strong>内部沙盒测试模式生效中：</strong>根据《反不正当竞争法》和《规范促销行为暂行规定》，商业性公开有奖销售严禁操纵或人为修改中奖概率。
-            本面板的概率干预功能<strong>仅在 [内部测试] 或 [非公开内测] 状态下可用。</strong>
+      {/* 一、活动数据看板卡片 (完美对应截图二指标) */}
+      <Row gutter={16} className="metrics-dashboard-row">
+        <Col xs={24} md={8}>
+          <div className="metric-card">
+            <div className="card-info">
+              <span className="metric-label">👤 抽奖总人数 (位)</span>
+              <h2 className="metric-value">3</h2>
+            </div>
+            <LineChartOutlined className="metric-icon blue" />
           </div>
-        </div>
+        </Col>
+        <Col xs={24} md={8}>
+          <div className="metric-card">
+            <div className="card-info">
+              <span className="metric-label">🎮 累计抽奖次数 (次)</span>
+              <h2 className="metric-value">5</h2>
+            </div>
+            <TrophyOutlined className="metric-icon orange" />
+          </div>
+        </Col>
+        <Col xs={24} md={8}>
+          <div className="metric-card">
+            <div className="card-info">
+              <span className="metric-label">💵 实发红包总额 (元)</span>
+              <h2 className="metric-value">0.3</h2>
+            </div>
+            <SafetyCertificateOutlined className="metric-icon red" />
+          </div>
+        </Col>
+      </Row>
+
+      {/* 二、列表过滤条件与查询栏 */}
+      <div className="list-search-bar">
+        <Form layout="inline" style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+          <Form.Item label="活动名称" style={{ margin: 0 }}>
+            <Input
+              placeholder="请输入活动名称"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              prefix={<SearchOutlined />}
+              style={{ width: 180 }}
+            />
+          </Form.Item>
+          <Form.Item label="活动状态" style={{ margin: 0 }}>
+            <Select value={searchStatus} onChange={setSearchStatus} style={{ width: 120 }}>
+              <Select.Option value="all">选择状态</Select.Option>
+              <Select.Option value="running">进行中</Select.Option>
+              <Select.Option value="ended">已结束</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item label="抽奖类型" style={{ margin: 0 }}>
+            <Select value={searchType} onChange={setSearchType} style={{ width: 120 }}>
+              <Select.Option value="all">选择类型</Select.Option>
+              <Select.Option value="积分抽奖">积分抽奖</Select.Option>
+              <Select.Option value="转盘抽奖">转盘抽奖</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item style={{ margin: 0, marginLeft: 'auto' }}>
+            <Space>
+              <Button type="primary" icon={<SearchOutlined />}>查询</Button>
+              <Button type="primary" icon={<PlusOutlined />} style={{ background: '#52c41a', borderColor: '#52c41a' }}>
+                新建抽奖活动
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
       </div>
 
-      <Row gutter={24}>
-        {/* 左侧：手机预览模拟器 */}
-        <Col xs={24} lg={9} xl={8} className="mobile-preview-container">
-          <div className="preview-sticky-wrap">
-            <div className="mobile-phone-frame">
-              {/* 听筒和镜头 */}
+      {/* 三、活动列表主体 Table */}
+      <div className="activities-table-wrapper">
+        <Table
+          dataSource={filteredActivities}
+          columns={activityColumns}
+          rowKey="key"
+          pagination={{ pageSize: 10, showSizeChanger: true }}
+          size="middle"
+          className="main-activities-table"
+        />
+      </div>
+
+      {/* 四、概率干预配置抽屉 (Drawer - 整合重点) */}
+      <Drawer
+        title={
+          <div className="drawer-header-title">
+            <ControlOutlined style={{ marginRight: 6, color: '#1890ff' }} />
+            <span>概率干预配置与规则控制 ➔ <span style={{ color: '#1890ff' }}>{currentAct?.name}</span></span>
+          </div>
+        }
+        open={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        width={720}
+        destroyOnClose
+        className="intervention-config-drawer"
+        footer={
+          <div style={{ textAlign: 'right' }}>
+            <Button onClick={() => setDrawerVisible(false)} style={{ marginRight: 8 }}>取消</Button>
+            <Button type="primary" onClick={handleSaveDrawerSettings} icon={<SaveOutlined />}>保存规则</Button>
+          </div>
+        }
+      >
+        {/* 全局开关启用区域 */}
+        <div className="drawer-global-toggle-box">
+          <div className="toggle-info">
+            <strong className="toggle-title">开启概率干预规则</strong>
+            <span className="toggle-desc">开启后规则方可生效，活动将被隔离于内部员工测试及沙盒测试中。</span>
+          </div>
+          <Switch
+            checked={globalEnableIntervention}
+            onChange={handleGlobalSwitchChange}
+            checkedChildren="已启用"
+            unCheckedChildren="已关闭"
+            className="global-switch-toggle"
+          />
+        </div>
+
+        {/* 调试模拟器快捷入口 */}
+        {globalEnableIntervention && (
+          <div className="sandbox-simulator-trigger-row animate-fade-in">
+            <div style={{ fontSize: 12, color: '#8c8c8c' }}>
+              💡 规则已启用！建议打开沙盒调试面板测试您的干预设置。
+            </div>
+            <Button
+              type="primary"
+              size="small"
+              icon={<SafetyCertificateOutlined />}
+              onClick={() => setSimModalVisible(true)}
+              style={{ fontSize: 11 }}
+            >
+              打开沙盒调试模拟器
+            </Button>
+          </div>
+        )}
+
+        {/* 若未开启全局开关的引导提示 */}
+        {!globalEnableIntervention && (
+          <Alert
+            message="概率干预规则未开启"
+            description="请先在上方开关处“开启概率干预规则”，经合规确认后，即可进行规则一和规则二的具体条件参数配置。"
+            type="info"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
+        {/* 概率与顺位对照表 */}
+        <div className={`drawer-prizes-section ${!globalEnableIntervention ? 'disabled-section' : ''}`}>
+          <div className="flex-align-center-between" style={{ marginBottom: 10 }}>
+            <h4 className="section-title">一、奖品概率与干预顺位（由低到高排列）</h4>
+            <Tag color={totalProbability === 100 ? 'success' : 'warning'} style={{ margin: 0 }}>
+              总中奖率: {totalProbability}%
+            </Tag>
+          </div>
+
+          <Table
+            dataSource={prizes}
+            columns={prizeColumns}
+            rowKey="id"
+            pagination={false}
+            size="small"
+            className="prize-rank-table"
+          />
+
+          {/* 概率一致顺位唯一化消重解析 */}
+          {hasDuplicateProbabilities && (
+            <div className="probability-duplicate-tip">
+              <InfoCircleOutlined className="tip-icon" />
+              <span>
+                系统监测到<strong>存在概率相同的奖品</strong>。为确保逻辑严密，已自动按 <strong>[奖品价值]</strong> 进行消重与排序以分派唯一顺位，避免机制判定冲突。
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* 规则一：非酋防连续空车保底机制 */}
+        <div className={`drawer-rule-card-wrap ${!globalEnableIntervention ? 'disabled-section' : ''}`}>
+          <div className="rule-card-header">
+            <div className="title-area">
+              <GiftOutlined className="icon-blue" />
+              <span className="title-text">二、规则一：非酋防连续空车保底机制</span>
+            </div>
+            <Switch
+              checked={enableRule1}
+              onChange={setEnableRule1}
+              disabled={!globalEnableIntervention}
+              size="small"
+            />
+          </div>
+
+          {enableRule1 && globalEnableIntervention && (
+            <div className="rule-card-body animate-slide-in">
+              <div className="sentence-config-row">
+                <span>当用户连续</span>
+                <InputNumber
+                  min={1}
+                  max={99}
+                  value={rule1N}
+                  onChange={(val) => val && setRule1N(val)}
+                  size="small"
+                  className="inline-number-input"
+                />
+                <span>次未抽中概率最低的前</span>
+                <InputNumber
+                  min={1}
+                  max={prizes.length}
+                  value={rule1X}
+                  onChange={(val) => val && setRule1X(val)}
+                  size="small"
+                  className="inline-number-input"
+                />
+                <span>顺位奖品时，下一次抽奖强制从前</span>
+                <InputNumber
+                  min={1}
+                  max={prizes.length}
+                  value={rule1Y}
+                  onChange={(val) => val && setRule1Y(val)}
+                  size="small"
+                  className="inline-number-input"
+                />
+                <span>顺位奖品中随机派发一个。</span>
+              </div>
+
+              {/* 动态解释 */}
+              <div className="explain-box success">
+                <strong>💡 连续空车保底规则解析：</strong>
+                <div className="explain-desc">
+                  测试账号连续未中 <strong>{rule1N}</strong> 次大奖时，自动从小奖池剔除并强制触发保底发奖。
+                  <br />
+                  其判定的目标大奖范围（前 {rule1X} 顺位）：
+                  <div className="prizes-list-tags">
+                    {rule1TargetPrizes.map(p => (
+                      <span className="p-tag bad" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name}</span>
+                    ))}
+                  </div>
+                  触发保底时的强制派奖奖池（前 {rule1Y} 顺位）：
+                  <div className="prizes-list-tags">
+                    {rule1RewardPrizes.map(p => (
+                      <span className="p-tag good" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 规则二：大奖出货上限限制 */}
+        <div className={`drawer-rule-card-wrap ${!globalEnableIntervention ? 'disabled-section' : ''}`}>
+          <div className="rule-card-header">
+            <div className="title-area">
+              <WarningOutlined className="icon-orange" />
+              <span className="title-text">三、规则二：大奖出货上限限制（防刷/防薅羊毛）</span>
+            </div>
+            <Switch
+              checked={enableRule2}
+              onChange={setEnableRule2}
+              disabled={!globalEnableIntervention}
+              size="small"
+            />
+          </div>
+
+          {enableRule2 && globalEnableIntervention && (
+            <div className="rule-card-body animate-slide-in">
+              <div className="sentence-config-row">
+                <span>当用户已抽中过前</span>
+                <InputNumber
+                  min={1}
+                  max={prizes.length}
+                  value={rule2X}
+                  onChange={(val) => val && setRule2X(val)}
+                  size="small"
+                  className="inline-number-input"
+                />
+                <span>顺位奖品时，后续抽奖将自动屏蔽并无法抽中前</span>
+                <InputNumber
+                  min={1}
+                  max={prizes.length}
+                  value={rule2Y}
+                  onChange={(val) => val && setRule2Y(val)}
+                  size="small"
+                  className="inline-number-input"
+                />
+                <span>顺位奖品。</span>
+              </div>
+
+              {/* 动态解释 */}
+              <div className="explain-box error">
+                <strong>💡 大奖上限限制规则解析：</strong>
+                <div className="explain-desc">
+                  当测试账号已获得过以下大奖中任意一个时（前 {rule2X} 顺位）：
+                  <div className="prizes-list-tags">
+                    {rule2TriggerPrizes.map(p => (
+                      <span className="p-tag danger" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name}</span>
+                    ))}
+                  </div>
+                  后续再次抽奖，将自动剔除大奖库存，屏蔽以下奖池（前 {rule2Y} 顺位）：
+                  <div className="prizes-list-tags">
+                    {rule2BlockPrizes.map(p => (
+                      <span className="p-tag blocked" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 五、红色库存及物理限制超限降级声明 (新增标红描述 - 满足需求3) */}
+        {globalEnableIntervention && (
+          <div className="drawer-inventory-fallback-notice">
+            <h4 className="notice-title">
+              <WarningOutlined style={{ marginRight: 6 }} />
+              库存与规则物理限制超限特别提醒
+            </h4>
+            <p className="notice-text">
+              由于实际运营环境复杂，在触发<strong>非酋保底</strong>或<strong>防刷屏蔽</strong>干预逻辑时，若遇到以下情况可能会出现<strong>非预期出货现象</strong>：
+            </p>
+            <ul className="notice-bullets">
+              <li><strong>保底池库存耗尽：</strong>当触发规则一保底派奖时，若派发范围（前 {rule1Y} 顺位）内的所有奖品库存均已全部扣减完毕，系统将触发安全降级保护，<strong>自动降级为普发普通奖池（如积分、谢谢参与）</strong>，并向后台发出库存告警日志。</li>
+              <li><strong>干预冲突死锁：</strong>当规则二屏蔽了前 {rule2Y} 顺位奖品后，若剩下的 4 顺位至 8 顺位小奖品在此时恰好无库存，可能导致抽奖死锁。系统会自动以<strong>“谢谢参与”</strong>兜底出货，避免页面崩溃。</li>
+              <li><strong>单人频次限制超限：</strong>若高价值奖品在主商品配置中设定了每人仅限兑换/中奖 1 次，在干预强派时如触发此限制，系统同样会静默降级派奖。</li>
+            </ul>
+            <p className="notice-tip-text">
+              建议运营及测试人员：<strong>务必在活动期间监控保底/高顺位奖品的库存额度充裕</strong>，并提前核对单人中奖上限，防止干预机制因物理限制触发默认降级保护。
+            </p>
+          </div>
+        )}
+      </Drawer>
+
+      {/* 五、沙盒测试模拟器弹窗 Modal */}
+      <Modal
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 'bold' }}>
+            <SafetyCertificateOutlined style={{ color: '#52c41a', fontSize: 18 }} />
+            <span>内部沙盒抽奖模拟与规则验证</span>
+          </div>
+        }
+        open={simModalVisible}
+        onCancel={() => setSimModalVisible(false)}
+        footer={null}
+        width={750}
+        centered
+        destroyOnClose
+        className="sandbox-simulator-modal"
+      >
+        <Row gutter={24} style={{ display: 'flex', alignItems: 'flex-start' }}>
+          {/* 左侧手机框 */}
+          <Col xs={24} md={11} style={{ display: 'flex', justifyContent: 'center' }}>
+            <div className="mobile-phone-frame" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
               <div className="phone-top-notch"></div>
-              
-              {/* 状态栏 */}
               <div className="phone-status-bar" style={{ color: '#000' }}>
-                <span className="time">16:00</span>
+                <span className="time">16:40</span>
                 <div className="icons">
                   <span className="cellular">📶</span>
                   <span className="wifi">🔋</span>
                 </div>
               </div>
-
-              {/* 手机内部屏幕 */}
               <div className="phone-screen-content">
                 <div className="phone-nav-header">
                   <span className="back-arrow"><ArrowLeftOutlined /></span>
-                  <span className="nav-title">内部测试·抽奖沙盒</span>
+                  <span className="nav-title">测试沙盒·大抽奖</span>
                   <span className="more-menu">•••</span>
                 </div>
-
-                <div className="preview-scroll-body">
-                  {/* 活动性质角标 */}
-                  <div className={`simulator-badge ${activityType}`}>
-                    {activityType === 'internal' ? '⚠️ 内部测试沙盒' : '🌐 外部商业抽奖'}
+                <div className="preview-scroll-body" style={{ paddingBottom: 20 }}>
+                  <div className="simulator-badge internal">
+                    ⚠️ 内部沙盒内测
                   </div>
-
-                  {/* 头部装饰 */}
                   <div className="lottery-head-decor">
                     <h2 className="title">幸 运 大 抽 奖</h2>
-                    <p className="desc">特步会员尊享 · 内部调试沙盒</p>
+                    <p className="desc">内测调试 · {currentAct?.name}</p>
                   </div>
 
                   {/* 九宫格盘 */}
                   <div className="nine-grid-layout">
-                    {/* 下面手动排列九宫格，以确保正确的视觉表现 */}
-                    {/* 第一排 */}
                     <div className={`grid-cell ${activeIndex === 0 ? 'active' : ''}`}>
                       <span className="name">{gridPrizes[0]?.name.substring(0, 5)}</span>
                       <span className="prob-label">{gridPrizes[0]?.prob}%</span>
@@ -521,7 +975,6 @@ export default function LotteryRulesIntervention() {
                       <span className="prob-label">{gridPrizes[2]?.prob}%</span>
                     </div>
 
-                    {/* 第二排 */}
                     <div className={`grid-cell ${activeIndex === 7 ? 'active' : ''}`}>
                       <span className="name">{gridPrizes[7]?.name.substring(0, 5)}</span>
                       <span className="prob-label">{gridPrizes[7]?.prob}%</span>
@@ -532,15 +985,14 @@ export default function LotteryRulesIntervention() {
                       onClick={executeMockDraw}
                       disabled={isDrawing}
                     >
-                      <div className="btn-title">立即抽奖</div>
-                      <div className="btn-subtext">消耗10积分</div>
+                      <div className="btn-title">抽奖</div>
+                      <div className="btn-subtext">扣除10积分</div>
                     </button>
                     <div className={`grid-cell ${activeIndex === 3 ? 'active' : ''}`}>
                       <span className="name">{gridPrizes[3]?.name.substring(0, 5)}</span>
                       <span className="prob-label">{gridPrizes[3]?.prob}%</span>
                     </div>
 
-                    {/* 第三排 */}
                     <div className={`grid-cell ${activeIndex === 6 ? 'active' : ''}`}>
                       <span className="name">{gridPrizes[6]?.name.substring(0, 5)}</span>
                       <span className="prob-label">{gridPrizes[6]?.prob}%</span>
@@ -556,365 +1008,108 @@ export default function LotteryRulesIntervention() {
                   </div>
 
                   {/* 状态看板卡片 */}
-                  <div className="simulator-stats-card">
-                    <div className="stats-header">👤 当前模拟账户状态</div>
+                  <div className="simulator-stats-card" style={{ marginTop: 10 }}>
+                    <div className="stats-header">👤 模拟账户状态</div>
                     <div className="stats-item">
                       <span className="label">模拟身份:</span>
                       <Tag color={simAccountType === 'test' ? 'blue' : 'gray'}>
-                        {simAccountType === 'test' ? '内部测试账号 (干预生效)' : '外部普通账户 (不触发干预)'}
+                        {simAccountType === 'test' ? '内测账号 (干预有效)' : '普通账户 (不触发)'}
                       </Tag>
                     </div>
                     <div className="stats-item">
-                      <span className="label">连续未中大奖:</span>
+                      <span className="label">连空计数:</span>
                       <span className={`value ${simConsecutiveLosses >= rule1N ? 'highlight-red animate-pulse' : ''}`}>
-                        <strong>{simConsecutiveLosses}</strong> 次
-                        {activityType === 'internal' && enableRule1 && simConsecutiveLosses >= rule1N && (
-                          <span className="small-alert-tag">已达保底线</span>
-                        )}
+                        <strong>{simConsecutiveLosses}</strong> 次未中大奖
                       </span>
                     </div>
                     <div className="stats-item">
-                      <span className="label">已中过特等/一等大奖:</span>
-                      <span className="value">
-                        {simHasWonGrand ? (
-                          <Tag color="error">是 (后续屏蔽大奖)</Tag>
-                        ) : (
-                          <Tag color="success">否</Tag>
-                        )}
-                      </span>
+                      <span className="label">中过大奖:</span>
+                      <span>{simHasWonGrand ? <Tag color="error">是</Tag> : <Tag color="success">否</Tag>}</span>
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
+          </Col>
 
-            {/* 模拟器专属：C端用户属性调试控制板 */}
-            <div className="simulator-debug-panel">
-              <div className="panel-title-row">
-                <span className="panel-title">👤 C端登录账户属性模拟器</span>
-                <span className="panel-subtitle">用于调试和测试概率干预规则的判定</span>
-              </div>
+          {/* 右侧调试控制板 */}
+          <Col xs={24} md={13}>
+            <div className="simulator-debug-panel" style={{ width: '100%', minHeight: 320, padding: 20 }}>
+              <h4 className="debug-title" style={{ fontSize: 14, fontWeight: 'bold', borderBottom: '1px solid #e8e8e8', paddingBottom: 8, marginBottom: 12 }}>
+                👤 沙盒状态控制板
+              </h4>
+              <p style={{ fontSize: 12, color: '#8c8c8c', lineHeight: 1.4, marginBottom: 16 }}>
+                通过滑动下方的调试状态，可以绕过真实的连续抽奖测试，快速让模拟账号符合规则一或规则二判定条件，然后点击左侧【抽奖】即可观察逻辑反馈。
+              </p>
 
               <div className="debug-item-row">
-                <span className="debug-label">模拟身份类型:</span>
+                <span className="debug-label">模拟身份选择：</span>
                 <Radio.Group 
                   size="small" 
                   value={simAccountType} 
                   onChange={(e) => setSimAccountType(e.target.value)}
                 >
                   <Radio.Button value="test">内测账号</Radio.Button>
-                  <Radio.Button value="visitor">外部访客</Radio.Button>
+                  <Radio.Button value="visitor">外部普通访客</Radio.Button>
                 </Radio.Group>
               </div>
 
-              <div className="debug-item-row" style={{ display: 'block' }}>
+              <div className="debug-item-row" style={{ display: 'block', margin: '16px 0' }}>
                 <div className="slider-label-row">
-                  <span className="debug-label">未中大奖次数 (M):</span>
-                  <strong className="slider-value">{simConsecutiveLosses} 次</strong>
+                  <span className="debug-label">手动调整未中大奖次数 (M)：</span>
+                  <strong className="slider-value" style={{ color: simConsecutiveLosses >= rule1N ? '#ff4d4f' : '#1890ff' }}>
+                    {simConsecutiveLosses} 次
+                  </strong>
                 </div>
                 <Slider
                   min={0}
                   max={15}
                   value={simConsecutiveLosses}
                   onChange={setSimConsecutiveLosses}
-                  tooltip={{ formatter: (v) => `已连续未中大奖 ${v} 次` }}
+                  tooltip={{ formatter: (v?: number) => `连续未中大奖 ${v} 次` }}
                 />
+                <div style={{ fontSize: 10.5, color: '#bfbfbf', marginTop: 4 }}>
+                  * 当前保底触发线设为 {rule1N} 次。达到或超过该值时，下一次抽奖将触发「非酋保底」干预。
+                </div>
               </div>
 
-              <div className="debug-item-row">
-                <span className="debug-label">已抽中过大奖:</span>
+              <div className="debug-item-row" style={{ margin: '16px 0' }}>
+                <span className="debug-label">模拟已抽中过特等/一等大奖：</span>
                 <Switch 
                   checked={simHasWonGrand} 
                   onChange={setSimHasWonGrand}
-                  checkedChildren="已抽中" 
-                  unCheckedChildren="未抽中"
+                  checkedChildren="已中过" 
+                  unCheckedChildren="没中过"
                 />
               </div>
 
-              <div className="debug-actions-row">
+              <div style={{ marginTop: 24, borderTop: '1px dashed #e8e8e8', paddingTop: 16, display: 'flex', gap: 8 }}>
                 <Button 
-                  size="small" 
                   icon={<ReloadOutlined />} 
                   onClick={() => {
                     setSimConsecutiveLosses(0)
                     setSimHasWonGrand(false)
-                    message.success('已清空当前用户的模拟状态数据')
+                    message.success('已清空状态，模拟账户恢复初始值')
                   }}
-                  style={{ width: '100%', fontSize: 11 }}
+                  style={{ flex: 1 }}
                 >
                   重置模拟状态
                 </Button>
-              </div>
-            </div>
-          </div>
-        </Col>
-
-        {/* 右侧：配置属性面板 */}
-        <Col xs={24} lg={15} xl={16}>
-          <div className="editor-properties-panel">
-            
-            {/* 顶栏控制组 */}
-            <div className="panel-header-section">
-              <span className="title">干预规则配置表单</span>
-              <div className="action-buttons">
-                <Button
-                  type="text"
-                  icon={<ReloadOutlined />}
-                  onClick={handleResetSettings}
-                  style={{ color: '#8c8c8c' }}
-                >
-                  重置
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<SaveOutlined />}
-                  onClick={handleSaveSettings}
-                  style={{ borderRadius: 6 }}
-                >
-                  发布活动并生效
+                <Button type="primary" onClick={() => setSimModalVisible(false)} style={{ flex: 1 }}>
+                  关闭调试器
                 </Button>
               </div>
             </div>
-
-            {/* 活动公开状态及法务隔离区 */}
-            <div className="prop-group-card legal-isolation-card">
-              <h3 className="group-title" style={{ borderLeftColor: '#d46b08' }}>活动发布性质与合规限制</h3>
-              <div className="prop-row">
-                <div className="prop-label">发布类型：</div>
-                <div className="prop-control">
-                  <Radio.Group
-                    value={activityType}
-                    onChange={(e) => {
-                      const type = e.target.value
-                      if (type === 'public') {
-                        // 提示法律警告
-                        Modal.confirm({
-                          title: '⚠️ 法律合规风险提示',
-                          icon: <WarningOutlined style={{ color: '#ff4d4f' }} />,
-                          content: (
-                            <div>
-                              <p>如果将本抽奖活动设为<strong>【外部公开商业抽奖】</strong>，系统会强制禁用并锁定一切概率干预算法。</p>
-                              <p>《反不正当竞争法》和《规范促销行为暂行规定》明确禁止欺骗性有奖销售（包括人为内定中奖、中途修改公开中奖概率、屏蔽大奖等）。外部活动必须严谨、透明、客观抽奖。</p>
-                              <strong style={{ color: '#ff4d4f' }}>是否确认切换并锁定干预配置？</strong>
-                            </div>
-                          ),
-                          onOk: () => {
-                            setActivityType('public')
-                            message.warning('已切换为外部公开商业活动。概率干预功能已锁定停用。')
-                          }
-                        })
-                      } else {
-                        setActivityType('internal')
-                        message.success('已切换为内部员工内测/沙盒测试模式。干预功能已恢复可配置。')
-                      }
-                    }}
-                    optionType="button"
-                    buttonStyle="solid"
-                  >
-                    <Radio.Button value="internal">⚠️ 内部员工测试 / 沙盒内测活动</Radio.Button>
-                    <Radio.Button value="public">🌐 外部公开商业活动（强制公平/禁用干预）</Radio.Button>
-                  </Radio.Group>
-                </div>
-              </div>
-
-              {activityType === 'public' ? (
-                <Alert
-                  message="概率干预规则已被锁定"
-                  description="因当前设定为【外部公开商业活动】，为了满足消费公平和合规经营要求，已强制停用保底机制与防刷大奖屏蔽机制。当前仅接受基于奖品池中奖概率之和的传统客观随机精算。"
-                  type="warning"
-                  showIcon
-                  icon={<LockOutlined />}
-                  className="legal-alert"
-                />
-              ) : (
-                <Alert
-                  message="已启用内部沙盒调试环境"
-                  description="干预机制已开启。本配置仅对配置为“内测账户/测试身份”的登录用户生效，外部自然用户访问将默认降级为无干预的常规真实概率模式，保证隔离安全。"
-                  type="info"
-                  showIcon
-                  icon={<SafetyCertificateOutlined />}
-                  className="legal-alert info"
-                />
-              )}
-            </div>
-
-            {/* 概率顺位表 */}
-            <div className="prop-group-card">
-              <div className="flex-align-center-between" style={{ marginBottom: 12 }}>
-                <h3 className="group-title" style={{ margin: 0 }}>一、当前奖品概率顺位（排序自低至高）</h3>
-                <span className={`prob-sum-badge ${totalProbability === 100 ? 'success' : 'warning'}`}>
-                  中奖率总和: {totalProbability}%
-                  {totalProbability !== 100 && (
-                    <span style={{ fontSize: 10.5, marginLeft: 6 }}>
-                      (差额 {Math.max(0, 100 - totalProbability).toFixed(2)}% 自动归入“谢谢参与”)
-                    </span>
-                  )}
-                </span>
-              </div>
-              <Table
-                dataSource={prizes}
-                columns={columns}
-                rowKey="id"
-                pagination={false}
-                size="small"
-                className="prize-rank-table"
-              />
-              <div className="table-intro-text">
-                <InfoCircleOutlined style={{ marginRight: 4, color: '#1890ff' }} />
-                中奖率在表格中支持即时微调，系统会自动按概率重新划定升序顺位（1顺位表示中奖概率最低的大奖，顺位越大表示中奖概率越高）。
-              </div>
-            </div>
-
-            {/* 规则一：非酋兜底/保底规则卡片 */}
-            <div className={`prop-group-card rule-card ${activityType === 'public' ? 'locked' : ''}`}>
-              <div className="rule-header">
-                <div className="title-area">
-                  <GiftOutlined className="rule-icon" />
-                  <span className="rule-title">二、规则一：非酋防连续空车保底机制</span>
-                </div>
-                <Switch 
-                  checked={enableRule1} 
-                  onChange={setEnableRule1}
-                  disabled={activityType === 'public'}
-                  checkedChildren="启用"
-                  unCheckedChildren="关闭"
-                />
-              </div>
-
-              {enableRule1 && (
-                <div className="rule-content-body animate-slide-in">
-                  <div className="sentence-config-row">
-                    <span>当用户连续</span>
-                    <InputNumber
-                      min={1}
-                      max={99}
-                      value={rule1N}
-                      onChange={(val) => val && setRule1N(val)}
-                      disabled={activityType === 'public'}
-                      size="small"
-                      className="inline-number-input"
-                    />
-                    <span>次未抽中概率最低的前</span>
-                    <InputNumber
-                      min={1}
-                      max={prizes.length}
-                      value={rule1X}
-                      onChange={(val) => val && setRule1X(val)}
-                      disabled={activityType === 'public'}
-                      size="small"
-                      className="inline-number-input"
-                    />
-                    <span>顺位奖品时，系统将在下一次抽奖时，强制从前</span>
-                    <InputNumber
-                      min={1}
-                      max={prizes.length}
-                      value={rule1Y}
-                      onChange={(val) => val && setRule1Y(val)}
-                      disabled={activityType === 'public'}
-                      size="small"
-                      className="inline-number-input"
-                    />
-                    <span>顺位奖品中随机派发一个。</span>
-                  </div>
-
-                  {/* 关联解析说明 */}
-                  <div className="explain-box success">
-                    <strong>💡 当前规则一解析：</strong>
-                    <div className="explain-desc">
-                      对连续空车达到 <strong>{rule1N}</strong> 次的测试账号，如果他之前一直没抽到：
-                      <div className="prizes-list-tags">
-                        {rule1TargetPrizes.map((p) => (
-                          <span className="p-tag bad" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name} ({p.prob}%)</span>
-                        ))}
-                      </div>
-                      则下一次必定会从以下奖池中随机必中派发一个：
-                      <div className="prizes-list-tags">
-                        {rule1RewardPrizes.map((p) => (
-                          <span className="p-tag good" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 规则二：大奖限制/防刷屏蔽规则卡片 */}
-            <div className={`prop-group-card rule-card ${activityType === 'public' ? 'locked' : ''}`}>
-              <div className="rule-header">
-                <div className="title-area">
-                  <WarningOutlined className="rule-icon danger" />
-                  <span className="rule-title">三、规则二：大奖出货上限限制（防刷/防薅羊毛）</span>
-                </div>
-                <Switch 
-                  checked={enableRule2} 
-                  onChange={setEnableRule2}
-                  disabled={activityType === 'public'}
-                  checkedChildren="启用"
-                  unCheckedChildren="关闭"
-                />
-              </div>
-
-              {enableRule2 && (
-                <div className="rule-content-body animate-slide-in">
-                  <div className="sentence-config-row">
-                    <span>当用户在活动中已抽中过前</span>
-                    <InputNumber
-                      min={1}
-                      max={prizes.length}
-                      value={rule2X}
-                      onChange={(val) => val && setRule2X(val)}
-                      disabled={activityType === 'public'}
-                      size="small"
-                      className="inline-number-input"
-                    />
-                    <span>顺位奖品时，后续抽奖将自动屏蔽并无法抽中前</span>
-                    <InputNumber
-                      min={1}
-                      max={prizes.length}
-                      value={rule2Y}
-                      onChange={(val) => val && setRule2Y(val)}
-                      disabled={activityType === 'public'}
-                      size="small"
-                      className="inline-number-input"
-                    />
-                    <span>顺位奖品。</span>
-                  </div>
-
-                  {/* 关联解析说明 */}
-                  <div className="explain-box error">
-                    <strong>💡 当前规则二解析：</strong>
-                    <div className="explain-desc">
-                      只要用户在本次活动中曾经抽中过以下大奖：
-                      <div className="prizes-list-tags">
-                        {rule2TriggerPrizes.map((p) => (
-                          <span className="p-tag danger" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name}</span>
-                        ))}
-                      </div>
-                      在后续的抽奖过程中，他将永远无法再次抽到以下受限奖池（概率将被强制置 0）：
-                      <div className="prizes-list-tags">
-                        {rule2BlockPrizes.map((p) => (
-                          <span className="p-tag blocked" key={p.id}>[{sortedPrizes.findIndex(sp => sp.id === p.id) + 1}顺位] {p.name} (屏蔽)</span>
-                        ))}
-                      </div>
-                      <i>(该规则常用于对高价值奖品防刷、防单账号多次出特等大奖，以保障奖池资金安全。)</i>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </Col>
-      </Row>
+          </Col>
+        </Row>
+      </Modal>
 
       {/* 中奖 Modal 弹窗 */}
       <Modal
-        visible={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        open={drawResultModalVisible}
+        onCancel={() => setDrawResultModalVisible(false)}
         footer={[
-          <Button key="close" type="primary" onClick={() => setModalVisible(false)}>
+          <Button key="close" type="primary" onClick={() => setDrawResultModalVisible(false)}>
             确认收下
           </Button>
         ]}
@@ -946,30 +1141,6 @@ export default function LotteryRulesIntervention() {
         </div>
       </Modal>
 
-      {/* 内部测试保存提示 Modal */}
-      <Modal
-        visible={showLegalConfirm}
-        title="💾 内部规则保存安全提示"
-        onCancel={() => setShowLegalConfirm(false)}
-        onOk={handleConfirmInternalSave}
-        okText="确认发布 (仅内测账户生效)"
-        cancelText="取消"
-        centered
-      >
-        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
-          <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 'bold' }}>
-            <SafetyCertificateOutlined style={{ color: '#52c41a', fontSize: 18 }} />
-            您当前保存的概率干预规则属于【内部沙盒/非公开测试】设定。
-          </p>
-          <Alert
-            message="安全保障激活"
-            description="本规则保存后，仅会对系统数据库中配置了 [Test_Account] 标签的内测白名单成员生效；外部访客在点击抽奖时，系统将自动使用原版真实概率，以保障平台促销公平性及法律合规性。"
-            type="success"
-            showIcon
-            style={{ marginTop: 12 }}
-          />
-        </div>
-      </Modal>
     </div>
   )
 }
