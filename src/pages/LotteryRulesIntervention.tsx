@@ -142,6 +142,14 @@ export default function LotteryRulesIntervention() {
   }
 
   // ==========================================
+  // 顺位范围文本生成函数（提取大奖名字）
+  // ==========================================
+  const rule1TargetPrizes = useMemo(() => sortedPrizes.slice(0, rule1X), [sortedPrizes, rule1X])
+  const rule1RewardPrizes = useMemo(() => sortedPrizes.slice(0, rule1Y), [sortedPrizes, rule1Y])
+  const rule2TriggerPrizes = useMemo(() => sortedPrizes.slice(0, rule2X), [sortedPrizes, rule2X])
+  const rule2BlockPrizes = useMemo(() => sortedPrizes.slice(0, rule2Y), [sortedPrizes, rule2Y])
+
+  // ==========================================
   // 全局干预启用开关与强合规警告弹窗
   // ==========================================
   const handleGlobalSwitchChange = (checked: boolean) => {
@@ -542,7 +550,19 @@ export default function LotteryRulesIntervention() {
               <div className="explain-box success">
                 <strong>💡 规则一简析：</strong>
                 <div className="explain-desc">
-                  当用户连续 <strong>{rule1N}</strong> 次未中概率最低的前 <strong>{rule1X}</strong> 顺位大奖时，下一次抽奖将强制从前 <strong>{rule1Y}</strong> 顺位奖品中随机必中派发一个。
+                  当用户连续 <strong>{rule1N}</strong> 次未中大奖时，下一次抽奖将从保底池中随机必中派发一个。
+                  <div style={{ marginTop: 6, fontSize: 11.5 }}>
+                    🎯 <strong>判定大奖范围（前 {rule1X} 顺位）：</strong>
+                    <span style={{ color: '#cf1322', fontWeight: 600 }}>
+                      {rule1TargetPrizes.map(p => p.name).join('、') || '无'}
+                    </span>
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 11.5 }}>
+                    🎁 <strong>保底派发池（前 {rule1Y} 顺位）：</strong>
+                    <span style={{ color: '#389e0d', fontWeight: 600 }}>
+                      {rule1RewardPrizes.map(p => p.name).join('、') || '无'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -592,23 +612,40 @@ export default function LotteryRulesIntervention() {
               <div className="explain-box error">
                 <strong>💡 规则二简析：</strong>
                 <div className="explain-desc">
-                  当用户抽中过前 <strong>{rule2X}</strong> 顺位奖品时，后续抽奖将自动屏蔽前 <strong>{rule2Y}</strong> 顺位大奖，无法再次抽中。
+                  当用户抽中过触发大奖时，后续抽奖将自动屏蔽屏蔽池内的大奖，防止重复出货。
+                  <div style={{ marginTop: 6, fontSize: 11.5 }}>
+                    ⚠️ <strong>触发大奖范围（前 {rule2X} 顺位）：</strong>
+                    <span style={{ color: '#d4380d', fontWeight: 600 }}>
+                      {rule2TriggerPrizes.map(p => p.name).join('、') || '无'}
+                    </span>
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 11.5 }}>
+                    🚫 <strong>后续屏蔽大奖（前 {rule2Y} 顺位）：</strong>
+                    <span style={{ color: '#595959', fontWeight: 600, textDecoration: 'line-through' }}>
+                      {rule2BlockPrizes.map(p => p.name).join('、') || '无'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* 异常与超限降级声明 (满足需求5: 简化并表达库存超限和概率一致顺位受影响) */}
+        {/* 异常与超限降级声明 (通用化描述，增加后续修改影响提醒) */}
         {globalEnableIntervention && (
           <div className="drawer-inventory-fallback-notice">
             <h4 className="notice-title">
               <WarningOutlined style={{ marginRight: 6 }} />
-              规则执行异常提示
+              概率干预规则执行异常提示
             </h4>
-            <p className="notice-text" style={{ margin: 0 }}>
-              由于库存等原因，这里规则设置后也并非 100% 可以执行。另外，如果抽奖活动中存在概率一致的奖品，可能会影响顺位执行判定，建议核对并合理微调各奖品的概率。
-            </p>
+            <div className="notice-text">
+              <p style={{ margin: '0 0 6px 0' }}>
+                1. <strong>库存与客观限制：</strong>由于奖品剩余库存不足、单用户领奖频次受限或并发扣减延迟等客观物理原因，概率干预规则在触发时<strong>并非 100% 能够成功执行</strong>。若保底或非屏蔽池内奖品已全部消耗完毕，系统将自动降级为常规随机派奖或兜底普发奖品。
+              </p>
+              <p style={{ margin: 0 }}>
+                2. <strong>奖品库变更影响：</strong>本干预规则的顺位完全基于当前奖品库的中奖概率升序排列自动分派。<strong>后续若在其他奖品设置页中修改了任意奖品的概率、增删了奖品种类或调整了奖品库存</strong>，均会直接使当前顺位划分发生漂移或覆盖，可能导致干预规则的执行偏离预期。建议每次调整奖品库后，务必重新检查并在此点击保存规则。
+              </p>
+            </div>
           </div>
         )}
       </Drawer>

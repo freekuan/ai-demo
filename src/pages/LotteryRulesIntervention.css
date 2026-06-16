@@ -202,18 +202,24 @@
 .rule-card-header .icon-blue { color: #1890ff; font-size: 15px; }
 .rule-card-header .icon-orange { color: #fa8c16; font-size: 15px; }
 
+/* 规则填充句配置：文本流排版而非 flex 块，以防换行突兀 */
 .sentence-config-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  line-height: 2.2;
+  font-size: 13px;
+  line-height: 2.4;
   color: #262626;
+  white-space: normal;
+  word-break: break-all;
+}
+
+.sentence-config-row > span {
+  display: inline;
+  margin: 0 2px;
 }
 
 .inline-number-input {
-  width: 65px;
+  width: 70px;
+  margin: 0 4px;
+  vertical-align: middle;
 }
 
 /* 规则解释说明框 */
@@ -221,8 +227,8 @@
   margin-top: 12px;
   padding: 10px 12px;
   border-radius: 6px;
-  font-size: 11.5px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .explain-box.success {
@@ -238,9 +244,7 @@
 }
 
 .explain-box strong {
-  display: block;
   font-size: 12px;
-  margin-bottom: 4px;
 }
 
 /* ==========================================================================
@@ -291,6 +295,7 @@
 .prize-rank-table .ant-table-cell {
   padding: 6px 10px !important;
   font-size: 12px;
+  white-space: nowrap !important; /* 禁止换行以节省纵向空间 */
 }
 
 .rank-badge-cell {
