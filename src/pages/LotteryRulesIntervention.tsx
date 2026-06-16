@@ -460,7 +460,7 @@ export default function LotteryRulesIntervention() {
         <div className="drawer-global-toggle-box">
           <div className="toggle-info">
             <strong className="toggle-title">开启概率干预规则</strong>
-            <span className="toggle-desc">开启后规则方可生效，活动将被隔离于内部员工测试及沙盒测试中。</span>
+            <span className="toggle-desc">开启后规则方可生效，请确保活动用于内部员工测试或沙盒测试中。</span>
           </div>
           <Switch
             checked={globalEnableIntervention}
@@ -640,10 +640,10 @@ export default function LotteryRulesIntervention() {
             </h4>
             <div className="notice-text">
               <p style={{ margin: '0 0 6px 0' }}>
-                1. <strong>库存与客观限制：</strong>由于奖品剩余库存不足、单用户领奖频次受限或并发扣减延迟等客观物理原因，概率干预规则在触发时<strong>并非 100% 能够成功执行</strong>。若保底或非屏蔽池内奖品已全部消耗完毕，系统将自动降级为常规随机派奖或兜底普发奖品。
+                1. <strong>库存与客观限制：</strong>由于奖品剩余库存不足、单用户领奖频次受限等客观原因，概率干预规则在触发时<strong>并非 100% 成功</strong>。若保底或非屏蔽池内奖品已全部消耗完毕，系统将自动降级为常规随机派奖。
               </p>
               <p style={{ margin: 0 }}>
-                2. <strong>奖品库变更影响：</strong>本干预规则的顺位完全基于当前奖品库的中奖概率升序排列自动分派。<strong>后续若在其他奖品设置页中修改了任意奖品的概率、增删了奖品种类或调整了奖品库存</strong>，均会直接使当前顺位划分发生漂移或覆盖，可能导致干预规则的执行偏离预期。建议每次调整奖品库后，务必重新检查并在此点击保存规则。
+                2. <strong>奖品库变更影响：</strong>本干预规则的顺位完全基于当前奖品库的中奖概率升序排列自动分派。<strong>后续若在活动中修改了任意奖品的概率、增删了奖品种类或调整了奖品库存</strong>，均会直接使当前顺位划分发生漂移或覆盖，可能导致干预规则的执行偏离预期。建议每次调整奖品库后，务必重新检查规则。
               </p>
             </div>
           </div>
