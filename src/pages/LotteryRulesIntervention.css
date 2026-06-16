@@ -1,0 +1,852 @@
+/* ==========================================================================
+   抽奖概率干预 (LotteryRulesIntervention) 专属样式定义
+   ========================================================================== */
+
+.lottery-intervention-container {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.intervention-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.intervention-header .header-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   合规沙盒警示条
+   ========================================================================== */
+.sandbox-notice-banner {
+  background: linear-gradient(90deg, #fff7e6 0%, #fffbe6 100%);
+  border: 1px solid #ffd591;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(250, 173, 20, 0.05);
+}
+
+.sandbox-notice-banner .banner-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sandbox-notice-banner .notice-icon {
+  font-size: 20px;
+  color: #fa8c16;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.sandbox-notice-banner .notice-text {
+  font-size: 12.5px;
+  color: #d46b08;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   左侧：手机预览模拟器
+   ========================================================================== */
+.mobile-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.preview-sticky-wrap {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.mobile-phone-frame {
+  position: relative;
+  width: 320px;
+  height: 640px;
+  background: #111;
+  border: 12px solid #2d2d2d;
+  border-radius: 36px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 听筒和镜头 */
+.phone-top-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 18px;
+  background: #2d2d2d;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  z-index: 999;
+}
+
+/* 状态栏 */
+.phone-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #ffffff;
+  z-index: 10;
+}
+
+.phone-status-bar .icons {
+  display: flex;
+  gap: 4px;
+}
+
+/* 手机内部主屏 */
+.phone-screen-content {
+  flex: 1;
+  background: #f5222d; /* 喜庆中国红 */
+  background-image: radial-gradient(circle at center, #ff4d4f 0%, #b71c1c 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 页面导航栏 */
+.phone-nav-header {
+  height: 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 13.5px;
+  font-weight: bold;
+  color: #262626;
+  z-index: 5;
+}
+
+.phone-nav-header .back-arrow {
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.phone-nav-header .more-menu {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+/* 可滚动主体 */
+.preview-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: none;
+  z-index: 2;
+  position: relative;
+}
+
+.preview-scroll-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* 模拟器状态角标 */
+.simulator-badge {
+  align-self: center;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+}
+
+.simulator-badge.internal {
+  background: #fa8c16;
+}
+
+.simulator-badge.public {
+  background: #52c41a;
+}
+
+/* 头部大标题 */
+.lottery-head-decor {
+  text-align: center;
+  margin: 10px 0 5px;
+}
+
+.lottery-head-decor .title {
+  font-size: 24px;
+  color: #ffe58f;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.lottery-head-decor .desc {
+  font-size: 11px;
+  color: #ffffff;
+  opacity: 0.85;
+  margin: 4px 0 0;
+}
+
+/* 九宫格排列 */
+.nine-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+  border: 2px solid #ffc53d;
+}
+
+.grid-cell {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #ffffff 0%, #fffbe6 100%);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  border: 1px solid #ffe58f;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.grid-cell.active {
+  background: linear-gradient(135deg, #ffe58f 0%, #ffc53d 100%);
+  transform: scale(0.96);
+  border-color: #faad14;
+  box-shadow: 0 0 10px #ffc53d, inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.grid-cell .name {
+  font-size: 11px;
+  font-weight: bold;
+  color: #cf1322;
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+.grid-cell .prob-label {
+  font-size: 9px;
+  color: #8c8c8c;
+  margin-top: 3px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* 中间抽奖按钮 */
+.grid-draw-button {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #ffc53d 0%, #fa8c16 100%);
+  border: 2px solid #ffe58f;
+  border-radius: 8px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(250, 140, 22, 0.4);
+  transition: all 0.2s;
+  padding: 2px;
+}
+
+.grid-draw-button:hover:not(.disabled) {
+  transform: scale(1.02);
+  background: linear-gradient(135deg, #ffe58f 0%, #fa8c16 100%);
+  box-shadow: 0 6px 14px rgba(250, 140, 22, 0.5);
+}
+
+.grid-draw-button:active:not(.disabled) {
+  transform: scale(0.96);
+}
+
+.grid-draw-button.disabled {
+  background: #d9d9d9 !important;
+  border-color: #bfbfbf !important;
+  color: #8c8c8c !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+
+.grid-draw-button .btn-title {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.grid-draw-button .btn-subtext {
+  font-size: 8px;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+/* 模拟账户状态显示卡片 */
+.simulator-stats-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(250, 140, 22, 0.2);
+}
+
+.simulator-stats-card .stats-header {
+  font-size: 12px;
+  font-weight: bold;
+  color: #262626;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.simulator-stats-card .stats-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  margin-bottom: 6px;
+}
+
+.simulator-stats-card .stats-item:last-child {
+  margin-bottom: 0;
+}
+
+.simulator-stats-card .stats-item .label {
+  color: #595959;
+}
+
+.simulator-stats-card .stats-item .value {
+  font-weight: bold;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.simulator-stats-card .value.highlight-red {
+  color: #ff4d4f;
+}
+
+.small-alert-tag {
+  background: #fff1f0;
+  color: #ff4d4f;
+  border: 1px solid #ffa39e;
+  font-size: 8px;
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+/* ==========================================================================
+   调试区控制板
+   ========================================================================== */
+.simulator-debug-panel {
+  width: 320px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.panel-title-row {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+.panel-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #262626;
+}
+
+.panel-subtitle {
+  font-size: 9px;
+  color: #8c8c8c;
+}
+
+.debug-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+
+.debug-label {
+  color: #595959;
+}
+
+.slider-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.slider-value {
+  color: #1890ff;
+}
+
+.simulator-debug-panel .ant-slider {
+  margin: 4px 6px 12px;
+}
+
+.debug-actions-row {
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   右侧配置属性面板
+   ========================================================================== */
+.editor-properties-panel {
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 600px;
+}
+
+.panel-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.panel-header-section .title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #262626;
+  position: relative;
+  padding-left: 8px;
+}
+
+.panel-header-section .title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 14px;
+  background: #1890ff;
+  border-radius: 2px;
+}
+
+.panel-header-section .action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* 配置卡片 */
+.prop-group-card {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+.prop-group-card:hover {
+  border-color: #d9d9d9;
+  background: #fcfcfc;
+}
+
+.prop-group-card .group-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 14px;
+  border-left: 3px solid #1890ff;
+  padding-left: 8px;
+  line-height: 1;
+}
+
+.prop-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.prop-row:last-child {
+  margin-bottom: 0;
+}
+
+.prop-label {
+  width: 80px;
+  font-size: 13px;
+  color: #595959;
+  flex-shrink: 0;
+}
+
+.prop-control {
+  flex: 1;
+}
+
+/* 法务隔离特制卡片 */
+.legal-isolation-card {
+  background: #fffaf4;
+  border: 1px solid #ffd591;
+}
+
+.legal-isolation-card:hover {
+  background: #fffaf4;
+  border-color: #ffb95e;
+}
+
+.legal-alert {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* 概率顺位表设计 */
+.prize-rank-table {
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+}
+
+.prize-rank-table .ant-table-thead > tr > th {
+  background: #f5f5f5 !important;
+  font-weight: bold;
+  font-size: 12.5px;
+  color: #262626;
+  border-bottom: 1px solid #e8e8e8 !important;
+}
+
+.prize-rank-table .ant-table-cell {
+  padding: 8px 12px !important;
+  font-size: 12.5px;
+}
+
+.rank-badge-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rank-number-badge {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+  background: #bfbfbf;
+}
+
+/* 顺位等级前三色调 */
+.rank-number-badge.rank-1 { background: #ff4d4f; box-shadow: 0 2px 6px rgba(255,77,79,0.3); }
+.rank-number-badge.rank-2 { background: #fa8c16; box-shadow: 0 2px 6px rgba(250,140,22,0.3); }
+.rank-number-badge.rank-3 { background: #ffc53d; box-shadow: 0 2px 6px rgba(255,197,61,0.3); }
+.rank-number-badge.rank-4 { background: #40a9ff; }
+.rank-number-badge.rank-5 { background: #52c41a; }
+
+.prob-sum-badge {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.prob-sum-badge.success {
+  background: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+}
+
+.prob-sum-badge.warning {
+  background: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.table-intro-text {
+  font-size: 11.5px;
+  color: #8c8c8c;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.intervention-assoc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* 规则卡片设计 */
+.rule-card {
+  border: 1px solid #e8e8e8;
+  position: relative;
+  overflow: hidden;
+}
+
+.rule-card.locked {
+  opacity: 0.65;
+  background: #f5f5f5 !important;
+  border-color: #d9d9d9 !important;
+  pointer-events: none;
+}
+
+.rule-card.locked::before {
+  content: '🔒 外部公开活动已停用概率干预';
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: rgba(250, 140, 22, 0.1);
+  color: #fa8c16;
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.rule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.rule-header .title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rule-header .rule-icon {
+  font-size: 16px;
+  color: #1890ff;
+}
+
+.rule-header .rule-icon.danger {
+  color: #fa8c16;
+}
+
+.rule-header .rule-title {
+  font-size: 13.5px;
+  font-weight: bold;
+  color: #262626;
+}
+
+.sentence-config-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 2.2;
+  color: #262626;
+}
+
+.inline-number-input {
+  width: 70px;
+  margin: 0 2px;
+}
+
+/* 规则解释说明框 */
+.explain-box {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.explain-box.success {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: #237804;
+}
+
+.explain-box.error {
+  background: #fff2e8;
+  border: 1px solid #ffbb96;
+  color: #ad4e00;
+}
+
+.explain-box strong {
+  display: block;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+
+.explain-desc {
+  display: block;
+}
+
+.prizes-list-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.p-tag {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  border: 1px solid transparent;
+}
+
+.p-tag.good { background: #d9f7be; border-color: #b7eb8f; color: #389e0d; }
+.p-tag.bad { background: #fff1f0; border-color: #ffa39e; color: #cf1322; }
+.p-tag.danger { background: #ffd8bf; border-color: #ffbb96; color: #d4380d; }
+.p-tag.blocked { background: #f0f0f0; border-color: #d9d9d9; color: #595959; text-decoration: line-through; }
+
+/* ==========================================================================
+   中奖 Modal 特制样式
+   ========================================================================== */
+.draw-result-modal .ant-modal-content {
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 24px !important;
+  text-align: center;
+}
+
+.draw-result-modal .ant-modal-body {
+  padding-top: 12px;
+}
+
+.modal-result-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.win-icon-bounce {
+  font-size: 48px;
+  animation: bounce 0.6s infinite alternate;
+  margin-bottom: 12px;
+}
+
+.win-congrats {
+  font-size: 15px;
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.win-prize-name {
+  font-size: 20px;
+  font-weight: 900;
+  margin: 8px 0 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.intervention-notice-tag {
+  font-size: 10.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  margin-bottom: 14px;
+  line-height: 1.4;
+  border: 1px dashed transparent;
+}
+
+.intervention-notice-tag.pity {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+  color: #389e0d;
+}
+
+.intervention-notice-tag.abuse {
+  background: #fff2e8;
+  border-color: #ffbb96;
+  color: #d4380d;
+}
+
+.win-prize-desc {
+  font-size: 11.5px;
+  color: #8c8c8c;
+  line-height: 1.4;
+}
+
+/* 动效 */
+@keyframes bounce {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-8px) scale(1.05); }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 常用布局辅助 */
+.flex-align-center-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 992px) {
+  .mobile-preview-container {
+    margin-bottom: 24px;
+  }
+}

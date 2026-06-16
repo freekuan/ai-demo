@@ -76,6 +76,7 @@ import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import InviteReward from './pages/InviteReward'
 import NavigationEditor from './pages/NavigationEditor'
 import PointsGoodsLimit from './pages/PointsGoodsLimit'
+import LotteryRulesIntervention from './pages/LotteryRulesIntervention'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -100,6 +101,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     label: '客群运营',
     children: [
       { key: 'shop-points-lottery', label: '积分抽奖' }, // 触发抽奖装修页面
+      { key: 'shop-points-lottery-rules', label: '抽奖概率干预' },
       { key: 'shop-points-mall', label: '积分商城' },
       { key: 'shop-points-task', label: '积分任务' },
       { key: 'shop-points-mkt', label: '积分营销' }, // 触发蓝色页面
@@ -3711,13 +3713,14 @@ export default function App() {
   const isPointsMarketingPage = railKey === 'shop' && secondaryKey === 'shop-points-mkt'
   const isGoldenEggPage = railKey === 'shop' && secondaryKey === 'shop-golden-egg'
   const isPointsLotteryPage = railKey === 'shop' && (secondaryKey === 'shop-points-lottery' || secondaryKey === 'shop-lottery-center')
+  const isPointsLotteryRulesPage = railKey === 'shop' && secondaryKey === 'shop-points-lottery-rules'
   const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
   const isInviteRewardPage = railKey === 'shop' && secondaryKey === 'shop-invite-reward'
   const isNavigationPage = railKey === 'shop' && secondaryKey === 'shop-navigation'
   const isPointsProdPage = railKey === 'shop' && secondaryKey === 'shop-points-prod'
   
   // 基础主题色
-  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage) ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -3828,6 +3831,8 @@ export default function App() {
                 <SmashGoldenEgg />
               ) : isPointsLotteryPage ? (
                 <LotteryEditor />
+              ) : isPointsLotteryRulesPage ? (
+                <LotteryRulesIntervention />
               ) : isPointsTaskPage ? (
                 <TaskEditor />
               ) : isInviteRewardPage ? (
