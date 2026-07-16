@@ -77,6 +77,7 @@ import InviteReward from './pages/InviteReward'
 import NavigationEditor from './pages/NavigationEditor'
 import PointsGoodsLimit from './pages/PointsGoodsLimit'
 import LotteryRulesIntervention from './pages/LotteryRulesIntervention'
+import AppsMarket from './pages/AppsMarket'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -3719,6 +3720,7 @@ export default function App() {
   const isInviteRewardPage = railKey === 'shop' && secondaryKey === 'shop-invite-reward'
   const isNavigationPage = railKey === 'shop' && secondaryKey === 'shop-navigation'
   const isPointsProdPage = railKey === 'shop' && secondaryKey === 'shop-points-prod'
+  const isAppsMarketPage = railKey === 'apps' && secondaryKey === 'dash-apps-market'
   
   // 基础主题色
   const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage) ? 'blue' : 'orange'
@@ -3842,6 +3844,8 @@ export default function App() {
                 <NavigationEditor />
               ) : isPointsProdPage ? (
                 <PointsGoodsLimit />
+              ) : isAppsMarketPage ? (
+                <AppsMarket />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
