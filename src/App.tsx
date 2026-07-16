@@ -123,6 +123,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-product-list', label: '商品列表' },
       { key: 'shop-product-category', label: '商品分类' },
       { key: 'shop-product-shelf', label: '商品上架' },
+      { key: 'shop-virtual-product-prototype', label: <a href="/saas_prototype_v2.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>虚拟商品原型(卡密)</a> },
     ],
   },
   {
@@ -3857,6 +3858,8 @@ export default function App() {
                         4. <strong>客群运营 -&gt; 积分抽奖</strong> (大抽奖页面装修)
                         <br />
                         5. <strong>客群运营 -&gt; 积分任务</strong> (互动任务页面优化)
+                        <br />
+                        6. <strong>商品管理 -&gt; 虚拟商品原型(卡密)</strong> (点击在新标签页查看)
                       </span>
                     }
                   />
