@@ -85,7 +85,7 @@
                 <h2 class="text-2xl font-bold text-gray-800">卡密/券码库管理</h2>
                 <div class="space-x-2">
                     <button class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">数据导出</button>
-                    <button class="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700">+ 新建卡密库</button>
+                    <button onclick="let name = prompt('请输入新建卡密库的名称:'); if(name) { alert('卡密库【' + name + '】创建成功！您现在可以为其导入券码了。'); }" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700">+ 新建卡密库</button>
                 </div>
             </div>
 
