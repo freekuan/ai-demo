@@ -409,7 +409,7 @@
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors cursor-pointer">
                         <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         <span class="font-medium text-sm">点击或拖拽上传 Excel / CSV 文件</span>
-                        <span class="text-xs mt-1 opacity-70">支持批量导入新的卡密，每次最多导入1万条</span>
+                        <span class="text-xs mt-1 opacity-70">支持批量导入新的卡密，单次最多1万条，格式为6～20位数字或英文字母</span>
                         <a href="#" class="text-blue-500 text-xs mt-3 hover:underline">下载标准导入模板</a>
                     </div>
                 </div>
@@ -444,46 +444,46 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">券码</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">导入时间</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">发货时间</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">关联订单</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">操作</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">券码</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">状态</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">导入时间</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">发货时间</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">关联订单</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase whitespace-nowrap">操作</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 text-sm bg-white">
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-8A9C-2M3L-Q1PZ</td>
-                                <td class="px-4 py-3"><span class="text-red-600 bg-red-50 px-2.5 py-1 rounded-md text-xs font-medium">已发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-26 09:35</td>
-                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline">DD20231026001293</td>
-                                <td class="px-4 py-3 text-right text-gray-400">-</td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-8A9C-2M3L-Q1PZ</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-red-600 bg-red-50 px-2 py-0.5 rounded text-[11px] font-medium">已发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-26 09:35</td>
+                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline whitespace-nowrap text-[13px]">DD20231026001293</td>
+                                <td class="px-4 py-3 text-right text-gray-400 whitespace-nowrap text-[13px]">-</td>
                             </tr>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-X9K2-5F8N-W4TY</td>
-                                <td class="px-4 py-3"><span class="text-red-600 bg-red-50 px-2.5 py-1 rounded-md text-xs font-medium">已发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-25 14:20</td>
-                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline">DD20231025008472</td>
-                                <td class="px-4 py-3 text-right text-gray-400">-</td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-X9K2-5F8N-W4TY</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-red-600 bg-red-50 px-2 py-0.5 rounded text-[11px] font-medium">已发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-25 14:20</td>
+                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline whitespace-nowrap text-[13px]">DD20231025008472</td>
+                                <td class="px-4 py-3 text-right text-gray-400 whitespace-nowrap text-[13px]">-</td>
                             </tr>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-L3P8-9M1C-H7XB</td>
-                                <td class="px-4 py-3"><span class="text-green-600 bg-green-50 px-2.5 py-1 rounded-md text-xs font-medium">未发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
-                                <td class="px-4 py-3 text-right"><a href="#" onclick="confirm('确定删除该未发放的券码吗？')" class="text-red-500 hover:text-red-700">删除</a></td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-L3P8-9M1C-H7XB</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-green-600 bg-green-50 px-2 py-0.5 rounded text-[11px] font-medium">未发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap text-[13px]"><a href="#" onclick="confirm('确定删除该未发放的券码吗？')" class="text-red-500 hover:text-red-700">删除</a></td>
                             </tr>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-V5N4-2K9J-R6DQ</td>
-                                <td class="px-4 py-3"><span class="text-green-600 bg-green-50 px-2.5 py-1 rounded-md text-xs font-medium">未发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
-                                <td class="px-4 py-3 text-right"><a href="#" onclick="confirm('确定删除该未发放的券码吗？')" class="text-red-500 hover:text-red-700">删除</a></td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-V5N4-2K9J-R6DQ</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-green-600 bg-green-50 px-2 py-0.5 rounded text-[11px] font-medium">未发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap text-[13px]"><a href="#" onclick="confirm('确定删除该未发放的券码吗？')" class="text-red-500 hover:text-red-700">删除</a></td>
                             </tr>
                         </tbody>
                     </table>
