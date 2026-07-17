@@ -256,7 +256,7 @@
                                 <label class="flex items-center"><input type="radio" name="instruction" class="mr-2">关闭</label>
                                 <label class="flex items-center"><input type="radio" name="instruction" checked class="mr-2 text-blue-600">开启</label>
                             </div>
-                            <textarea class="w-full h-24 border border-gray-300 rounded-md p-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="请输入使用说明">1. 复制上方提货券码；&#10;2. 点击下方【前往兑换】按钮进入腾讯视频小程序；&#10;3. 登录账号后，粘贴券码即可兑换成功。</textarea>
+                            <textarea class="w-full h-24 border border-gray-300 rounded-md p-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="请输入使用说明">1. 复制上方券码；&#10;2. 点击下方【前往兑换】按钮进入腾讯视频小程序；&#10;3. 登录账号后，粘贴券码即可兑换成功。</textarea>
                         </div>
                     </div>
 
@@ -323,7 +323,7 @@
                         <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-4 -mt-4"></div>
                         
                         <div class="text-center pb-3 border-b border-dashed border-gray-200">
-                            <h3 class="text-gray-500 text-sm mb-1">提货券码</h3>
+                            <h3 class="text-gray-500 text-sm mb-1">券码</h3>
                             <div class="text-xl font-bold tracking-wider text-gray-800 my-2">TXVP-8A9C-2M3L-Q1PZ</div>
                             <button class="px-5 py-1.5 border border-gray-300 rounded-full text-sm text-gray-700 font-medium active:bg-gray-100">复制</button>
                         </div>
@@ -331,7 +331,7 @@
                         <div class="pt-3">
                             <h4 class="text-sm font-bold text-gray-800 mb-2">使用说明</h4>
                             <div id="c-instruction-steps" class="text-xs text-gray-500 leading-relaxed space-y-1">
-                                <p>1. 请先点击上方按钮复制提货券码；</p>
+                                <p>1. 请先点击上方按钮复制券码；</p>
                                 <p>2. 点击下方【前往兑换】按钮，进入指定页面；</p>
                                 <p>3. 登录您的账号后，粘贴券码即可激活服务。</p>
                             </div>
@@ -664,12 +664,12 @@
                 btnJump.className = "px-6 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-600 transition-colors";
                 btnManual.className = "px-6 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors";
                 redeemBtn.style.display = 'flex';
-                instructionSteps.innerHTML = '<p>1. 请先点击上方按钮复制提货券码；</p><p>2. 点击下方【前往兑换】按钮，进入指定页面；</p><p>3. 登录您的账号后，粘贴券码即可激活服务。</p>';
+                instructionSteps.innerHTML = '<p>1. 请先点击上方按钮复制券码；</p><p>2. 点击下方【前往兑换】按钮，进入指定页面；</p><p>3. 登录您的账号后，粘贴券码即可激活服务。</p>';
             } else {
                 btnJump.className = "px-6 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors";
                 btnManual.className = "px-6 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-600 transition-colors";
                 redeemBtn.style.display = 'none';
-                instructionSteps.innerHTML = '<p>1. 请先点击上方按钮复制提货券码；</p><p>2. 自行打开对应的APP或官方网页；</p><p>3. 登录您的账号后，在兑换入口处粘贴券码即可激活服务。</p>';
+                instructionSteps.innerHTML = '<p>1. 请先点击上方按钮复制券码；</p><p>2. 自行打开对应的APP或官方网页；</p><p>3. 登录您的账号后，在兑换入口处粘贴券码即可激活服务。</p>';
             }
         }
     </script>
