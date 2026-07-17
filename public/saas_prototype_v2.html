@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SaaS虚拟商品卡密功能原型</title>
+    <title>SaaS虚拟商品券码功能原型</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 模拟手机端容器 */
@@ -63,7 +63,7 @@
         <div class="flex-1 overflow-y-auto py-4">
             <div class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">B端商家后台</div>
             <a href="#" onclick="switchTab('library')" id="tab-library" class="tab-btn flex items-center px-6 py-3 bg-blue-600 text-white transition-colors duration-200">
-                卡密/券码库管理
+                券码库管理
             </a>
             <a href="#" onclick="switchTab('publish')" id="tab-publish" class="tab-btn flex items-center px-6 py-3 hover:bg-slate-700 text-slate-300 transition-colors duration-200">
                 发布虚拟商品
@@ -79,21 +79,28 @@
     <!-- 主内容区 -->
     <div class="flex-1 flex flex-col overflow-hidden bg-white">
         
-        <!-- 页面 1：卡密库管理 -->
+        <!-- 页面 1：券码库管理 -->
         <div id="page-library" class="page-content flex-1 overflow-y-auto p-8 bg-gray-50">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">卡密/券码库管理</h2>
+                <h2 class="text-2xl font-bold text-gray-800">券码库管理</h2>
                 <div class="space-x-2">
-                    <button class="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">数据导出</button>
-                    <button class="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700">+ 新建卡密库</button>
+                    <button onclick="let name = prompt('请输入新建券码库的名称:'); if(name) { alert('券码库【' + name + '】创建成功！您现在可以为其导入券码了。'); }" class="px-4 py-2 bg-blue-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700">+ 新建券码库</button>
                 </div>
             </div>
 
             <!-- 数据概览和搜索 -->
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 flex justify-between items-center">
                 <div class="flex gap-4 items-center">
-                    <input type="text" placeholder="搜索卡密库名称" class="px-3 py-2 border border-gray-300 rounded-md text-sm w-64 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <input type="text" placeholder="搜索券码库名称" class="px-3 py-2 border border-gray-300 rounded-md text-sm w-64 focus:outline-none focus:ring-1 focus:ring-blue-500">
                     <button class="px-4 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium">搜索</button>
+                </div>
+            </div>
+
+            <!-- 提示 -->
+            <div class="mb-4 text-sm text-blue-700 bg-blue-50 p-3 rounded-lg border border-blue-100 flex items-start">
+                <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                    <b>提示：</b>在【券码导入】中可以批量导入Excel格式的外部券码，并在发布商品时进行关联。点击<b class="px-1">总数量</b>的数字可查看券码明细。
                 </div>
             </div>
 
@@ -102,7 +109,7 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">卡密库名称</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">券码库名称</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总数量</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">已发放</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">剩余可用</th>
@@ -113,57 +120,48 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">腾讯视频VIP月卡兑换码</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1,000</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <a href="#" onclick="openModal('modal-codes', '已发放券码明细 (腾讯视频VIP月卡)')" class="text-blue-600 font-bold hover:underline">850</a>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
+                                <a href="#" onclick="openModal('modal-codes', '券码明细 (腾讯视频VIP月卡)')" class="hover:underline">1,000</a>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                                <a href="#" onclick="openModal('modal-codes', '剩余可用券码明细 (腾讯视频VIP月卡)')" class="text-green-600 hover:underline">150</a>
-                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">850</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-bold">150</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2023-10-24 10:00</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" onclick="openModal('modal-import')" class="text-blue-600 hover:text-blue-900 mr-3">管理券码 (导入)</a>
-                                <a href="#" onclick="prompt('请输入新的卡密库名称:', '腾讯视频VIP月卡兑换码')" class="text-gray-600 hover:text-gray-900 mr-3">编辑</a>
-                                <a href="#" onclick="confirm('确定要删除该卡密库吗？删除后相关的虚拟商品可能无法正常发货。')" class="text-red-600 hover:text-red-900">删除</a>
+                                <a href="#" onclick="openModal('modal-import')" class="text-blue-600 hover:text-blue-900 mr-3">券码导入</a>
+                                <a href="#" onclick="prompt('请输入新的券码库名称:', '腾讯视频VIP月卡兑换码')" class="text-gray-600 hover:text-gray-900 mr-3">编辑</a>
+                                <a href="#" onclick="confirm('确定要删除该券码库吗？删除后相关的虚拟商品可能无法正常发货。')" class="text-red-600 hover:text-red-900">删除</a>
                             </td>
                         </tr>
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">联名洗车店单次体验券</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
+                                <a href="#" onclick="openModal('modal-codes', '券码明细 (联名洗车店)')" class="hover:underline">500</a>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">500</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <a href="#" onclick="openModal('modal-codes', '已发放券码明细 (联名洗车店)')" class="text-blue-600 font-bold hover:underline">500</a>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-500">
-                                <a href="#" onclick="openModal('modal-codes', '剩余可用券码明细 (联名洗车店)')" class="text-red-500 hover:underline">0</a>
-                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-500 font-bold">0</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2023-10-20 14:30</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" onclick="openModal('modal-import')" class="text-blue-600 hover:text-blue-900 mr-3">管理券码 (导入)</a>
-                                <a href="#" onclick="prompt('请输入新的卡密库名称:', '联名洗车店单次体验券')" class="text-gray-600 hover:text-gray-900 mr-3">编辑</a>
-                                <a href="#" onclick="confirm('确定要删除该卡密库吗？')" class="text-red-600 hover:text-red-900">删除</a>
+                                <a href="#" onclick="openModal('modal-import')" class="text-blue-600 hover:text-blue-900 mr-3">券码导入</a>
+                                <a href="#" onclick="prompt('请输入新的券码库名称:', '联名洗车店单次体验券')" class="text-gray-600 hover:text-gray-900 mr-3">编辑</a>
+                                <a href="#" onclick="confirm('确定要删除该券码库吗？')" class="text-red-600 hover:text-red-900">删除</a>
                             </td>
                         </tr>
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">爱奇艺季卡（内部测试）</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <a href="#" onclick="openModal('modal-codes', '已发放券码明细 (爱奇艺季卡)')" class="text-blue-600 font-bold hover:underline">2</a>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
+                                <a href="#" onclick="openModal('modal-codes', '券码明细 (爱奇艺季卡)')" class="hover:underline">10</a>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
-                                <a href="#" onclick="openModal('modal-codes', '剩余可用券码明细 (爱奇艺季卡)')" class="text-green-600 hover:underline">8</a>
-                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-bold">8</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2023-10-25 09:15</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="#" onclick="openModal('modal-import')" class="text-blue-600 hover:text-blue-900 mr-3">管理券码 (导入)</a>
-                                <a href="#" onclick="prompt('请输入新的卡密库名称:', '爱奇艺季卡（内部测试）')" class="text-gray-600 hover:text-gray-900 mr-3">编辑</a>
-                                <a href="#" onclick="confirm('确定要删除该卡密库吗？')" class="text-red-600 hover:text-red-900">删除</a>
+                                <a href="#" onclick="openModal('modal-import')" class="text-blue-600 hover:text-blue-900 mr-3">券码导入</a>
+                                <a href="#" onclick="prompt('请输入新的券码库名称:', '爱奇艺季卡（内部测试）')" class="text-gray-600 hover:text-gray-900 mr-3">编辑</a>
+                                <a href="#" onclick="confirm('确定要删除该券码库吗？')" class="text-red-600 hover:text-red-900">删除</a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="mt-4 text-sm text-gray-500 text-center">
-                💡 提示：在【管理券码】中可以批量导入Excel格式的外部卡密，并在发布商品时进行关联。点击数字可查看券码明细。
             </div>
         </div>
 
@@ -172,7 +170,7 @@
             <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                 <h2 class="text-xl font-bold text-gray-800 border-b pb-4 mb-6">发布商品 - 销售与发货信息</h2>
                 
-                <form class="space-y-6">
+                <form class="space-y-6 text-sm">
                     <!-- 商品类型 (只读展示) -->
                     <div class="flex items-start">
                         <label class="w-32 text-right pr-4 text-gray-700 font-medium pt-2">商品类型：</label>
@@ -192,24 +190,24 @@
                             <label class="flex items-center cursor-pointer">
                                 <input type="radio" name="delivery_type" value="platform" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" onchange="toggleDeliveryMode()">
                                 <span class="ml-2 text-gray-700">平台自动生成核销码</span>
-                                <span class="ml-3 text-xs text-gray-400">用户购买后由系统生成二维码，适用于自有门店核销</span>
+                                <span class="ml-3 text-xs text-gray-400">用户购买后由系统自动生成核销码</span>
                             </label>
                             
                             <!-- 选项2：外部导入券码 -->
                             <label class="flex items-center cursor-pointer">
                                 <input type="radio" name="delivery_type" value="external" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked onchange="toggleDeliveryMode()">
-                                <span class="ml-2 text-gray-700">外部导入卡密/券码</span>
-                                <span class="ml-3 text-xs text-gray-400">从卡密库中扣减并下发给用户，适用于代售第三方卡券</span>
+                                <span class="ml-2 text-gray-700">外部导入券码</span>
+                                <span class="ml-3 text-xs text-gray-400">从券码库中扣减并下发给用户，适用于代售第三方卡券</span>
                             </label>
 
-                            <!-- 关联卡密库设置区 (选中外部导入时显示) -->
+                            <!-- 关联券码库设置区 (选中外部导入时显示) -->
                             <div id="external_settings" class="mt-4 p-4 bg-white border border-gray-200 rounded-md space-y-4 relative">
                                 <div class="absolute -top-2 left-6 w-4 h-4 bg-white border-t border-l border-gray-200 transform rotate-45"></div>
                                 
                                 <div class="flex items-center">
-                                    <label class="w-24 text-right pr-3 text-gray-600 text-sm"><span class="text-red-500 mr-1">*</span>关联卡密库：</label>
+                                    <label class="w-28 whitespace-nowrap text-right pr-3 text-gray-600 text-sm"><span class="text-red-500 mr-1">*</span>关联券码库：</label>
                                     <select id="lib_select" class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" onchange="updateStock()">
-                                        <option value="">请选择要关联的卡密库</option>
+                                        <option value="">请选择要关联的券码库</option>
                                         <option value="150" selected>腾讯视频VIP月卡兑换码 (剩余: 150)</option>
                                         <option value="0" disabled>联名洗车店单次体验券 (剩余: 0)</option>
                                         <option value="8">爱奇艺季卡（内部测试） (剩余: 8)</option>
@@ -219,19 +217,19 @@
                                 
                                 <!-- 追加的库存分配方案设计，解决库存逻辑不严谨问题 -->
                                 <div class="flex items-start mt-4 pt-4 border-t border-gray-100">
-                                    <label class="w-24 text-right pr-3 text-gray-600 text-sm pt-1">库存策略：</label>
+                                    <label class="w-28 whitespace-nowrap text-right pr-3 text-gray-600 text-sm pt-1">库存策略：</label>
                                     <div class="flex-1 space-y-3">
                                         <label class="flex items-center cursor-pointer">
                                             <input type="radio" name="stock_sync" value="sync" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked onchange="toggleStockMode()">
-                                            <span class="ml-2 text-gray-700 text-sm">自动同步卡密库库存 (推荐)</span>
+                                            <span class="ml-2 text-gray-700 text-sm">自动同步券码库库存 (推荐)</span>
                                         </label>
-                                        <div class="text-xs text-gray-400 pl-6 -mt-2 mb-2">商品库存与卡密库剩余可用数量保持一致，当卡密库补充券码时，商品库存会自动增加。</div>
+                                        <div class="text-xs text-gray-400 pl-6 -mt-2 mb-2">商品库存与券码库剩余可用数量保持一致，当券码库补充券码时，商品库存会自动增加。</div>
                                         
                                         <label class="flex items-center cursor-pointer">
                                             <input type="radio" name="stock_sync" value="fixed" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" onchange="toggleStockMode()">
-                                            <span class="ml-2 text-gray-700 text-sm">手动分配库存 (从卡密库预扣)</span>
+                                            <span class="ml-2 text-gray-700 text-sm">手动分配库存 (从券码库预扣)</span>
                                         </label>
-                                        <div class="text-xs text-gray-400 pl-6 -mt-2">手动设置该商品可售卖的库存数量，设置后将从卡密库中锁定对应数量。</div>
+                                        <div class="text-xs text-gray-400 pl-6 -mt-2">手动设置该商品可售卖的库存数量，设置后将从券码库中锁定对应数量。</div>
                                     </div>
                                 </div>
                             </div>
@@ -244,7 +242,7 @@
                         <div class="flex items-center flex-1">
                             <input type="number" id="product_stock" value="150" disabled class="w-32 bg-gray-100 border border-gray-300 text-gray-500 rounded-md px-3 py-2 text-sm cursor-not-allowed">
                             <span class="ml-2 text-sm text-gray-500">件</span>
-                            <span id="stock_tip" class="ml-4 text-xs text-orange-500 bg-orange-50 px-2 py-1 rounded">不可修改，已与卡密库剩余数量(150)实时同步</span>
+                            <span id="stock_tip" class="ml-4 text-xs text-orange-500 bg-orange-50 px-2 py-1 rounded">不可修改，已与券码库剩余库存进行同步</span>
                         </div>
                     </div>
 
@@ -258,7 +256,7 @@
                                 <label class="flex items-center"><input type="radio" name="instruction" class="mr-2">关闭</label>
                                 <label class="flex items-center"><input type="radio" name="instruction" checked class="mr-2 text-blue-600">开启</label>
                             </div>
-                            <textarea class="w-full h-24 border border-gray-300 rounded-md p-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="请输入使用说明">1. 复制上方提货卡密；&#10;2. 点击下方【前往兑换】按钮进入腾讯视频小程序；&#10;3. 登录账号后，粘贴卡密即可兑换成功。</textarea>
+                            <textarea class="w-full h-24 border border-gray-300 rounded-md p-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="请输入使用说明">1. 复制上方券码；&#10;2. 点击下方【前往兑换】按钮进入腾讯视频小程序；&#10;3. 登录账号后，粘贴券码即可兑换成功。</textarea>
                         </div>
                     </div>
 
@@ -291,10 +289,16 @@
         </div>
 
         <!-- 页面 3：C端订单详情 (买家端展示) -->
-        <div id="page-order" class="page-content hidden flex-1 overflow-y-auto p-8 bg-gray-200 flex items-center justify-center">
+        <div id="page-order" class="page-content hidden flex-1 overflow-y-auto p-8 bg-gray-200 flex flex-col items-center justify-center">
             
+            <!-- 交互模式切换器 -->
+            <div class="mb-6 bg-white p-1 rounded-lg shadow-sm inline-flex">
+                <button onclick="toggleRedeemBtn(true)" id="btn-mode-jump" class="px-6 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-600 transition-colors">支持跳转兑换</button>
+                <button onclick="toggleRedeemBtn(false)" id="btn-mode-manual" class="px-6 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">需手动复制打开</button>
+            </div>
+
             <!-- 手机外壳 -->
-            <div class="mobile-container">
+            <div class="mobile-container relative">
                 <!-- 状态栏模拟 -->
                 <div class="h-6 w-full flex justify-between items-center px-4 text-xs font-medium" style="background-color: #fff;">
                     <span>09:41</span>
@@ -307,31 +311,31 @@
                 <!-- 顶部导航 -->
                 <div class="mobile-header border-b border-gray-100">
                     <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    <span class="flex-1 text-center pr-10">待使用</span>
+                    <span class="flex-1 text-center pr-10">已完成</span>
                 </div>
 
                 <!-- 页面内容 -->
                 <div class="mobile-content space-y-3 pb-8">
                     
-                    <!-- 卡密模块 (核心设计：无二维码，纯卡密展示 + 跳转) -->
+                    <!-- 券码模块 (核心设计：无二维码，纯券码展示 + 跳转) -->
                     <div class="bg-white rounded-xl p-4 shadow-sm relative overflow-hidden">
                         <!-- 装饰背景 -->
                         <div class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-4 -mt-4"></div>
                         
                         <div class="text-center pb-3 border-b border-dashed border-gray-200">
-                            <h3 class="text-gray-500 text-sm mb-1">提货卡密</h3>
+                            <h3 class="text-gray-500 text-sm mb-1">券码</h3>
                             <div class="text-xl font-bold tracking-wider text-gray-800 my-2">TXVP-8A9C-2M3L-Q1PZ</div>
                             <button class="px-5 py-1.5 border border-gray-300 rounded-full text-sm text-gray-700 font-medium active:bg-gray-100">复制</button>
                         </div>
 
                         <div class="pt-3">
                             <h4 class="text-sm font-bold text-gray-800 mb-2">使用说明</h4>
-                            <div class="text-xs text-gray-500 leading-relaxed space-y-1">
-                                <p>1. 请先点击上方按钮复制提货卡密；</p>
+                            <div id="c-instruction-steps" class="text-xs text-gray-500 leading-relaxed space-y-1">
+                                <p>1. 请先点击上方按钮复制券码；</p>
                                 <p>2. 点击下方【前往兑换】按钮，进入指定页面；</p>
-                                <p>3. 登录您的账号后，粘贴卡密即可激活服务。</p>
+                                <p>3. 登录您的账号后，粘贴券码即可激活服务。</p>
                             </div>
-                            <button class="w-full mt-4 bg-blue-600 text-white font-medium py-2.5 rounded-lg active:bg-blue-700 shadow-sm flex items-center justify-center gap-1">
+                            <button id="c-redeem-btn" class="w-full mt-4 bg-blue-600 text-white font-medium py-2.5 rounded-lg active:bg-blue-700 shadow-sm flex items-center justify-center gap-1">
                                 前往兑换
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                             </button>
@@ -341,7 +345,7 @@
                     <!-- 提示文字 -->
                     <div class="text-center text-xs text-orange-500 flex items-center justify-center bg-orange-50 py-2 rounded-lg">
                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        为保障您的权益，未消费前请勿将卡密泄露给他人
+                        为保障您的权益，未消费前请勿将券码泄露给他人
                     </div>
 
                     <!-- 商品信息 -->
@@ -352,8 +356,8 @@
                         </div>
                         <div class="flex-1 flex flex-col justify-between">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-800 leading-tight">腾讯视频VIP月卡 (直充卡密) 新建测试</h3>
-                                <div class="text-xs text-gray-400 mt-1">发货形式：卡密发货</div>
+                                <h3 class="text-sm font-medium text-gray-800 leading-tight">腾讯视频VIP月卡 (直充券码) 新建测试</h3>
+                                <div class="text-xs text-gray-400 mt-1">发货形式：券码发货</div>
                             </div>
                             <div class="flex justify-between items-end">
                                 <span class="text-xs text-gray-500">x1</span>
@@ -392,8 +396,8 @@
                 <h4 class="font-bold text-base mb-2">C端交互变化说明：</h4>
                 <ul class="list-disc pl-4 space-y-2">
                     <li><strong>隐藏二维码：</strong> 因为外部券码通常直接复制使用，扫码场景极少，隐藏条码/二维码让页面更清爽。</li>
-                    <li><strong>大字号展示卡密：</strong> 方便用户核对和复制。</li>
-                    <li><strong>强化引导：</strong> 将“使用说明”和“跳转小程序”按钮整合在卡密下方，形成流畅的“复制->跳转->粘贴”使用闭环。</li>
+                    <li><strong>大字号展示券码：</strong> 方便用户核对和复制。</li>
+                    <li><strong>强化引导：</strong> 将“使用说明”和“跳转小程序”按钮整合在券码下方，形成流畅的“复制->跳转->粘贴”使用闭环。</li>
                 </ul>
             </div>
         </div>
@@ -415,7 +419,7 @@
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center text-gray-500 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors cursor-pointer">
                         <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         <span class="font-medium text-sm">点击或拖拽上传 Excel / CSV 文件</span>
-                        <span class="text-xs mt-1 opacity-70">支持批量导入新的卡密</span>
+                        <span class="text-xs mt-1 opacity-70">支持批量导入新的券码，单次最多1万条，格式为6～20位数字或英文字母</span>
                         <a href="#" class="text-blue-500 text-xs mt-3 hover:underline">下载标准导入模板</a>
                     </div>
                 </div>
@@ -429,7 +433,7 @@
 
     <!-- 2. 查看券码明细弹窗 -->
     <div id="modal-codes" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg w-[750px] max-h-[85vh] flex flex-col shadow-xl">
+        <div class="bg-white rounded-lg w-[850px] max-h-[85vh] flex flex-col shadow-xl">
             <div class="p-5 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
                 <h3 class="text-lg font-bold text-gray-800" id="modal-codes-title">券码明细</h3>
                 <button onclick="closeModal('modal-codes')" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
@@ -437,54 +441,59 @@
             <div class="p-6 flex-1 overflow-y-auto">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex space-x-2">
-                        <button class="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-md text-sm font-medium border border-blue-200">全部</button>
-                        <button class="px-4 py-1.5 bg-white text-gray-600 rounded-md text-sm border border-gray-300 hover:bg-gray-50">已发放</button>
-                        <button class="px-4 py-1.5 bg-white text-gray-600 rounded-md text-sm border border-gray-300 hover:bg-gray-50">未发放(可用)</button>
+                        <button onclick="filterCodes('all', this)" class="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-md text-sm font-medium border border-blue-200">全部</button>
+                        <button onclick="filterCodes('已发放', this)" class="px-4 py-1.5 bg-white text-gray-600 rounded-md text-sm border border-gray-300 hover:bg-gray-50">已发放</button>
+                        <button onclick="filterCodes('未发放', this)" class="px-4 py-1.5 bg-white text-gray-600 rounded-md text-sm border border-gray-300 hover:bg-gray-50">未发放(可用)</button>
                     </div>
                     <div class="relative">
                         <input type="text" placeholder="搜索券码 / 订单号" class="pl-8 pr-3 py-1.5 border border-gray-300 rounded-md text-sm w-64 focus:outline-none focus:ring-1 focus:ring-blue-500">
                         <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
-                <div class="border rounded-lg overflow-hidden">
+                <div class="border rounded-lg overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">券码</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">导入时间</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">发货时间</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">关联订单</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">券码</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">状态</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">导入时间</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">发货时间</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap">关联订单</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase whitespace-nowrap">操作</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 text-sm bg-white">
+                        <tbody id="code-list-tbody" class="divide-y divide-gray-200 text-sm bg-white">
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-8A9C-2M3L-Q1PZ</td>
-                                <td class="px-4 py-3"><span class="text-red-600 bg-red-50 px-2.5 py-1 rounded-md text-xs font-medium">已发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-26 09:35</td>
-                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline">DD20231026001293</td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-8A9C-2M3L-Q1PZ</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-red-600 bg-red-50 px-2 py-0.5 rounded text-[11px] font-medium">已发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-26 09:35</td>
+                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline whitespace-nowrap text-[13px]">DD20231026001293</td>
+                                <td class="px-4 py-3 text-right text-gray-400 whitespace-nowrap text-[13px]">-</td>
                             </tr>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-X9K2-5F8N-W4TY</td>
-                                <td class="px-4 py-3"><span class="text-red-600 bg-red-50 px-2.5 py-1 rounded-md text-xs font-medium">已发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-25 14:20</td>
-                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline">DD20231025008472</td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-X9K2-5F8N-W4TY</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-red-600 bg-red-50 px-2 py-0.5 rounded text-[11px] font-medium">已发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-25 14:20</td>
+                                <td class="px-4 py-3 text-blue-600 cursor-pointer hover:underline whitespace-nowrap text-[13px]">DD20231025008472</td>
+                                <td class="px-4 py-3 text-right text-gray-400 whitespace-nowrap text-[13px]">-</td>
                             </tr>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-L3P8-9M1C-H7XB</td>
-                                <td class="px-4 py-3"><span class="text-green-600 bg-green-50 px-2.5 py-1 rounded-md text-xs font-medium">未发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-L3P8-9M1C-H7XB</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-green-600 bg-green-50 px-2 py-0.5 rounded text-[11px] font-medium">未发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap text-[13px]"><a href="#" onclick="confirm('确定删除该未发放的券码吗？')" class="text-red-500 hover:text-red-700">删除</a></td>
                             </tr>
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 font-mono text-gray-800">TXVP-V5N4-2K9J-R6DQ</td>
-                                <td class="px-4 py-3"><span class="text-green-600 bg-green-50 px-2.5 py-1 rounded-md text-xs font-medium">未发放</span></td>
-                                <td class="px-4 py-3 text-gray-500">2023-10-24 10:00</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
-                                <td class="px-4 py-3 text-gray-400">-</td>
+                                <td class="px-4 py-3 font-mono text-[13px] text-gray-800 whitespace-nowrap">TXVP-V5N4-2K9J-R6DQ</td>
+                                <td class="px-4 py-3 whitespace-nowrap"><span class="text-green-600 bg-green-50 px-2 py-0.5 rounded text-[11px] font-medium">未发放</span></td>
+                                <td class="px-4 py-3 text-gray-500 whitespace-nowrap text-[13px]">2023-10-24 10:00</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-gray-400 whitespace-nowrap text-[13px]">-</td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap text-[13px]"><a href="#" onclick="confirm('确定删除该未发放的券码吗？')" class="text-red-500 hover:text-red-700">删除</a></td>
                             </tr>
                         </tbody>
                     </table>
@@ -570,7 +579,7 @@
                 stockInput.classList.remove('bg-white');
                 stockInput.value = availableStock;
                 
-                stockTip.innerHTML = `不可修改，已与卡密库剩余数量(${availableStock})实时同步`;
+                stockTip.innerHTML = `不可修改，已与券码库剩余库存进行同步`;
                 stockTip.className = "ml-4 text-xs text-orange-500 bg-orange-50 px-2 py-1 rounded";
             } else {
                 // 手动模式：放开输入框，提示最大上限
@@ -579,7 +588,7 @@
                 stockInput.classList.add('bg-white');
                 stockInput.value = availableStock; // 默认带出全部
                 
-                stockTip.innerHTML = `可手动修改，最多不可超过卡密库当前可用数量：<b>${availableStock}</b>`;
+                stockTip.innerHTML = `可手动修改，最多不可超过券码库当前可用数量：<b>${availableStock}</b>`;
                 stockTip.className = "ml-4 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded";
                 
                 // 监听输入，防止超过最大库存
@@ -588,13 +597,13 @@
                     let max = parseInt(availableStock);
                     if (val > max) {
                         this.value = max;
-                        alert('分配的商品库存不能超过卡密库剩余可用数量！');
+                        alert('分配的商品库存不能超过券码库剩余可用数量！');
                     }
                 }
             }
         }
 
-        // 选择卡密库时更新库存
+        // 选择券码库时更新库存
         function updateStock() {
             toggleStockMode(); // 复用库存策略的逻辑，根据当前选择的策略更新 UI
         }
@@ -615,6 +624,52 @@
             const modal = document.getElementById(modalId);
             if(modal) {
                 modal.classList.add('hidden');
+            }
+        }
+
+        // 券码弹窗状态筛选逻辑
+        function filterCodes(status, btnElement) {
+            // 1. 切换按钮激活样式
+            const buttons = btnElement.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.className = "px-4 py-1.5 bg-white text-gray-600 rounded-md text-sm border border-gray-300 hover:bg-gray-50";
+            });
+            btnElement.className = "px-4 py-1.5 bg-blue-50 text-blue-600 rounded-md text-sm font-medium border border-blue-200";
+
+            // 2. 遍历隐藏/显示表格行
+            const tbody = document.getElementById('code-list-tbody');
+            if(!tbody) return;
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const statusSpan = row.querySelector('td:nth-child(2) span');
+                if(!statusSpan) return;
+                const rowStatus = statusSpan.innerText;
+                
+                if (status === 'all' || rowStatus.includes(status)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // C端订单详情页交互模式切换
+        function toggleRedeemBtn(hasJump) {
+            const btnJump = document.getElementById('btn-mode-jump');
+            const btnManual = document.getElementById('btn-mode-manual');
+            const redeemBtn = document.getElementById('c-redeem-btn');
+            const instructionSteps = document.getElementById('c-instruction-steps');
+            
+            if (hasJump) {
+                btnJump.className = "px-6 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-600 transition-colors";
+                btnManual.className = "px-6 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors";
+                redeemBtn.style.display = 'flex';
+                instructionSteps.innerHTML = '<p>1. 请先点击上方按钮复制券码；</p><p>2. 点击下方【前往兑换】按钮，进入指定页面；</p><p>3. 登录您的账号后，粘贴券码即可激活服务。</p>';
+            } else {
+                btnJump.className = "px-6 py-2 rounded-md text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors";
+                btnManual.className = "px-6 py-2 rounded-md text-sm font-medium bg-blue-50 text-blue-600 transition-colors";
+                redeemBtn.style.display = 'none';
+                instructionSteps.innerHTML = '<p>1. 请先点击上方按钮复制券码；</p><p>2. 自行打开对应的APP或官方网页；</p><p>3. 登录您的账号后，在兑换入口处粘贴券码即可激活服务。</p>';
             }
         }
     </script>
