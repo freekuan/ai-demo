@@ -181,6 +181,7 @@ const placeholderMenus: Record<PrimaryKey, MenuProps['items']> = {
   home: [
     { key: 'dash-home-overview', label: '数据概览' },
     { key: 'dash-home-shortcut', label: '快捷入口' },
+    { key: 'dash-home-excellent-tag', label: <a href="/excellent_tag_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>优秀标签原型</a> },
   ],
   customer: [
     { key: 'dash-customer-assets', label: '客户资产' },
