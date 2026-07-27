@@ -71,13 +71,14 @@ import {
   message,
 } from 'antd'
 import type { ReactNode } from 'react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import InviteReward from './pages/InviteReward'
 import NavigationEditor from './pages/NavigationEditor'
 import PointsGoodsLimit from './pages/PointsGoodsLimit'
 import LotteryRulesIntervention from './pages/LotteryRulesIntervention'
 import AppsMarket from './pages/AppsMarket'
+import GroupBuyPage from './pages/GroupBuyPage'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -554,9 +555,9 @@ const blueMaintenanceTools: ToolItem[] = [
 // ==========================================
 // 辅助子组件
 // ==========================================
-function ToolCard({ item, theme }: { item: ToolItem; theme: 'orange' | 'blue' }) {
+function ToolCard({ item, theme, onClick }: { item: ToolItem; theme: 'orange' | 'blue'; onClick?: () => void }) {
   return (
-    <div className={`tool-card card-${theme}`}>
+    <div className={`tool-card card-${theme}`} onClick={onClick} style={onClick ? { cursor: 'pointer' } : undefined}>
       <div className="tool-card-icon-wrap">
         {item.badge === 'new' && <span className="badge-new">最新</span>}
         {item.badge === 'hot' && <span className="badge-hot">热门</span>}
@@ -577,10 +578,12 @@ function ToolSection({
   title,
   items,
   theme,
+  onToolClick,
 }: {
   title: string
   items: ToolItem[]
   theme: 'orange' | 'blue'
+  onToolClick?: (key: string) => void
 }) {
   return (
     <section className="tool-section">
@@ -588,7 +591,7 @@ function ToolSection({
       <Row gutter={[16, 16]}>
         {items.map((item) => (
           <Col key={item.key} xs={24} sm={12} lg={8}>
-            <ToolCard item={item} theme={theme} />
+            <ToolCard item={item} theme={theme} onClick={() => onToolClick && onToolClick(item.key)} />
           </Col>
         ))}
       </Row>
@@ -3696,6 +3699,15 @@ export default function App() {
     defaultSecondaryKey.shop,
   )
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const page = params.get('page')
+    if (page === 'group-buy') {
+      setRailKey('shop')
+      setSecondaryKey('shop-group-buy')
+    }
+  }, [])
+
   const selectPrimary = useCallback((key: PrimaryKey) => {
     setRailKey(key)
     setSecondaryKey(defaultSecondaryKey[key])
@@ -3722,6 +3734,13 @@ export default function App() {
   const isNavigationPage = railKey === 'shop' && secondaryKey === 'shop-navigation'
   const isPointsProdPage = railKey === 'shop' && secondaryKey === 'shop-points-prod'
   const isAppsMarketPage = railKey === 'apps' && secondaryKey === 'dash-apps-market'
+  const isGroupBuyPage = railKey === 'shop' && secondaryKey === 'shop-group-buy'
+
+  const handleToolClick = useCallback((key: string) => {
+    if (key === 'group') {
+      setSecondaryKey('shop-group-buy')
+    }
+  }, [])
   
   // 基础主题色
   const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage) ? 'blue' : 'orange'
@@ -3821,9 +3840,9 @@ export default function App() {
               {/* 主干内容根据选中的页面动态切换 */}
               {isMarketingToolsPage ? (
                 <div className="tools-container">
-                  <ToolSection title="经典营销" items={orangeClassicTools} theme="orange" />
-                  <ToolSection title="降本工具" items={orangeSourcingTools} theme="orange" />
-                  <ToolSection title="其它工具" items={orangeOtherTools} theme="orange" />
+                  <ToolSection title="经典营销" items={orangeClassicTools} theme="orange" onToolClick={handleToolClick} />
+                  <ToolSection title="降本工具" items={orangeSourcingTools} theme="orange" onToolClick={handleToolClick} />
+                  <ToolSection title="其它工具" items={orangeOtherTools} theme="orange" onToolClick={handleToolClick} />
                 </div>
               ) : isPointsMarketingPage ? (
                 <div className="tools-container">
@@ -3847,6 +3866,8 @@ export default function App() {
                 <PointsGoodsLimit />
               ) : isAppsMarketPage ? (
                 <AppsMarket />
+              ) : isGroupBuyPage ? (
+                <GroupBuyPage />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
