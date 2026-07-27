@@ -71,7 +71,7 @@ import {
   message,
 } from 'antd'
 import type { ReactNode } from 'react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import InviteReward from './pages/InviteReward'
 import NavigationEditor from './pages/NavigationEditor'
@@ -3698,6 +3698,15 @@ export default function App() {
   const [secondaryKey, setSecondaryKey] = useState<string>(
     defaultSecondaryKey.shop,
   )
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const page = params.get('page')
+    if (page === 'group-buy') {
+      setRailKey('shop')
+      setSecondaryKey('shop-group-buy')
+    }
+  }, [])
 
   const selectPrimary = useCallback((key: PrimaryKey) => {
     setRailKey(key)
