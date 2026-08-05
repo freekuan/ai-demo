@@ -79,6 +79,7 @@ import PointsGoodsLimit from './pages/PointsGoodsLimit'
 import LotteryRulesIntervention from './pages/LotteryRulesIntervention'
 import AppsMarket from './pages/AppsMarket'
 import GroupBuyPage from './pages/GroupBuyPage'
+import OrderConversion from './pages/OrderConversion'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -116,6 +117,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     children: [
       { key: 'shop-order-list', label: '订单列表' },
       { key: 'shop-order-verify', label: '订单核销' },
+      { key: 'shop-order-conversion', label: '订单转积分' },
     ],
   },
   {
@@ -3735,6 +3737,7 @@ export default function App() {
   const isPointsProdPage = railKey === 'shop' && secondaryKey === 'shop-points-prod'
   const isAppsMarketPage = railKey === 'apps' && secondaryKey === 'dash-apps-market'
   const isGroupBuyPage = railKey === 'shop' && secondaryKey === 'shop-group-buy'
+  const isOrderConversionPage = railKey === 'shop' && secondaryKey === 'shop-order-conversion'
 
   const handleToolClick = useCallback((key: string) => {
     if (key === 'group') {
@@ -3868,6 +3871,8 @@ export default function App() {
                 <AppsMarket />
               ) : isGroupBuyPage ? (
                 <GroupBuyPage />
+              ) : isOrderConversionPage ? (
+                <OrderConversion />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
