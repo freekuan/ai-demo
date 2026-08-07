@@ -75,6 +75,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import InviteReward from './pages/InviteReward'
 import NavigationEditor from './pages/NavigationEditor'
+import DecorationTemplateManager from './pages/DecorationTemplateManager'
 import PointsGoodsLimit from './pages/PointsGoodsLimit'
 import LotteryRulesIntervention from './pages/LotteryRulesIntervention'
 import AppsMarket from './pages/AppsMarket'
@@ -98,6 +99,7 @@ export type PrimaryKey =
   | 'apps'
 
 /** 二级菜单树结构：小店模块 (完美匹配截图) */
+const CURRENT_TENANT_ID = 'system' // 模拟当前租户
 export const shopSecondaryMenuItems: MenuProps['items'] = [
   {
     key: 'shop-points',
@@ -166,6 +168,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     label: '店铺设置',
     children: [
       { key: 'shop-navigation', label: '店铺导航' },
+      ...(CURRENT_TENANT_ID === 'system' ? [{ key: 'shop-template-manager', label: '装修模板管理' }] : []),
     ],
   },
 ]
@@ -3734,6 +3737,7 @@ export default function App() {
   const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
   const isInviteRewardPage = railKey === 'shop' && secondaryKey === 'shop-invite-reward'
   const isNavigationPage = railKey === 'shop' && secondaryKey === 'shop-navigation'
+  const isTemplateManagerPage = railKey === 'shop' && secondaryKey === 'shop-template-manager'
   const isPointsProdPage = railKey === 'shop' && secondaryKey === 'shop-points-prod'
   const isAppsMarketPage = railKey === 'apps' && secondaryKey === 'dash-apps-market'
   const isGroupBuyPage = railKey === 'shop' && secondaryKey === 'shop-group-buy'
@@ -3865,6 +3869,8 @@ export default function App() {
                 <InviteReward />
               ) : isNavigationPage ? (
                 <NavigationEditor />
+              ) : isTemplateManagerPage ? (
+                <DecorationTemplateManager />
               ) : isPointsProdPage ? (
                 <PointsGoodsLimit />
               ) : isAppsMarketPage ? (
