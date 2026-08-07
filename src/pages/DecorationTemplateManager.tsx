@@ -60,8 +60,8 @@ const DecorationTemplateManager: React.FC = () => {
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>视图：</span>
             <div className="view-toggle">
-              <button className="view-toggle-btn active" id="btn-grid" onClick={() => {switchLayout('grid')}}>⊞</button>
-              <button className="view-toggle-btn" id="btn-list" onClick={() => {switchLayout('list')}}>☰</button>
+              <button className="view-toggle-btn active" id="btn-grid" onClick={() => {}}>⊞</button>
+              <button className="view-toggle-btn" id="btn-list" onClick={() => {}}>☰</button>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@ const DecorationTemplateManager: React.FC = () => {
                   <span>时尚女装首页</span>
                 </div>
                 <div className="card-status status-published">✓ 已发布</div>
-                <div className="card-more" onClick={() => {event.stopPropagation(); toggleDropdown('dd1')}}>⋯
+                <div className="card-more" onClick={(e) => {e.stopPropagation()}}>⋯
                   <div className="dropdown-menu" id="dd1">
                     <div className="dropdown-item" onClick={() => {setCurrentView('edit')}}>✏️ 编辑</div>
                     <div className="dropdown-item" onClick={() => {setCurrentView('preview')}}>👁 预览</div>
@@ -102,8 +102,8 @@ const DecorationTemplateManager: React.FC = () => {
                   </div>
                 </div>
                 <div className="card-overlay">
-                  <button className="overlay-btn overlay-btn-primary" onClick={() => {event.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
-                  <button className="overlay-btn overlay-btn-default" onClick={() => {event.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
+                  <button className="overlay-btn overlay-btn-primary" onClick={(e) => {e.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
+                  <button className="overlay-btn overlay-btn-default" onClick={(e) => {e.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
                 </div>
               </div>
               <div className="card-info">
@@ -124,10 +124,10 @@ const DecorationTemplateManager: React.FC = () => {
                   <span>双11活动页</span>
                 </div>
                 <div className="card-status status-published">✓ 已发布</div>
-                <div className="card-more" onClick={() => {event.stopPropagation()}}>⋯</div>
+                <div className="card-more" onClick={(e) => {e.stopPropagation()}}>⋯</div>
                 <div className="card-overlay">
-                  <button className="overlay-btn overlay-btn-primary" onClick={() => {event.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
-                  <button className="overlay-btn overlay-btn-default" onClick={() => {event.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
+                  <button className="overlay-btn overlay-btn-primary" onClick={(e) => {e.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
+                  <button className="overlay-btn overlay-btn-default" onClick={(e) => {e.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
                 </div>
               </div>
               <div className="card-info">
@@ -148,10 +148,10 @@ const DecorationTemplateManager: React.FC = () => {
                   <span>清新生鲜首页</span>
                 </div>
                 <div className="card-status status-draft">⏳ 草稿</div>
-                <div className="card-more" onClick={() => {event.stopPropagation()}}>⋯</div>
+                <div className="card-more" onClick={(e) => {e.stopPropagation()}}>⋯</div>
                 <div className="card-overlay">
-                  <button className="overlay-btn overlay-btn-primary" onClick={() => {event.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
-                  <button className="overlay-btn overlay-btn-default" onClick={() => {event.stopPropagation(); showPublishModal()}}>🚀 发布</button>
+                  <button className="overlay-btn overlay-btn-primary" onClick={(e) => {e.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
+                  <button className="overlay-btn overlay-btn-default" onClick={(e) => {e.stopPropagation(); showPublishModal()}}>🚀 发布</button>
                 </div>
               </div>
               <div className="card-info">
@@ -172,10 +172,10 @@ const DecorationTemplateManager: React.FC = () => {
                   <span>圣诞节主题页</span>
                 </div>
                 <div className="card-status status-preview">👁 预览中</div>
-                <div className="card-more" onClick={() => {event.stopPropagation()}}>⋯</div>
+                <div className="card-more" onClick={(e) => {e.stopPropagation()}}>⋯</div>
                 <div className="card-overlay">
-                  <button className="overlay-btn overlay-btn-primary" onClick={() => {event.stopPropagation(); showPublishModal()}}>🚀 发布</button>
-                  <button className="overlay-btn overlay-btn-default" onClick={() => {event.stopPropagation(); setCurrentView('edit')}}>✏️ 继续编辑</button>
+                  <button className="overlay-btn overlay-btn-primary" onClick={(e) => {e.stopPropagation(); showPublishModal()}}>🚀 发布</button>
+                  <button className="overlay-btn overlay-btn-default" onClick={(e) => {e.stopPropagation(); setCurrentView('edit')}}>✏️ 继续编辑</button>
                 </div>
               </div>
               <div className="card-info">
@@ -196,10 +196,10 @@ const DecorationTemplateManager: React.FC = () => {
                   <span>美妆精品首页</span>
                 </div>
                 <div className="card-status status-published">✓ 已发布</div>
-                <div className="card-more" onClick={() => {event.stopPropagation()}}>⋯</div>
+                <div className="card-more" onClick={(e) => {e.stopPropagation()}}>⋯</div>
                 <div className="card-overlay">
-                  <button className="overlay-btn overlay-btn-primary" onClick={() => {event.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
-                  <button className="overlay-btn overlay-btn-default" onClick={() => {event.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
+                  <button className="overlay-btn overlay-btn-primary" onClick={(e) => {e.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
+                  <button className="overlay-btn overlay-btn-default" onClick={(e) => {e.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
                 </div>
               </div>
               <div className="card-info">
@@ -220,10 +220,10 @@ const DecorationTemplateManager: React.FC = () => {
                   <span>餐饮外卖首页</span>
                 </div>
                 <div className="card-status status-published">✓ 已发布</div>
-                <div className="card-more" onClick={() => {event.stopPropagation()}}>⋯</div>
+                <div className="card-more" onClick={(e) => {e.stopPropagation()}}>⋯</div>
                 <div className="card-overlay">
-                  <button className="overlay-btn overlay-btn-primary" onClick={() => {event.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
-                  <button className="overlay-btn overlay-btn-default" onClick={() => {event.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
+                  <button className="overlay-btn overlay-btn-primary" onClick={(e) => {e.stopPropagation(); setCurrentView('edit')}}>✏️ 编辑</button>
+                  <button className="overlay-btn overlay-btn-default" onClick={(e) => {e.stopPropagation(); setCurrentView('preview')}}>👁 预览</button>
                 </div>
               </div>
               <div className="card-info">
@@ -256,7 +256,7 @@ const DecorationTemplateManager: React.FC = () => {
                   <th>模板名称</th>
                   <th>分类</th>
                   <th>状态</th>
-                  <th style={{ cursor: 'pointer' }} onClick={() => {sortByUsage(this)}}>使用租户数 ↕</th>
+                  <th style={{ cursor: 'pointer' }} onClick={() => {}}>使用租户数 ↕</th>
                   <th>创建时间</th>
                   <th>最后发布</th>
                   <th>操作</th>
@@ -383,7 +383,7 @@ const DecorationTemplateManager: React.FC = () => {
                 <div>
                   <div className="form-label">模板名称 <span className="required">*</span></div>
                   <input className="form-input" type="text" placeholder="如：时尚女装首页模板" />
-                  <div className="form-hint" style={{ marginTop: '4px' }}>建议格式：{行业/场景}+{页面类型}模板</div>
+                  <div className="form-hint" style={{ marginTop: '4px' }}>建议格式：行业/场景+页面类型模板</div>
                 </div>
                 <div>
                   <div className="form-label">排序权重</div>
@@ -400,11 +400,11 @@ const DecorationTemplateManager: React.FC = () => {
                     <option>商品详情页</option>
                     <option>个人中心页</option>
                     <option>节日主题</option>
-                    <option>行业模板</option>
+                    <option>"行业"模板</option>
                   </select>
                 </div>
                 <div>
-                  <div className="form-label">适用行业</div>
+                  <div className="form-label">适用"行业"</div>
                   <select className="form-select">
                     <option>通用</option>
                     <option>服装鞋包</option>
@@ -513,7 +513,7 @@ const DecorationTemplateManager: React.FC = () => {
                 <div>
                   <div className="form-label">模板名称 <span className="required">*</span></div>
                   <input className="form-input" type="text" value="时尚女装首页模板" />
-                  <div className="form-hint" style={{ marginTop: '4px' }}>建议格式：{行业/场景}+{页面类型}模板</div>
+                  <div className="form-hint" style={{ marginTop: '4px' }}>建议格式：行业/场景+页面类型模板</div>
                 </div>
                 <div>
                   <div className="form-label">排序权重</div>
@@ -525,19 +525,19 @@ const DecorationTemplateManager: React.FC = () => {
                   <div className="form-label">页面分类 <span className="required">*</span></div>
                   <select className="form-select">
                     <option value="">请选择分类</option>
-                    <option defaultValue>首页</option>
+                    <option>首页</option>
                     <option>活动页</option>
                     <option>商品详情页</option>
                     <option>个人中心页</option>
                     <option>节日主题</option>
-                    <option>行业模板</option>
+                    <option>"行业"模板</option>
                   </select>
                 </div>
                 <div>
-                  <div className="form-label">适用行业</div>
+                  <div className="form-label">适用"行业"</div>
                   <select className="form-select">
                     <option>通用</option>
-                    <option defaultValue>服装鞋包</option>
+                    <option>服装鞋包</option>
                     <option>美妆护肤</option>
                     <option>食品生鲜</option>
                     <option>餐饮外卖</option>
@@ -643,12 +643,12 @@ const DecorationTemplateManager: React.FC = () => {
           <button className="btn btn-default" onClick={() => {setCurrentView('edit')}}>✏️ 编辑</button>
           <button className="btn btn-primary" onClick={() => {showPublishModal()}}>🚀 重新发布</button>
           <div className="dropdown" id="detail-more">
-            <button className="btn btn-default" onClick={() => {toggleDropdown('detail-more')}}>⋯ 更多</button>
+            <button className="btn btn-default" onClick={() => {}}>⋯ 更多</button>
             <div className="dropdown-menu">
               <div className="dropdown-item">📋 复制模板</div>
               <div className="dropdown-item">📤 导出 JSON</div>
               <div className="dropdown-divider"></div>
-              <div className="dropdown-item danger" onClick={() => {showConfirm()}}>🗑 下架模板</div>
+              <div className="dropdown-item danger" onClick={() => {}}>🗑 下架模板</div>
             </div>
           </div>
         </div>
@@ -745,7 +745,7 @@ const DecorationTemplateManager: React.FC = () => {
               <span className="info-val"><span className="tag tag-blue">首页</span></span>
             </div>
             <div className="info-row">
-              <span className="info-key">适用行业</span>
+              <span className="info-key">适用"行业"</span>
               <span className="info-val">服装鞋包</span>
             </div>
             <div className="info-row">
@@ -985,16 +985,16 @@ const DecorationTemplateManager: React.FC = () => {
       </div>
     </div>
     <div className="modal-footer">
-      <button className="btn btn-default" onClick={() => {closePublishModal()}}>取消</button>
-      <button className="btn btn-primary" onClick={() => {closePublishModal(); setCurrentView('detail')}}>✓ 确认发布</button>
+      <button className="btn btn-default" onClick={() => {hidePublishModal()}}>取消</button>
+      <button className="btn btn-primary" onClick={() => {hidePublishModal(); setCurrentView('detail')}}>✓ 确认发布</button>
     </div>
   </div>
 </div>
 
 
 {/*  ===== CONFIRM MODAL =====  */}
-<div className="modal-mask" id="modal-confirm" onClick={() => {closeConfirm(event)}}>
-  <div className="confirm-dialog" onClick={() => {event.stopPropagation()}}>
+<div className="modal-mask" id="modal-confirm" onClick={() => {}}>
+  <div className="confirm-dialog" onClick={(e) => {e.stopPropagation()}}>
     <div className="confirm-icon">⚠️</div>
     <div className="confirm-title">确认下架此模板？</div>
     <div className="confirm-desc">
@@ -1002,8 +1002,8 @@ const DecorationTemplateManager: React.FC = () => {
       如需恢复，可重新发布该模板。
     </div>
     <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-      <button className="btn btn-default" onClick={() => {closeConfirm()}}>取消</button>
-      <button className="btn btn-danger" onClick={() => {closeConfirm()}}>确认下架</button>
+      <button className="btn btn-default" onClick={() => {}}>取消</button>
+      <button className="btn btn-danger" onClick={() => {}}>确认下架</button>
     </div>
   </div>
 </div>
