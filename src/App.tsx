@@ -99,7 +99,6 @@ export type PrimaryKey =
   | 'apps'
 
 /** 二级菜单树结构：小店模块 (完美匹配截图) */
-const CURRENT_TENANT_ID = 'system' // 模拟当前租户
 export const shopSecondaryMenuItems: MenuProps['items'] = [
   {
     key: 'shop-points',
@@ -168,7 +167,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     label: '店铺设置',
     children: [
       { key: 'shop-navigation', label: '店铺导航' },
-      ...(CURRENT_TENANT_ID === 'system' ? [{ key: 'shop-template-manager', label: '装修模板管理' }] : []),
+      { key: 'shop-template-manager', label: '装修模板管理' },
     ],
   },
 ]
