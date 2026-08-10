@@ -81,6 +81,7 @@ import LotteryRulesIntervention from './pages/LotteryRulesIntervention'
 import AppsMarket from './pages/AppsMarket'
 import GroupBuyPage from './pages/GroupBuyPage'
 import OrderConversion from './pages/OrderConversion'
+import BossAdminTaobaoSync from './pages/BossAdminTaobaoSync'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -3711,6 +3712,13 @@ export default function App() {
       setSecondaryKey('shop-group-buy')
     }
   }, [])
+
+  const params = new URLSearchParams(window.location.search);
+  const isBossTaobaoPage = params.get('page') === 'boss-taobao';
+
+  if (isBossTaobaoPage) {
+    return <BossAdminTaobaoSync />;
+  }
 
   const selectPrimary = useCallback((key: PrimaryKey) => {
     setRailKey(key)
