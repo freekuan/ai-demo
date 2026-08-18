@@ -76,6 +76,7 @@ import SmashGoldenEgg from './pages/SmashGoldenEgg'
 import InviteReward from './pages/InviteReward'
 import NavigationEditor from './pages/NavigationEditor'
 import DecorationTemplateManager from './pages/DecorationTemplateManager'
+import HomeDecoration from './pages/HomeDecoration'
 import PointsGoodsLimit from './pages/PointsGoodsLimit'
 import LotteryRulesIntervention from './pages/LotteryRulesIntervention'
 import AppsMarket from './pages/AppsMarket'
@@ -167,8 +168,10 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     key: 'shop-decoration',
     label: '店铺设置',
     children: [
+      { key: 'shop-homepage-decoration', label: '首页装修' },
       { key: 'shop-navigation', label: '店铺导航' },
       { key: 'shop-template-manager', label: '装修模板管理' },
+      { key: 'shop-top-nav-prototype', label: <a href="/top_nav_search_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>顶部搜索原型(独立页)</a> },
     ],
   },
 ]
@@ -3743,6 +3746,7 @@ export default function App() {
   const isPointsLotteryRulesPage = railKey === 'shop' && secondaryKey === 'shop-points-lottery-rules'
   const isPointsTaskPage = railKey === 'shop' && secondaryKey === 'shop-points-task'
   const isInviteRewardPage = railKey === 'shop' && secondaryKey === 'shop-invite-reward'
+  const isHomeDecorationPage = railKey === 'shop' && secondaryKey === 'shop-homepage-decoration'
   const isNavigationPage = railKey === 'shop' && secondaryKey === 'shop-navigation'
   const isTemplateManagerPage = railKey === 'shop' && secondaryKey === 'shop-template-manager'
   const isPointsProdPage = railKey === 'shop' && secondaryKey === 'shop-points-prod'
@@ -3757,7 +3761,7 @@ export default function App() {
   }, [])
   
   // 基础主题色
-  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage) ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -3874,6 +3878,8 @@ export default function App() {
                 <TaskEditor />
               ) : isInviteRewardPage ? (
                 <InviteReward />
+              ) : isHomeDecorationPage ? (
+                <HomeDecoration onBack={() => setSecondaryKey('shop-template-manager')} />
               ) : isNavigationPage ? (
                 <NavigationEditor />
               ) : isTemplateManagerPage ? (
