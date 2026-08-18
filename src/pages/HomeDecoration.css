@@ -1,12 +1,56 @@
 /* ==========================================================================
-   HomeDecoration.css - 小程序首页装修 (顶部导航搜索入口配置)
+   HomeDecoration.css - 小程序首页装修 (顶部导航与搜索深度配置)
    ========================================================================== */
 
+/* --------------------------------------------------------------------------
+   0. 全局工具类 (Vanilla CSS Utilities - 替代缺少的 Tailwind)
+   -------------------------------------------------------------------------- */
+.u-shrink-0 { flex-shrink: 0 !important; }
+.u-mr-2 { margin-right: 8px !important; }
+.u-mx-auto { margin-left: auto !important; margin-right: auto !important; }
+.u-truncate {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.u-font-bold { font-weight: 700 !important; }
+.u-font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important; }
+.u-text-blue-600 { color: #2563eb !important; }
+.u-text-slate-900 { color: #0f172a !important; }
+.u-text-slate-800 { color: #1e293b !important; }
+.u-text-slate-600 { color: #475569 !important; }
+.u-text-slate-500 { color: #64748b !important; }
+.u-text-slate-400 { color: #94a3b8 !important; }
+.u-text-xs { font-size: 11px !important; }
+.u-text-center { text-align: center !important; }
+.u-text-dark { color: #0f172a !important; }
+.u-text-light { color: #ffffff !important; }
+.u-flex { display: flex !important; }
+.u-items-center { align-items: center !important; }
+.u-gap-1_5 { gap: 6px !important; }
+.u-mt-2 { margin-top: 8px !important; }
+.u-mt-3 { margin-top: 12px !important; }
+.u-mb-0 { margin-bottom: 0 !important; }
+.u-mb-1 { margin-bottom: 4px !important; }
+.u-mb-3 { margin-bottom: 12px !important; }
+.u-p-3 { padding: 12px !important; }
+.u-bg-white { background-color: #ffffff !important; }
+.u-bg-slate-50 { background-color: #f8fafc !important; }
+.u-border { border: 1px solid #e2e8f0 !important; }
+.u-border-slate-200 { border-color: #e2e8f0 !important; }
+.u-rounded-xl { border-radius: 12px !important; }
+.u-rounded-lg { border-radius: 8px !important; }
+.u-shadow-sm { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important; }
+.u-space-y-1 > * + * { margin-top: 4px !important; }
+
+/* --------------------------------------------------------------------------
+   1. 整体容器 (Wrapper)
+   -------------------------------------------------------------------------- */
 .home-decoration-wrapper {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 72px);
-  min-height: 720px;
+  height: calc(100vh - 84px);
+  min-height: 700px;
   background-color: #f8fafc;
   color: #1e293b;
   overflow: hidden;
@@ -16,13 +60,13 @@
 }
 
 /* --------------------------------------------------------------------------
-   1. 顶部操作栏 (Header)
+   2. 顶部操作栏 (Header)
    -------------------------------------------------------------------------- */
 .home-dec-header {
-  height: 56px;
+  height: 54px;
   background-color: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  padding: 0 20px;
+  padding: 0 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,7 +89,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 5px 8px;
   border-radius: 6px;
   transition: all 0.2s;
 }
@@ -124,7 +168,7 @@
   background-color: #2563eb;
   border: 1px solid #2563eb;
   color: #ffffff;
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
 }
 
 .dec-btn-primary:hover {
@@ -133,7 +177,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   2. 主工作区布局 (3-Column Body)
+   3. 主工作区布局 (3-Column Body)
    -------------------------------------------------------------------------- */
 .home-dec-body {
   flex: 1;
@@ -143,7 +187,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   3. 左侧组件库面板 (Left Sidebar)
+   4. 左侧组件库面板 (Left Sidebar)
    -------------------------------------------------------------------------- */
 .home-dec-sidebar-left {
   width: 240px;
@@ -228,14 +272,14 @@
 .component-card:hover {
   border-color: #3b82f6;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.15);
   color: #2563eb;
 }
 
 .component-card.active-featured {
   border: 2px solid #2563eb;
   background-color: #eff6ff;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18);
 }
 
 .comp-icon-text {
@@ -265,11 +309,11 @@
   font-weight: 700;
   padding: 1px 5px;
   border-radius: 9999px;
-  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.35);
 }
 
 /* --------------------------------------------------------------------------
-   4. 中间画布预览区 (Canvas Area)
+   5. 中间画布预览区 (Canvas Area)
    -------------------------------------------------------------------------- */
 .home-dec-canvas-area {
   flex: 1;
@@ -278,31 +322,31 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 20px;
+  padding: 16px 20px;
   overflow-y: auto;
   position: relative;
 }
 
 .canvas-toast-alert {
   position: absolute;
-  top: 16px;
+  top: 14px;
   background-color: #1e293b;
   color: #ffffff;
   font-size: 12px;
   padding: 8px 16px;
   border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   gap: 8px;
   z-index: 100;
-  animation: fadeInDown 0.3s ease-out;
+  animation: fadeInDown 0.25s ease-out;
 }
 
 @keyframes fadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -312,13 +356,13 @@
 
 .canvas-top-bar {
   width: 375px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
   color: #64748b;
-  padding: 0 4px;
+  padding: 0 2px;
 }
 
 .canvas-device-info {
@@ -352,7 +396,7 @@
 
 .simulator-value {
   font-size: 11px;
-  width: 32px;
+  width: 34px;
   text-align: right;
   color: #2563eb;
   font-weight: 600;
@@ -361,7 +405,7 @@
 /* 手机外壳 (Phone Shell) */
 .phone-mockup-frame {
   width: 375px;
-  height: 667px;
+  height: 640px;
   background-color: #ffffff;
   border-radius: 36px;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 8px #1e293b;
@@ -377,12 +421,12 @@
   position: relative;
   width: 100%;
   z-index: 30;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .phone-status-bar {
   height: 24px;
-  padding: 2px 14px 0 14px;
+  padding: 3px 14px 0 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -408,7 +452,7 @@
 
 .phone-nav-bar {
   height: 44px;
-  padding: 0 12px;
+  padding: 0 10px 0 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -421,6 +465,10 @@
   flex: 1;
   margin-right: 8px;
   overflow: hidden;
+}
+
+.nav-content-box.justify-center {
+  justify-content: center;
 }
 
 .nav-brand-title {
@@ -452,6 +500,7 @@
   letter-spacing: 0.05em;
 }
 
+/* 顶部搜索图标按钮 (Icon Only Mode) */
 .search-icon-btn {
   margin-left: auto;
   display: flex;
@@ -461,33 +510,64 @@
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .search-icon-btn:hover {
   background-color: rgba(0, 0, 0, 0.08);
+  transform: scale(1.08);
 }
 
+/* 顶部搜索胶囊框 (Inline & Full Search Pill) */
 .search-input-pill {
   flex: 1;
+  height: 30px;
   display: flex;
   align-items: center;
-  padding: 5px 10px;
-  border-radius: 9999px;
+  padding: 0 10px;
   font-size: 11px;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.search-input-pill:hover {
+  filter: brightness(0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-input-pill.text-center-align {
+  justify-content: center;
 }
 
 .search-pill-icon {
   margin-right: 6px;
   font-size: 12px;
   color: #94a3b8;
+  flex-shrink: 0;
 }
 
 .search-pill-placeholder {
   font-size: 11px;
-  line-height: 1.2;
+  line-height: 1;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-pill-action-icon {
+  margin-left: 6px;
+  font-size: 12px;
+  color: #64748b;
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: all 0.2s;
+}
+
+.search-pill-action-icon:hover {
+  opacity: 1;
+  color: #2563eb;
 }
 
 /* 微信胶囊按钮 (WeChat Capsule Button) */
@@ -512,7 +592,7 @@
 
 .capsule-light-mode {
   border: 1px solid rgba(255, 255, 255, 0.35);
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.25);
   color: #ffffff;
 }
 
@@ -553,7 +633,7 @@
 .mockup-banner-area {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 210px;
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
   display: flex;
   flex-direction: column;
@@ -583,14 +663,65 @@
 }
 
 .banner-cta-button {
-  margin-top: 12px;
+  margin-top: 10px;
   background-color: #facc15;
   color: #0f172a;
   font-weight: 700;
   font-size: 11px;
-  padding: 5px 14px;
+  padding: 4px 12px;
   border-radius: 9999px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+/* 页面主体搜索框组件 (In-Body Search Component) */
+.mockup-body-search-container {
+  padding: 10px 12px;
+  cursor: pointer;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.body-search-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  height: 38px;
+  padding: 0 6px 0 12px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.body-search-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.body-search-icon {
+  color: #2563eb;
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.body-search-text {
+  font-size: 12px;
+  color: #64748b;
+  flex: 1;
+}
+
+.body-search-action-btn {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 9999px;
   cursor: pointer;
 }
 
@@ -598,7 +729,7 @@
 .mockup-nav-grid {
   padding: 12px 8px;
   background-color: #ffffff;
-  margin: 12px;
+  margin: 10px 12px;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: grid;
@@ -655,6 +786,13 @@
   padding: 2px 8px;
   border-radius: 9999px;
   white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hot-tag-pill:hover {
+  background-color: #e2e8f0;
+  color: #2563eb;
 }
 
 /* Product Section */
@@ -679,7 +817,7 @@
 }
 
 .mockup-products-grid {
-  padding: 10px 12px;
+  padding: 8px 12px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
@@ -696,7 +834,7 @@
 }
 
 .product-thumb {
-  height: 100px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -744,7 +882,7 @@
 }
 
 .product-price {
-  margin-top: 6px;
+  margin-top: 4px;
   color: #ef4444;
   font-size: 12px;
   font-weight: 700;
@@ -757,15 +895,224 @@
 }
 
 .mockup-footer-indicator {
-  height: 60px;
+  height: 50px;
   text-align: center;
   font-size: 10px;
   color: #94a3b8;
-  padding-top: 16px;
+  padding-top: 14px;
 }
 
 /* --------------------------------------------------------------------------
-   5. 右侧配置面板 (Right Sidebar)
+   6. 手机内搜索交互浮层 (Interactive Mobile Search Overlay)
+   -------------------------------------------------------------------------- */
+.phone-search-overlay-modal {
+  position: absolute;
+  inset: 0;
+  background-color: #ffffff;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  animation: slideUpOverlay 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpOverlay {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.search-overlay-header {
+  padding: 32px 12px 10px 12px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-overlay-input-wrap {
+  flex: 1;
+  height: 32px;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  position: relative;
+}
+
+.overlay-search-icon {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-right: 6px;
+}
+
+.overlay-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.overlay-search-clear {
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.overlay-cancel-btn {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.search-overlay-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.overlay-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.overlay-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.overlay-section-header .section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+}
+
+.section-delete-btn {
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 12px;
+  transition: color 0.15s;
+}
+
+.section-delete-btn:hover {
+  color: #ef4444;
+}
+
+.overlay-tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.overlay-tag-item {
+  padding: 4px 10px;
+  background-color: #f1f5f9;
+  color: #475569;
+  border-radius: 9999px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.overlay-tag-item:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.overlay-hot-rank-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.hot-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.hot-rank-row:hover {
+  background-color: #eff6ff;
+}
+
+.rank-number {
+  font-size: 11px;
+  font-weight: 800;
+  width: 16px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.rank-number.rank-1 { color: #ef4444; }
+.rank-number.rank-2 { color: #f97316; }
+.rank-number.rank-3 { color: #f59e0b; }
+
+.rank-text {
+  font-size: 11px;
+  color: #334155;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hot-flame-tag {
+  font-size: 8px;
+  background-color: #ef4444;
+  color: #ffffff;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+.overlay-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.cat-badge-item {
+  padding: 6px 4px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 11px;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cat-badge-item:hover {
+  border-color: #3b82f6;
+  color: #2563eb;
+  background-color: #eff6ff;
+}
+
+/* --------------------------------------------------------------------------
+   7. 右侧配置面板 (Right Sidebar)
    -------------------------------------------------------------------------- */
 .home-dec-sidebar-right {
   width: 320px;
@@ -779,7 +1126,7 @@
 }
 
 .right-panel-header {
-  padding: 16px 20px;
+  padding: 14px 18px;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
@@ -788,7 +1135,7 @@
 
 .panel-title-text {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   color: #0f172a;
 }
 
@@ -802,10 +1149,10 @@
 }
 
 .right-panel-content {
-  padding: 16px 20px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .config-section {
@@ -945,13 +1292,14 @@
 }
 
 .seg-btn {
-  padding: 4px 12px;
+  padding: 4px 10px;
   font-size: 11px;
   background-color: #ffffff;
   color: #475569;
   border: none;
   cursor: pointer;
   transition: all 0.15s;
+  text-align: center;
 }
 
 .seg-btn:not(:last-child) {

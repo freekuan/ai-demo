@@ -25,7 +25,13 @@ import {
   FileTextOutlined,
   HeartOutlined,
   SmileOutlined,
-  RightOutlined
+  RightOutlined,
+  CameraOutlined,
+  AudioOutlined,
+  DeleteOutlined,
+  CloseOutlined,
+  HistoryOutlined,
+  CompassOutlined
 } from '@ant-design/icons'
 import './HomeDecoration.css'
 
@@ -34,48 +40,57 @@ interface HomeDecorationProps {
 }
 
 export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
-  // Navigation & Theme Settings
+  // 1. Navigation & Theme Settings
   const [navStyle, setNavStyle] = useState<'follow' | 'custom'>('custom')
   const [navTheme, setNavTheme] = useState<'standard' | 'immersive'>('immersive')
 
-  // Title Settings
+  // 2. Title Settings
   const [titleEnabled, setTitleEnabled] = useState<boolean>(true)
   const [contentType, setContentType] = useState<'text' | 'image'>('text')
   const [titleText, setTitleText] = useState<string>('奈雪的茶')
   const [titlePosition, setTitlePosition] = useState<'center' | 'left'>('left')
 
-  // Search Settings (New feature)
+  // 3. Search Settings (Core Feature)
   const [isSearchEnabled, setIsSearchEnabled] = useState<boolean>(true)
   const [searchMode, setSearchMode] = useState<'inline_input' | 'icon_only' | 'full_input'>('inline_input')
   const [searchPlaceholder, setSearchPlaceholder] = useState<string>('搜索心仪商品')
-  const [hotKeywords, setHotKeywords] = useState<string[]>(['霸气杨梅', '生酪拿铁', '草莓大福'])
+  const [searchShape, setSearchShape] = useState<'pill' | 'round' | 'square'>('pill')
+  const [textAlign, setTextAlign] = useState<'left' | 'center'>('left')
+  const [searchRightAction, setSearchRightAction] = useState<'none' | 'camera' | 'voice'>('camera')
+  const [showBodySearchBlock, setShowBodySearchBlock] = useState<boolean>(false)
+  const [hotKeywords, setHotKeywords] = useState<string[]>(['霸气杨梅', '生酪拿铁', '草莓大福', '油柑美式'])
   const [keywordInput, setKeywordInput] = useState<string>('')
 
-  // Color Settings
+  // 4. Color Settings
   const [navBgColor, setNavBgColor] = useState<string>('#FFFFFF')
   const [textMode, setTextMode] = useState<'dark' | 'light'>('dark')
 
-  // Active Left Tab (基础组件 / 高阶组件)
+  // 5. Left Component Library Tab
   const [activeComponentTab, setActiveComponentTab] = useState<'basic' | 'advanced'>('basic')
 
-  // Scroll simulator state
+  // 6. Interactive Search Simulation Overlay inside Phone Mockup
+  const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState<boolean>(false)
+  const [simulatedSearchQuery, setSimulatedSearchQuery] = useState<string>('')
+  const [searchHistory, setSearchHistory] = useState<string[]>(['芝士奶盖', '原味拿铁', '芋泥波波'])
+
+  // 7. Scroll simulator state
   const [scrollOffset, setScrollOffset] = useState<number>(0)
   const phoneBodyRef = useRef<HTMLDivElement>(null)
 
-  // Toast message simulation
+  // 8. Toast simulation
   const [toastMessage, setToastMessage] = useState<string>('')
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Preview Modal state
+  // 9. Preview Modal
   const [previewModalVisible, setPreviewModalVisible] = useState<boolean>(false)
 
-  // Helper for toast
+  // Toast Helper
   const showToast = useCallback((msg: string) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     setToastMessage(msg)
     toastTimerRef.current = setTimeout(() => {
       setToastMessage('')
-    }, 3200)
+    }, 3000)
   }, [])
 
   // Check scroll state
@@ -86,7 +101,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
   // Computed text brightness
   const isDarkText = useMemo(() => {
     if (navTheme === 'immersive' && !isScrolledDown) {
-      return false // Immersive banner background defaults to light text
+      return false // Immersive top banner has dark background -> white text
     }
     return textMode === 'dark'
   }, [navTheme, isScrolledDown, textMode])
@@ -112,21 +127,30 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
     }
   }, [navTheme, isScrolledDown, navBgColor])
 
-  // Dynamic Search Input Container Style
-  const customSearchBg = useMemo<React.CSSProperties>(() => {
+  // Dynamic Search Input Container Style (Top Nav)
+  const topNavSearchStyle = useMemo<React.CSSProperties>(() => {
+    let borderRadius = '9999px'
+    if (searchShape === 'round') borderRadius = '8px'
+    if (searchShape === 'square') borderRadius = '2px'
+
     if (navTheme === 'immersive' && !isScrolledDown) {
       return {
-        backgroundColor: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        color: '#334155'
+        backgroundColor: 'rgba(255, 255, 255, 0.82)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        color: '#1e293b',
+        border: '1px solid rgba(255, 255, 255, 0.6)',
+        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+        borderRadius
       }
     }
     return {
       backgroundColor: '#f1f5f9',
-      color: '#475569'
+      color: '#334155',
+      border: '1px solid #e2e8f0',
+      borderRadius
     }
-  }, [navTheme, isScrolledDown])
+  }, [navTheme, isScrolledDown, searchShape])
 
   // Handle phone scroll
   const handlePhoneScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -148,7 +172,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
     setIsSearchEnabled(checked)
     if (checked && searchMode === 'inline_input' && titlePosition === 'center') {
       setTitlePosition('left')
-      showToast('开启紧凑搜索框时，标题已自动为您调整为居左展示')
+      showToast('开启紧凑搜索框时，标题已自动调整为居左展示')
     }
   }
 
@@ -185,8 +209,8 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
       message.warning('该关键词已存在')
       return
     }
-    if (hotKeywords.length >= 5) {
-      message.warning('最多添加 5 个热搜关键词')
+    if (hotKeywords.length >= 6) {
+      message.warning('最多添加 6 个热搜关键词')
       return
     }
     setHotKeywords([...hotKeywords, keywordInput.trim()])
@@ -195,6 +219,19 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
 
   const handleRemoveKeyword = (kw: string) => {
     setHotKeywords(hotKeywords.filter(k => k !== kw))
+  }
+
+  const handleSearchClick = () => {
+    setIsSearchOverlayOpen(true)
+  }
+
+  const handleExecuteSearch = (term: string) => {
+    if (!term.trim()) return
+    if (!searchHistory.includes(term)) {
+      setSearchHistory([term, ...searchHistory.slice(0, 7)])
+    }
+    setSimulatedSearchQuery(term)
+    message.success(`正在搜索商品: "${term}"`)
   }
 
   // Publish dropdown menu
@@ -206,7 +243,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
         message.loading({ content: '正在同步发布到小程序...', key: 'publish' })
         setTimeout(() => {
           message.success({ content: '🎉 首页装修已成功发布上线！', key: 'publish', duration: 3 })
-        }, 800)
+        }, 600)
       }
     },
     {
@@ -220,7 +257,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
       key: 'save_as_template',
       label: '📋 保存为新模板',
       onClick: () => {
-        message.success('已将当前顶部导航与页面配置保存至装修模板库')
+        message.success('已将当前顶部导航与搜索配置保存至装修模板库')
       }
     }
   ]
@@ -228,8 +265,8 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
   const handleSaveDraft = () => {
     message.loading({ content: '正在保存草稿...', key: 'save_draft' })
     setTimeout(() => {
-      message.success({ content: '草稿保存成功！可以在左侧模板库中随时恢复', key: 'save_draft' })
-    }, 500)
+      message.success({ content: '草稿保存成功！可以在模板库中随时恢复', key: 'save_draft' })
+    }, 400)
   }
 
   return (
@@ -242,7 +279,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
           </button>
           <div className="dec-header-divider"></div>
           <h1 className="dec-header-title">店铺首页装修 - 顶部导航配置方案</h1>
-          <span className="dec-version-badge">v2.4 (支持搜索入口)</span>
+          <span className="dec-version-badge">v2.4 (搜索功能增强版)</span>
         </div>
 
         <div className="dec-header-right">
@@ -289,28 +326,36 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                 <div className="component-group">
                   <div className="group-title">基础组件</div>
                   <div className="component-grid">
-                    <div className="component-card" onClick={() => message.info('已选择「标题文字」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「标题文字」组件')}>
                       <span className="comp-icon-text">T</span>
                       <span className="comp-name">标题文字</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「图文广告」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「图文广告」组件')}>
                       <span className="comp-icon-box">🖼</span>
                       <span className="comp-name">图文广告</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「倒计时」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「倒计时」组件')}>
                       <span className="comp-icon-box">⏱</span>
                       <span className="comp-name">倒计时</span>
                     </div>
-                    <div className="component-card active-featured" onClick={() => message.success('您当前正在右侧配置「顶部搜索栏」')}>
+                    {/* Featured Search Component Card */}
+                    <div
+                      className="component-card active-featured"
+                      onClick={() => {
+                        setShowBodySearchBlock(!showBodySearchBlock)
+                        message.success(showBodySearchBlock ? '已隐藏页面主体搜索框' : '已在页面主体中添加「搜索框组件」！')
+                      }}
+                      title="点击切换页面主体搜索框"
+                    >
                       <span className="new-tag-pill">NEW</span>
                       <SearchOutlined style={{ fontSize: 20, color: '#2563eb' }} />
-                      <span className="comp-name font-bold text-blue-600">搜索框(页面)</span>
+                      <span className="comp-name u-font-bold u-text-blue-600">搜索框(页面)</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「公告」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「公告」组件')}>
                       <span className="comp-icon-box">📢</span>
                       <span className="comp-name">公告</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「图文导航」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「图文导航」组件')}>
                       <span className="comp-icon-box">📑</span>
                       <span className="comp-name">图文导航</span>
                     </div>
@@ -320,11 +365,11 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                 <div className="component-group">
                   <div className="group-title">商品组件</div>
                   <div className="component-grid">
-                    <div className="component-card" onClick={() => message.info('已选择「商品列表」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「商品列表」组件')}>
                       <span className="comp-icon-box">🛍</span>
                       <span className="comp-name">商品列表</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「积分商品」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「积分商品」组件')}>
                       <span className="comp-icon-box">🏪</span>
                       <span className="comp-name">积分商品</span>
                     </div>
@@ -336,19 +381,19 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                 <div className="component-group">
                   <div className="group-title">互动营销</div>
                   <div className="component-grid">
-                    <div className="component-card" onClick={() => message.info('已选择「幸运抽奖」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「幸运抽奖」组件')}>
                       <GiftFilled style={{ fontSize: 20, color: '#ec4899' }} />
                       <span className="comp-name">幸运抽奖</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「砸金蛋」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「砸金蛋」组件')}>
                       <ThunderboltFilled style={{ fontSize: 20, color: '#f59e0b' }} />
                       <span className="comp-name">砸金蛋</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「优惠券包」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「优惠券包」组件')}>
                       <span className="comp-icon-box">🎟</span>
                       <span className="comp-name">优惠券包</span>
                     </div>
-                    <div className="component-card" onClick={() => message.info('已选择「限时秒杀」组件')}>
+                    <div className="component-card" onClick={() => message.info('已选中「限时秒杀」组件')}>
                       <FireFilled style={{ fontSize: 20, color: '#ef4444' }} />
                       <span className="comp-name">限时秒杀</span>
                     </div>
@@ -387,7 +432,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                 onChange={handleSliderChange}
                 className="simulator-slider"
               />
-              <span className="simulator-value font-mono">{scrollOffset}px</span>
+              <span className="simulator-value u-font-mono">{scrollOffset}px</span>
             </div>
           </div>
 
@@ -396,9 +441,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
             {/* 微信小程序原生 Header (吸顶/沉浸过渡) */}
             <div className="phone-header-container" style={navHeaderStyle}>
               {/* 手机状态栏 (Status Bar) */}
-              <div
-                className={`phone-status-bar ${isDarkText ? 'text-dark' : 'text-light'}`}
-              >
+              <div className={`phone-status-bar ${isDarkText ? 'text-dark' : 'text-light'}`}>
                 <span className="status-time">9:41</span>
                 <div className="status-icons">
                   <span className="status-signal">●●●●</span>
@@ -414,12 +457,12 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                   {/* 1. Title / Logo Representation */}
                   {titleEnabled && searchMode !== 'full_input' && (
                     <div
-                      className={`nav-brand-title shrink-0 ${
-                        titlePosition === 'center' && !isSearchEnabled ? 'mx-auto' : 'mr-2'
+                      className={`nav-brand-title u-shrink-0 ${
+                        titlePosition === 'center' && !isSearchEnabled ? 'u-mx-auto' : 'u-mr-2'
                       }`}
                     >
                       {contentType === 'text' ? (
-                        <span className={`brand-text-display ${isDarkText ? 'text-slate-900' : 'text-white'}`}>
+                        <span className={`brand-text-display ${isDarkText ? 'u-text-dark' : 'u-text-light'}`}>
                           {titleText || '奈雪的茶'}
                         </span>
                       ) : (
@@ -431,35 +474,38 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                   {/* 2. Form A: Icon Only Mode */}
                   {isSearchEnabled && searchMode === 'icon_only' && (
                     <div
-                      className={`search-icon-btn ${isDarkText ? 'text-slate-800' : 'text-white'}`}
-                      onClick={() => message.info('点击了顶部搜索图标')}
-                      title="点击搜索"
+                      className={`search-icon-btn ${isDarkText ? 'u-text-dark' : 'u-text-light'}`}
+                      onClick={handleSearchClick}
+                      title="点击体验小程序搜索"
                     >
-                      <SearchOutlined style={{ fontSize: 15 }} />
+                      <SearchOutlined style={{ fontSize: 16 }} />
                     </div>
                   )}
 
                   {/* 3. Form B: Inline Input Mode / Form C: Full Input Mode */}
                   {isSearchEnabled && (searchMode === 'inline_input' || searchMode === 'full_input') && (
                     <div
-                      className={`search-input-pill ${isScrolledDown ? 'scrolled-down' : 'at-top'}`}
-                      style={customSearchBg}
-                      onClick={() => message.info('点击了搜索输入框')}
+                      className={`search-input-pill ${textAlign === 'center' ? 'text-center-align' : ''}`}
+                      style={topNavSearchStyle}
+                      onClick={handleSearchClick}
+                      title="点击体验小程序搜索浮层"
                     >
                       <SearchOutlined className="search-pill-icon" />
-                      <span className="search-pill-placeholder truncate">
+                      <span className="search-pill-placeholder u-truncate">
                         {searchPlaceholder || '搜索心仪商品'}
                       </span>
+                      {searchRightAction === 'camera' && (
+                        <CameraOutlined className="search-pill-action-icon" title="拍照识图" />
+                      )}
+                      {searchRightAction === 'voice' && (
+                        <AudioOutlined className="search-pill-action-icon" title="语音搜商品" />
+                      )}
                     </div>
                   )}
                 </div>
 
                 {/* 右侧：微信胶囊按钮固定位 (Capsule) */}
-                <div
-                  className={`phone-capsule-button ${
-                    isDarkText ? 'capsule-dark-mode' : 'capsule-light-mode'
-                  }`}
-                >
+                <div className={`phone-capsule-button ${isDarkText ? 'capsule-dark-mode' : 'capsule-light-mode'}`}>
                   <span className="capsule-dots">•••</span>
                   <div className="capsule-line"></div>
                   <span className="capsule-circle">◎</span>
@@ -481,6 +527,21 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                   立即参与 <RightOutlined style={{ fontSize: 10, marginLeft: 4 }} />
                 </div>
               </div>
+
+              {/* In-Page Body Search Component (页面主体搜索框组件) */}
+              {showBodySearchBlock && (
+                <div className="mockup-body-search-container" onClick={handleSearchClick}>
+                  <div className="body-search-card" style={{ borderRadius: searchShape === 'pill' ? '9999px' : searchShape === 'round' ? '8px' : '2px' }}>
+                    <SearchOutlined className="body-search-icon" />
+                    <span className="body-search-text u-truncate">
+                      {searchPlaceholder || '搜索心仪商品'} (页面组件)
+                    </span>
+                    <button className="body-search-action-btn">
+                      搜索
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Grid Nav Icons */}
               <div className="mockup-nav-grid">
@@ -516,7 +577,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                 </div>
               </div>
 
-              {/* Hot Keywords Bar (if enabled) */}
+              {/* Hot Keywords Bar */}
               {isSearchEnabled && hotKeywords.length > 0 && (
                 <div className="mockup-hot-keywords">
                   <span className="hot-label">
@@ -524,7 +585,14 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                   </span>
                   <div className="hot-tags-scroll">
                     {hotKeywords.map((kw, i) => (
-                      <span key={i} className="hot-tag-pill">
+                      <span
+                        key={i}
+                        className="hot-tag-pill"
+                        onClick={() => {
+                          handleExecuteSearch(kw)
+                          setIsSearchOverlayOpen(true)
+                        }}
+                      >
                         {kw}
                       </span>
                     ))}
@@ -572,13 +640,121 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
 
               <div className="mockup-footer-indicator">— 已经到底部了 —</div>
             </div>
+
+            {/* Interactive Search Overlay (真机级全真搜索弹层) */}
+            {isSearchOverlayOpen && (
+              <div className="phone-search-overlay-modal">
+                <div className="search-overlay-header">
+                  <div className="search-overlay-input-wrap">
+                    <SearchOutlined className="overlay-search-icon" />
+                    <input
+                      type="text"
+                      className="overlay-search-input"
+                      placeholder={searchPlaceholder || '搜索心仪商品'}
+                      value={simulatedSearchQuery}
+                      onChange={e => setSimulatedSearchQuery(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') handleExecuteSearch(simulatedSearchQuery)
+                      }}
+                      autoFocus
+                    />
+                    {simulatedSearchQuery && (
+                      <CloseOutlined
+                        className="overlay-search-clear"
+                        onClick={() => setSimulatedSearchQuery('')}
+                      />
+                    )}
+                  </div>
+                  <button
+                    className="overlay-cancel-btn"
+                    onClick={() => {
+                      setIsSearchOverlayOpen(false)
+                      setSimulatedSearchQuery('')
+                    }}
+                  >
+                    取消
+                  </button>
+                </div>
+
+                <div className="search-overlay-content">
+                  {/* 历史搜索 */}
+                  {searchHistory.length > 0 && (
+                    <div className="overlay-section">
+                      <div className="overlay-section-header">
+                        <span className="section-title">
+                          <HistoryOutlined style={{ marginRight: 4 }} /> 历史搜索
+                        </span>
+                        <DeleteOutlined
+                          className="section-delete-btn"
+                          onClick={() => setSearchHistory([])}
+                          title="清空历史"
+                        />
+                      </div>
+                      <div className="overlay-tag-cloud">
+                        {searchHistory.map((item, idx) => (
+                          <span
+                            key={idx}
+                            className="overlay-tag-item"
+                            onClick={() => handleExecuteSearch(item)}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 热门搜索榜 */}
+                  <div className="overlay-section">
+                    <div className="overlay-section-header">
+                      <span className="section-title">
+                        <FireFilled style={{ color: '#ef4444', marginRight: 4 }} /> 全网热搜榜
+                      </span>
+                    </div>
+                    <div className="overlay-hot-rank-list">
+                      {hotKeywords.map((kw, idx) => (
+                        <div
+                          key={idx}
+                          className="hot-rank-row"
+                          onClick={() => handleExecuteSearch(kw)}
+                        >
+                          <span className={`rank-number rank-${idx + 1}`}>{idx + 1}</span>
+                          <span className="rank-text">{kw}</span>
+                          {idx < 2 && <span className="hot-flame-tag">HOT</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 推荐探索 */}
+                  <div className="overlay-section">
+                    <div className="overlay-section-header">
+                      <span className="section-title">
+                        <CompassOutlined style={{ color: '#2563eb', marginRight: 4 }} /> 推荐分类
+                      </span>
+                    </div>
+                    <div className="overlay-category-grid">
+                      {['人气果茶', '生酪鲜乳', '手作烘焙', '精选咖啡', '周边潮玩', '积分特惠'].map((cat, idx) => (
+                        <div
+                          key={idx}
+                          className="cat-badge-item"
+                          onClick={() => handleExecuteSearch(cat)}
+                        >
+                          {cat}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </main>
 
-        {/* 右侧配置面板 (Matching prototype layout + New Search Section) */}
+        {/* 右侧配置面板 (Matching prototype layout + Full Search Section) */}
         <aside className="home-dec-sidebar-right">
           <div className="right-panel-header">
-            <span className="panel-title-text">顶部导航设置</span>
+            <span className="panel-title-text">顶部导航与搜索设置</span>
             <span className="panel-badge-tag">组件配置</span>
           </div>
 
@@ -632,7 +808,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
             {/* 3. 标题设置 */}
             <div className="config-section">
               <div className="section-header-toggle">
-                <label className="config-label mb-0">标题设置</label>
+                <label className="config-label u-mb-0">标题设置</label>
                 <button
                   onClick={() => setTitleEnabled(!titleEnabled)}
                   className={`switch-toggle-btn ${titleEnabled ? 'on' : 'off'}`}
@@ -663,14 +839,14 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
 
                   {contentType === 'text' && (
                     <div className="config-row-vertical">
-                      <span className="row-item-label mb-1">店铺名称/标题</span>
+                      <span className="row-item-label u-mb-1">店铺名称/标题</span>
                       <Input
                         value={titleText}
                         onChange={e => setTitleText(e.target.value)}
                         placeholder="请输入标题内容"
                         maxLength={10}
                         size="small"
-                        suffix={<span className="text-xs text-slate-400">{titleText.length}/10</span>}
+                        suffix={<span className="u-text-xs u-text-slate-400">{titleText.length}/10</span>}
                       />
                     </div>
                   )}
@@ -700,11 +876,11 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
 
             {/* 4. ★ 新增需求：搜索设置 (NEW SEARCH CONFIGURATION) ★ */}
             <div className="config-section featured-search-card">
-              <span className="featured-card-badge">新增配置</span>
+              <span className="featured-card-badge">核心新增</span>
 
               <div className="section-header-toggle">
-                <label className="config-label mb-0 flex items-center font-bold text-slate-900">
-                  <SearchOutlined style={{ color: '#2563eb', marginRight: 6, fontSize: 14 }} /> 搜索设置
+                <label className="config-label u-mb-0 u-flex u-items-center u-font-bold u-text-slate-900">
+                  <SearchOutlined style={{ color: '#2563eb', marginRight: 6, fontSize: 14 }} /> 顶部搜索入口设置
                 </label>
                 <button
                   onClick={() => handleToggleSearch(!isSearchEnabled)}
@@ -734,7 +910,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                         />
                         <div className="radio-text-box">
                           <span className="radio-main-text">紧凑搜索框模式</span>
-                          <span className="radio-sub-desc">( Logo/标题 + 搜索框 )</span>
+                          <span className="radio-sub-desc">( Logo/标题 + 搜索框并排 )</span>
                         </div>
                       </label>
 
@@ -752,7 +928,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                         />
                         <div className="radio-text-box">
                           <span className="radio-main-text">图标模式</span>
-                          <span className="radio-sub-desc">( 右侧 🔍 图标 )</span>
+                          <span className="radio-sub-desc">( 右侧 🔍 图标精简入口 )</span>
                         </div>
                       </label>
 
@@ -778,23 +954,94 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
 
                   {/* 提示文字 */}
                   {searchMode !== 'icon_only' && (
-                    <div className="config-field-block">
-                      <label className="config-sub-label">提示文字 (Placeholder)</label>
-                      <input
-                        type="text"
-                        value={searchPlaceholder}
-                        onChange={e => setSearchPlaceholder(e.target.value)}
-                        maxLength={15}
-                        placeholder="请输入搜索占位词"
-                        className="config-text-input"
-                      />
-                      <span className="input-char-counter">{searchPlaceholder.length}/15 字</span>
-                    </div>
+                    <>
+                      <div className="config-field-block">
+                        <label className="config-sub-label">占位提示文字 (Placeholder)</label>
+                        <input
+                          type="text"
+                          value={searchPlaceholder}
+                          onChange={e => setSearchPlaceholder(e.target.value)}
+                          maxLength={15}
+                          placeholder="请输入搜索占位词"
+                          className="config-text-input"
+                        />
+                        <span className="input-char-counter">{searchPlaceholder.length}/15 字</span>
+                      </div>
+
+                      {/* 框体形状 */}
+                      <div className="config-field-block">
+                        <label className="config-sub-label">搜索框圆角样式</label>
+                        <div className="segmented-btn-group w-full">
+                          <button
+                            onClick={() => setSearchShape('pill')}
+                            className={`seg-btn flex-1 ${searchShape === 'pill' ? 'active' : ''}`}
+                          >
+                            圆弧 (Pill)
+                          </button>
+                          <button
+                            onClick={() => setSearchShape('round')}
+                            className={`seg-btn flex-1 ${searchShape === 'round' ? 'active' : ''}`}
+                          >
+                            微圆角 (8px)
+                          </button>
+                          <button
+                            onClick={() => setSearchShape('square')}
+                            className={`seg-btn flex-1 ${searchShape === 'square' ? 'active' : ''}`}
+                          >
+                            方角 (2px)
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 文字对齐 */}
+                      <div className="config-field-block">
+                        <label className="config-sub-label">文字对齐方式</label>
+                        <div className="segmented-btn-group w-full">
+                          <button
+                            onClick={() => setTextAlign('left')}
+                            className={`seg-btn flex-1 ${textAlign === 'left' ? 'active' : ''}`}
+                          >
+                            居左对齐
+                          </button>
+                          <button
+                            onClick={() => setTextAlign('center')}
+                            className={`seg-btn flex-1 ${textAlign === 'center' ? 'active' : ''}`}
+                          >
+                            居中对齐
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 右侧辅助图标 */}
+                      <div className="config-field-block">
+                        <label className="config-sub-label">右侧辅助功能</label>
+                        <div className="segmented-btn-group w-full">
+                          <button
+                            onClick={() => setSearchRightAction('none')}
+                            className={`seg-btn flex-1 ${searchRightAction === 'none' ? 'active' : ''}`}
+                          >
+                            无
+                          </button>
+                          <button
+                            onClick={() => setSearchRightAction('camera')}
+                            className={`seg-btn flex-1 ${searchRightAction === 'camera' ? 'active' : ''}`}
+                          >
+                            📷 扫码识图
+                          </button>
+                          <button
+                            onClick={() => setSearchRightAction('voice')}
+                            className={`seg-btn flex-1 ${searchRightAction === 'voice' ? 'active' : ''}`}
+                          >
+                            🎤 语音输入
+                          </button>
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   {/* 推荐热搜关键词 */}
                   <div className="config-field-block">
-                    <label className="config-sub-label">推荐热搜关键词 (最多5个)</label>
+                    <label className="config-sub-label">推荐热搜关键词 (最多6个)</label>
                     <div className="hot-keywords-tags-wrap">
                       {hotKeywords.map(kw => (
                         <Tag
@@ -808,8 +1055,8 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                         </Tag>
                       ))}
                     </div>
-                    {hotKeywords.length < 5 && (
-                      <div className="flex items-center gap-1.5 mt-2">
+                    {hotKeywords.length < 6 && (
+                      <div className="u-flex u-items-center u-gap-1_5 u-mt-2">
                         <Input
                           size="small"
                           placeholder="添加热搜词"
@@ -843,7 +1090,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                     onChange={e => setNavBgColor(e.target.value)}
                     className="color-input-dot"
                   />
-                  <span className="color-hex-text font-mono">{navBgColor}</span>
+                  <span className="color-hex-text u-font-mono">{navBgColor}</span>
                 </div>
               </div>
 
@@ -860,7 +1107,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
                 ))}
               </div>
 
-              <div className="config-row-item mt-3">
+              <div className="config-row-item u-mt-3">
                 <span className="row-item-label">文字/图标模式</span>
                 <div className="segmented-btn-group">
                   <button
@@ -896,7 +1143,7 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
             type="primary"
             onClick={() => {
               setPreviewModalVisible(false)
-              message.success('已确认预览效果并发布！')
+              message.success('已确认预览效果并发布上线！')
             }}
           >
             直接发布该配置
@@ -906,17 +1153,18 @@ export const HomeDecoration: React.FC<HomeDecorationProps> = ({ onBack }) => {
         centered
       >
         <div className="preview-modal-body">
-          <div className="text-center mb-3">
-            <div className="inline-block p-3 bg-white border border-slate-200 rounded-xl shadow-sm">
+          <div className="u-text-center u-mb-3">
+            <div className="u-inline-block u-p-3 u-bg-white u-border u-border-slate-200 u-rounded-xl u-shadow-sm">
               <QrcodeOutlined style={{ fontSize: 120, color: '#334155' }} />
             </div>
-            <p className="text-xs text-slate-500 mt-2">微信扫描二维码在手机上实时体验当前搜索与导航配置</p>
+            <p className="u-text-xs u-text-slate-500 u-mt-2">微信扫描二维码在手机上实时体验当前搜索与导航配置</p>
           </div>
-          <div className="p-3 bg-slate-50 rounded-lg text-xs text-slate-600 space-y-1">
+          <div className="u-p-3 u-bg-slate-50 u-rounded-lg u-text-xs u-text-slate-600 u-space-y-1">
             <div><strong>导航模式:</strong> {navStyle === 'custom' ? '自定义样式' : '跟随店铺导航'}</div>
-            <div><strong>顶部风格:</strong> {navTheme === 'immersive' ? '沉浸式 (随滚动自动吸顶)' : '标准导航'}</div>
+            <div><strong>顶部风格:</strong> {navTheme === 'immersive' ? '沉浸式 (随滚动自动吸顶过渡)' : '标准导航'}</div>
             <div><strong>搜索入口:</strong> {isSearchEnabled ? (searchMode === 'inline_input' ? '紧凑搜索框' : searchMode === 'icon_only' ? '右侧图标' : '纯搜索框铺满') : '已关闭'}</div>
-            <div><strong>搜索占位词:</strong> {searchPlaceholder}</div>
+            <div><strong>搜索圆角:</strong> {searchShape === 'pill' ? '圆弧 (Pill)' : searchShape === 'round' ? '微圆角 (8px)' : '方角 (2px)'}</div>
+            <div><strong>占位词:</strong> {searchPlaceholder}</div>
           </div>
         </div>
       </Modal>
