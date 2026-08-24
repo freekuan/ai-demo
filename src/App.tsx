@@ -83,6 +83,7 @@ import AppsMarket from './pages/AppsMarket'
 import GroupBuyPage from './pages/GroupBuyPage'
 import OrderConversion from './pages/OrderConversion'
 import BossAdminTaobaoSync from './pages/BossAdminTaobaoSync'
+import CategoryManager from './pages/CategoryManager'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -169,6 +170,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     label: '店铺设置',
     children: [
       { key: 'shop-homepage-decoration', label: '首页装修' },
+      { key: 'shop-category-decoration', label: '分类装修(前台类目)' },
       { key: 'shop-navigation', label: '店铺导航' },
       { key: 'shop-template-manager', label: '装修模板管理' },
       { key: 'shop-top-nav-prototype', label: <a href="/top_nav_search_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>顶部搜索原型(独立页)</a> },
@@ -3753,6 +3755,7 @@ export default function App() {
   const isAppsMarketPage = railKey === 'apps' && secondaryKey === 'dash-apps-market'
   const isGroupBuyPage = railKey === 'shop' && secondaryKey === 'shop-group-buy'
   const isOrderConversionPage = railKey === 'shop' && secondaryKey === 'shop-order-conversion'
+  const isCategoryManagerPage = railKey === 'shop' && (secondaryKey === 'shop-product-category' || secondaryKey === 'shop-category-decoration')
 
   const handleToolClick = useCallback((key: string) => {
     if (key === 'group') {
@@ -3761,7 +3764,7 @@ export default function App() {
   }, [])
   
   // 基础主题色
-  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage) ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage || isCategoryManagerPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -3892,6 +3895,8 @@ export default function App() {
                 <GroupBuyPage />
               ) : isOrderConversionPage ? (
                 <OrderConversion />
+              ) : isCategoryManagerPage ? (
+                <CategoryManager />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty
