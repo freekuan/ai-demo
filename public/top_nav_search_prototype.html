@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小程序顶部导航搜索入口 - SaaS装修后台原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f3f4f6;
+      user-select: none;
+    }
+    /* Custom Scrollbar for Phone Container */
+    .phone-body-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .phone-body-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    /* Switch toggle styling */
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #3b82f6;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #3b82f6;
+    }
+    /* Glassmorphism blur simulation */
+    .backdrop-blur-nav {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+  <div id="app" class="h-full flex flex-col">
+    <!-- 顶部操作栏 -->
+    <header class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-20 shrink-0">
+      <div class="flex items-center space-x-4">
+        <button class="flex items-center text-slate-600 hover:text-slate-900 text-sm font-medium" onclick="window.history.back()">
+          <i class="fa-solid fa-chevron-left mr-2"></i> 返回
+        </button>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <h1 class="text-base font-semibold text-slate-800">店铺首页装修 - 顶部导航配置方案</h1>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <span class="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex items-center">
+          <i class="fa-solid fa-circle-info mr-1.5 text-xs"></i> 右侧已新增「搜索设置」模块
+        </span>
+        <button class="px-4 py-1.5 text-sm font-medium border border-slate-300 rounded hover:bg-slate-50 transition" @click="showToast('正在打开预览窗口...')">预览</button>
+        <button class="px-4 py-1.5 text-sm font-medium border border-slate-300 rounded hover:bg-slate-50 transition" @click="showToast('草稿保存成功！')">保存</button>
+        <button class="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition flex items-center" @click="showToast('已成功发布到线上！')">
+          页面发布 <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- 主工作区 -->
+    <div class="flex-1 flex overflow-hidden">
+
+      <!-- 左侧组件库面板 -->
+      <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-10 overflow-y-auto">
+        <div class="flex border-b border-slate-200 text-sm">
+          <button class="flex-1 py-3 font-medium text-blue-600 border-b-2 border-blue-600 bg-blue-50/30">基础组件</button>
+          <button class="flex-1 py-3 font-medium text-slate-500 hover:text-slate-800">高阶组件</button>
+        </div>
+
+        <div class="p-4 space-y-6">
+          <div>
+            <div class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">基础组件</div>
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-700">
+              <div class="p-3 border border-slate-200 rounded-lg flex flex-col items-center justify-center space-y-1.5 hover:border-blue-500 hover:text-blue-600 cursor-pointer transition bg-white shadow-sm">
+                <i class="fa-solid fa-font text-lg text-slate-500"></i>
+                <span>标题文字</span>
+              </div>
+              <div class="p-3 border border-slate-200 rounded-lg flex flex-col items-center justify-center space-y-1.5 hover:border-blue-500 hover:text-blue-600 cursor-pointer transition bg-white shadow-sm">
+                <i class="fa-regular fa-image text-lg text-slate-500"></i>
+                <span>图文广告</span>
+              </div>
+              <div class="p-3 border border-slate-200 rounded-lg flex flex-col items-center justify-center space-y-1.5 hover:border-blue-500 hover:text-blue-600 cursor-pointer transition bg-white shadow-sm">
+                <i class="fa-regular fa-clock text-lg text-slate-500"></i>
+                <span>倒计时</span>
+              </div>
+              <div class="p-3 border-2 border-blue-500 rounded-lg flex flex-col items-center justify-center space-y-1.5 text-blue-600 bg-blue-50/50 cursor-pointer relative shadow-sm">
+                <span class="absolute -top-2 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full scale-75">NEW</span>
+                <i class="fa-solid fa-magnifying-glass text-lg text-blue-600"></i>
+                <span class="font-medium">搜索框(页面)</span>
+              </div>
+              <div class="p-3 border border-slate-200 rounded-lg flex flex-col items-center justify-center space-y-1.5 hover:border-blue-500 hover:text-blue-600 cursor-pointer transition bg-white shadow-sm">
+                <i class="fa-solid fa-bullhorn text-lg text-slate-500"></i>
+                <span>公告</span>
+              </div>
+              <div class="p-3 border border-slate-200 rounded-lg flex flex-col items-center justify-center space-y-1.5 hover:border-blue-500 hover:text-blue-600 cursor-pointer transition bg-white shadow-sm">
+                <i class="fa-solid fa-list-check text-lg text-slate-500"></i>
+                <span>图文导航</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">商品组件</div>
+            <div class="grid grid-cols-2 gap-2 text-xs text-slate-700">
+              <div class="p-3 border border-slate-200 rounded-lg flex flex-col items-center justify-center space-y-1.5 hover:border-blue-500 hover:text-blue-600 cursor-pointer transition bg-white shadow-sm">
+                <i class="fa-solid fa-bag-shopping text-lg text-slate-500"></i>
+                <span>商品列表</span>
+              </div>
+              <div class="p-3 border border-slate-200 rounded-lg flex flex-col items-center justify-center space-y-1.5 hover:border-blue-500 hover:text-blue-600 cursor-pointer transition bg-white shadow-sm">
+                <i class="fa-solid fa-store text-lg text-slate-500"></i>
+                <span>积分商品</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 中间画布预览区 (iPhone 8 / Modern Mobile View) -->
+      <main class="flex-1 bg-slate-100 flex flex-col items-center justify-start p-6 overflow-y-auto relative">
+        
+        <!-- Toast Notification Alert -->
+        <transition name="fade">
+          <div v-if="toastMessage" class="absolute top-4 bg-slate-800 text-white text-xs px-4 py-2.5 rounded-lg shadow-lg flex items-center space-x-2 z-50">
+            <i class="fa-solid fa-circle-exclamation text-amber-400"></i>
+            <span>{{ toastMessage }}</span>
+          </div>
+        </transition>
+
+        <!-- Dynamic Tip Bar -->
+        <div class="w-[375px] mb-3 flex items-center justify-between text-xs text-slate-500 px-1">
+          <span class="flex items-center"><i class="fa-solid fa-circle-info mr-1 text-slate-400"></i> 默认预览视图: iPhone 8 (375x667)</span>
+          <!-- Canvas Scroll Simulator Slider -->
+          <div class="flex items-center space-x-2 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">
+            <span class="text-[11px] font-medium text-slate-600">模拟滚动:</span>
+            <input type="range" min="0" max="100" v-model="scrollOffset" class="w-20 accent-blue-600 h-1 cursor-pointer">
+            <span class="text-[10px] w-8 text-right font-mono">{{ scrollOffset }}px</span>
+          </div>
+        </div>
+
+        <!-- Phone Shell Container -->
+        <div class="w-[375px] h-[667px] bg-white rounded-[36px] shadow-2xl border-[8px] border-slate-800 flex flex-col overflow-hidden relative shrink-0">
+          
+          <!-- 微信小程序原生 Header (吸顶/沉浸过渡) -->
+          <div class="relative w-full z-30 transition-all duration-300"
+               :style="navHeaderStyle">
+            
+            <!-- 手机状态栏 (Status Bar) -->
+            <div class="h-6 px-4 flex justify-between items-center text-[10px] font-semibold pt-1"
+                 :class="isDarkText ? 'text-black' : 'text-white'">
+              <span>9:41</span>
+              <div class="flex items-center space-x-1.5">
+                <i class="fa-solid fa-signal text-[9px]"></i>
+                <i class="fa-solid fa-wifi text-[9px]"></i>
+                <i class="fa-solid fa-battery-full text-[10px]"></i>
+              </div>
+            </div>
+
+            <!-- 小程序自定义导航栏组件区域 -->
+            <div class="h-11 px-3 flex items-center justify-between relative">
+              
+              <!-- 左侧与中部：搜索及标题响应布局 -->
+              <div class="flex items-center flex-1 mr-2 overflow-hidden" :class="{'justify-center': titlePosition === 'center' && !isSearchEnabled}">
+                
+                <!-- 1. Title / Logo Representation -->
+                <div v-if="titleEnabled && searchMode !== 'full_input'" 
+                     class="flex items-center shrink-0 mr-2"
+                     :class="{'mx-auto': titlePosition === 'center' && !isSearchEnabled}">
+                  <template v-if="contentType === 'text'">
+                    <span class="font-bold text-sm truncate max-w-[110px]" :class="isDarkText ? 'text-slate-900' : 'text-white'">
+                      奈雪的茶
+                    </span>
+                  </template>
+                  <template v-else>
+                    <div class="h-6 w-16 bg-blue-500 text-white font-bold text-[10px] rounded flex items-center justify-center">
+                      BRAND LOGO
+                    </div>
+                  </template>
+                </div>
+
+                <!-- 2. Form A: Icon Only Mode -->
+                <template v-if="isSearchEnabled && searchMode === 'icon_only'">
+                  <div class="ml-auto flex items-center justify-center w-8 h-8 rounded-full cursor-pointer hover:bg-black/5"
+                       :class="isDarkText ? 'text-slate-800' : 'text-white'">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                  </div>
+                </template>
+
+                <!-- 3. Form B: Inline Input Mode / Form C: Full Input Mode -->
+                <template v-if="isSearchEnabled && (searchMode === 'inline_input' || searchMode === 'full_input')">
+                  <div class="flex-1 flex items-center px-3 py-1.5 text-xs transition-all duration-200"
+                       :class="[
+                         'rounded-full',
+                         isScrolledDown ? 'bg-slate-100 text-slate-500' : 'bg-white/80 backdrop-blur text-slate-600 shadow-sm'
+                       ]"
+                       :style="customSearchBg">
+                    <i class="fa-solid fa-magnifying-glass mr-2 text-slate-400 text-xs"></i>
+                    <span class="truncate text-[11px]">{{ searchPlaceholder || '搜索心仪商品' }}</span>
+                  </div>
+                </template>
+
+              </div>
+
+              <!-- 右侧：微信胶囊按钮固定位 (Capsule) -->
+              <div class="w-20 h-7 border rounded-full flex items-center justify-around px-2 shrink-0 z-10"
+                   :class="isDarkText ? 'border-slate-300 bg-white/60 text-black' : 'border-white/30 bg-black/20 text-white'">
+                <i class="fa-solid fa-ellipsis text-xs"></i>
+                <div class="w-px h-3 bg-current opacity-30"></div>
+                <i class="fa-regular fa-circle-dot text-xs"></i>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 手机页面画布可滚动区域 -->
+          <div class="flex-1 overflow-y-auto phone-body-scroll relative -mt-17" 
+               @scroll="handlePhoneScroll" 
+               ref="phoneBody">
+            
+            <!-- Banner Head Image Area -->
+            <div class="relative w-full h-56 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex flex-col items-center justify-center text-white px-4 pt-12">
+              <div class="text-[10px] bg-black/20 px-2 py-0.5 rounded mb-1">参与活动 · 挑战上榜</div>
+              <h2 class="text-2xl font-black italic tracking-wider drop-shadow-md">活动挑战榜</h2>
+              <div class="mt-3 bg-yellow-400 text-slate-900 font-bold text-xs px-4 py-1.5 rounded-full shadow-lg">
+                立即参与 <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i>
+              </div>
+            </div>
+
+            <!-- Grid Nav Icons -->
+            <div class="p-3 bg-white m-3 rounded-xl shadow-sm grid grid-cols-5 gap-2 text-center text-[10px] text-slate-600">
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center text-amber-500 text-base">
+                  <i class="fa-regular fa-calendar-check"></i>
+                </div>
+                <span>每日签到</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center text-blue-500 text-base">
+                  <i class="fa-solid fa-receipt"></i>
+                </div>
+                <span>订单转积分</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-9 h-9 bg-pink-50 rounded-lg flex items-center justify-center text-pink-500 text-base">
+                  <i class="fa-solid fa-gift"></i>
+                </div>
+                <span>幸运抽奖</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center text-purple-500 text-base">
+                  <i class="fa-regular fa-heart"></i>
+                </div>
+                <span>心愿单</span>
+              </div>
+              <div class="flex flex-col items-center space-y-1">
+                <div class="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-500 text-base">
+                  <i class="fa-solid fa-face-smile"></i>
+                </div>
+                <span>集集乐</span>
+              </div>
+            </div>
+
+            <!-- Section Title -->
+            <div class="px-4 py-1 flex items-center justify-between">
+              <span class="font-bold text-xs text-slate-800 flex items-center">
+                <i class="fa-solid fa-fire text-red-500 mr-1.5"></i> 积分爆款推荐
+              </span>
+              <span class="text-[10px] text-slate-400">更多 <i class="fa-solid fa-chevron-right text-[8px]"></i></span>
+            </div>
+
+            <!-- Product Cards -->
+            <div class="p-3 grid grid-cols-2 gap-3">
+              <div class="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
+                <div class="h-28 bg-slate-800 flex items-center justify-center text-white font-bold text-xs relative">
+                  <span class="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-br absolute top-0 left-0">HOT</span>
+                  剪映VIP-周卡
+                </div>
+                <div class="p-2 flex-1 flex flex-col justify-between">
+                  <div class="text-xs font-medium text-slate-800 line-clamp-1">剪映VIP会员周卡</div>
+                  <div class="mt-2 text-red-500 text-xs font-bold">1000 <span class="text-[9px] font-normal text-slate-400">积分</span></div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
+                <div class="h-28 bg-orange-100 flex items-center justify-center text-amber-700 font-bold text-xs relative">
+                  带说明商品
+                </div>
+                <div class="p-2 flex-1 flex flex-col justify-between">
+                  <div class="text-xs font-medium text-slate-800 line-clamp-1">带使用说明的特惠商品</div>
+                  <div class="mt-2 text-red-500 text-xs font-bold">4 <span class="text-[9px] font-normal text-slate-400">积分</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="h-16 text-center text-[10px] text-slate-400 pt-4">
+              — 已经到底部了 —
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      <!-- 右侧配置面板 (Matching screenshot layout + New Search Section) -->
+      <aside class="w-80 bg-white border-l border-slate-200 overflow-y-auto p-5 shrink-0 text-xs z-10 space-y-6">
+        
+        <div class="font-bold text-sm text-slate-900 border-b border-slate-200 pb-3 flex items-center justify-between">
+          <span>顶部导航设置</span>
+          <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded font-normal">组件配置</span>
+        </div>
+
+        <!-- 1. 导航样式 -->
+        <div class="space-y-2">
+          <label class="font-medium text-slate-700 block">导航样式</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="py-1.5 px-3 border rounded text-center transition"
+                    :class="navStyle === 'follow' ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'"
+                    @click="navStyle = 'follow'">
+              跟随店铺导航
+            </button>
+            <button class="py-1.5 px-3 border rounded text-center transition"
+                    :class="navStyle === 'custom' ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'"
+                    @click="navStyle = 'custom'">
+              自定义样式
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. 风格选择 -->
+        <div class="space-y-2">
+          <label class="font-medium text-slate-700 block">风格选择</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button class="py-1.5 px-3 border rounded text-center transition"
+                    :class="navTheme === 'standard' ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'"
+                    @click="setNavTheme('standard')">
+              标准
+            </button>
+            <button class="py-1.5 px-3 border rounded text-center transition"
+                    :class="navTheme === 'immersive' ? 'border-blue-600 text-blue-600 bg-blue-50/50 font-medium' : 'border-slate-200 text-slate-600 hover:border-slate-300'"
+                    @click="setNavTheme('immersive')">
+              沉浸式
+            </button>
+          </div>
+          <div v-if="navTheme === 'immersive'" class="p-2.5 bg-blue-50 border border-blue-100 rounded text-[11px] text-blue-700 space-y-1">
+            <p><i class="fa-solid fa-lightbulb mr-1"></i> 沉浸式会在吸顶前透明化背景，建议配合全屏Banner使用。</p>
+          </div>
+        </div>
+
+        <div class="h-px bg-slate-100"></div>
+
+        <!-- 3. 标题设置 -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="font-medium text-slate-800">标题设置</label>
+            <!-- Toggle Button -->
+            <button @click="titleEnabled = !titleEnabled" 
+                    class="w-9 h-5 flex items-center rounded-full p-0.5 cursor-pointer transition-colors"
+                    :class="titleEnabled ? 'bg-blue-600' : 'bg-slate-300'">
+              <div class="bg-white w-4 h-4 rounded-full shadow-md transform transition-transform"
+                   :class="{'translate-x-4': titleEnabled}"></div>
+            </button>
+          </div>
+
+          <template v-if="titleEnabled">
+            <div class="space-y-2 pl-2 border-l-2 border-slate-100">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600">内容形式</span>
+                <div class="inline-flex rounded-md shadow-sm">
+                  <button @click="contentType = 'text'" class="px-2.5 py-1 text-[11px] border rounded-l" :class="contentType === 'text' ? 'bg-blue-50 border-blue-600 text-blue-600' : 'border-slate-200'">文字</button>
+                  <button @click="contentType = 'image'" class="px-2.5 py-1 text-[11px] border-t border-b border-r rounded-r" :class="contentType === 'image' ? 'bg-blue-50 border-blue-600 text-blue-600' : 'border-slate-200'">图片</button>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600">位置选择</span>
+                <div class="inline-flex rounded-md shadow-sm">
+                  <button @click="setTitlePosition('center')" class="px-2.5 py-1 text-[11px] border rounded-l" :class="titlePosition === 'center' ? 'bg-blue-50 border-blue-600 text-blue-600' : 'border-slate-200'">居中</button>
+                  <button @click="setTitlePosition('left')" class="px-2.5 py-1 text-[11px] border-t border-b border-r rounded-r" :class="titlePosition === 'left' ? 'bg-blue-50 border-blue-600 text-blue-600' : 'border-slate-200'">居左</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="h-px bg-slate-100"></div>
+
+        <!-- 4. ★ 新增需求：搜索设置 (NEW SEARCH CONFIGURATION) ★ -->
+        <div class="space-y-4 bg-slate-50 p-3.5 rounded-xl border border-blue-200 relative">
+          <span class="absolute -top-2.5 right-3 bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">新增配置</span>
+          
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-magnifying-glass text-blue-600 mr-1.5"></i> 搜索设置
+            </label>
+            <!-- Search Toggle -->
+            <button @click="toggleSearch(!isSearchEnabled)" 
+                    class="w-9 h-5 flex items-center rounded-full p-0.5 cursor-pointer transition-colors"
+                    :class="isSearchEnabled ? 'bg-blue-600' : 'bg-slate-300'">
+              <div class="bg-white w-4 h-4 rounded-full shadow-md transform transition-transform"
+                   :class="{'translate-x-4': isSearchEnabled}"></div>
+            </button>
+          </div>
+
+          <template v-if="isSearchEnabled">
+            <div class="space-y-3.5 pt-1">
+              
+              <!-- 展现形态 -->
+              <div>
+                <label class="text-slate-600 block mb-1.5 font-medium">展现形态</label>
+                <div class="space-y-1.5">
+                  <label class="flex items-center space-x-2 p-1.5 rounded hover:bg-white cursor-pointer border"
+                         :class="searchMode === 'inline_input' ? 'border-blue-500 bg-white' : 'border-transparent'">
+                    <input type="radio" value="inline_input" v-model="searchMode" @change="onSearchModeChange" class="accent-blue-600">
+                    <span class="text-slate-800">紧凑搜索框模式 <span class="text-[10px] text-slate-400">( Logo/标题 + 搜索框 )</span></span>
+                  </label>
+                  
+                  <label class="flex items-center space-x-2 p-1.5 rounded hover:bg-white cursor-pointer border"
+                         :class="searchMode === 'icon_only' ? 'border-blue-500 bg-white' : 'border-transparent'">
+                    <input type="radio" value="icon_only" v-model="searchMode" @change="onSearchModeChange" class="accent-blue-600">
+                    <span class="text-slate-800">图标模式 <span class="text-[10px] text-slate-400">( 右侧 🔍 图标 )</span></span>
+                  </label>
+
+                  <label class="flex items-center space-x-2 p-1.5 rounded hover:bg-white cursor-pointer border"
+                         :class="searchMode === 'full_input' ? 'border-blue-500 bg-white' : 'border-transparent'">
+                    <input type="radio" value="full_input" v-model="searchMode" @change="onSearchModeChange" class="accent-blue-600">
+                    <span class="text-slate-800">纯搜索框模式 <span class="text-[10px] text-slate-400">( 隐藏标题，搜索框铺满 )</span></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 提示文字 -->
+              <div v-if="searchMode !== 'icon_only'">
+                <label class="text-slate-600 block mb-1 font-medium">提示文字</label>
+                <input type="text" v-model="searchPlaceholder" maxlength="15" placeholder="请输入搜索占位词" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none text-xs bg-white">
+                <span class="text-[10px] text-slate-400 mt-0.5 block text-right">{{ searchPlaceholder.length }}/15 字</span>
+              </div>
+
+            </div>
+          </template>
+        </div>
+
+        <div class="h-px bg-slate-100"></div>
+
+        <!-- 5. 颜色设置 -->
+        <div class="space-y-3">
+          <label class="font-medium text-slate-800 block">颜色设置</label>
+          
+          <div class="flex items-center justify-between">
+            <span class="text-slate-600">背景颜色</span>
+            <div class="flex items-center space-x-2">
+              <input type="color" v-model="navBgColor" class="w-6 h-6 rounded cursor-pointer border border-slate-300 p-0">
+              <span class="font-mono text-[11px] uppercase text-slate-600">{{ navBgColor }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-slate-600">文字/图标模式</span>
+            <div class="inline-flex rounded-md shadow-sm">
+              <button @click="textMode = 'light'" class="px-2.5 py-1 text-[11px] border rounded-l" :class="textMode === 'light' ? 'bg-blue-50 border-blue-600 text-blue-600' : 'border-slate-200'">浅色模式</button>
+              <button @click="textMode = 'dark'" class="px-2.5 py-1 text-[11px] border-t border-b border-r rounded-r" :class="textMode === 'dark' ? 'bg-blue-50 border-blue-600 text-blue-600' : 'border-slate-200'">深色模式</button>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch } = Vue;
+
+    createApp({
+      setup() {
+        // State variables
+        const navStyle = ref('custom');
+        const navTheme = ref('immersive'); // standard | immersive
+        
+        // Title settings
+        const titleEnabled = ref(true);
+        const contentType = ref('text'); // text | image
+        const titlePosition = ref('left'); // center | left
+
+        // Search settings
+        const isSearchEnabled = ref(true);
+        const searchMode = ref('inline_input'); // inline_input | icon_only | full_input
+        const searchPlaceholder = ref('搜索心仪商品');
+
+        // Color settings
+        const navBgColor = ref('#FFFFFF');
+        const textMode = ref('dark'); // dark | light
+
+        // Scroll simulator
+        const scrollOffset = ref(0);
+        const phoneBody = ref(null);
+        const toastMessage = ref('');
+
+        // Show toast notification
+        const showToast = (msg) => {
+          toastMessage.value = msg;
+          setTimeout(() => {
+            toastMessage.value = '';
+          }, 3000);
+        };
+
+        // Scroll logic check
+        const isScrolledDown = computed(() => {
+          return scrollOffset.value > 20;
+        });
+
+        // Computed text brightness
+        const isDarkText = computed(() => {
+          if (navTheme.value === 'immersive' && !isScrolledDown.value) {
+            return false; // Immersive background defaults to light text on banner
+          }
+          return textMode.value === 'dark';
+        });
+
+        // Dynamic Nav Style
+        const navHeaderStyle = computed(() => {
+          if (navTheme.value === 'immersive') {
+            if (isScrolledDown.value) {
+              return {
+                backgroundColor: navBgColor.value,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+              };
+            } else {
+              return {
+                backgroundColor: 'transparent'
+              };
+            }
+          } else {
+            return {
+              backgroundColor: navBgColor.value,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            };
+          }
+        });
+
+        // Custom search background dynamically adapts
+        const customSearchBg = computed(() => {
+          if (navTheme.value === 'immersive' && !isScrolledDown.value) {
+            return {
+              backgroundColor: 'rgba(255, 255, 255, 0.75)'
+            };
+          }
+          return {};
+        });
+
+        // Sync slider scroll to phone container body
+        watch(scrollOffset, (val) => {
+          if (phoneBody.value) {
+            phoneBody.value.scrollTop = val;
+          }
+        });
+
+        const handlePhoneScroll = (e) => {
+          scrollOffset.value = Math.round(e.target.scrollTop);
+        };
+
+        // Mutually exclusive rule handling
+        const toggleSearch = (val) => {
+          isSearchEnabled.value = val;
+          if (val && searchMode.value === 'inline_input' && titlePosition.value === 'center') {
+            titlePosition.value = 'left';
+            showToast('开启紧凑搜索框时，标题已自动为您调整为居左展示');
+          }
+        };
+
+        const onSearchModeChange = () => {
+          if (searchMode.value === 'inline_input' && titlePosition.value === 'center') {
+            titlePosition.value = 'left';
+            showToast('搜索框模式下，标题已自动调整为居左展示');
+          }
+        };
+
+        const setTitlePosition = (pos) => {
+          if (pos === 'center' && isSearchEnabled.value && searchMode.value === 'inline_input') {
+            showToast('搜索框模式下，标题不可设为居中（已切换为图标模式或居左）');
+            titlePosition.value = 'center';
+            searchMode.value = 'icon_only';
+            return;
+          }
+          titlePosition.value = pos;
+        };
+
+        const setNavTheme = (theme) => {
+          navTheme.value = theme;
+          if (theme === 'immersive') {
+            textMode.value = 'light';
+          } else {
+            textMode.value = 'dark';
+          }
+        };
+
+        return {
+          navStyle,
+          navTheme,
+          titleEnabled,
+          contentType,
+          titlePosition,
+          isSearchEnabled,
+          searchMode,
+          searchPlaceholder,
+          navBgColor,
+          textMode,
+          scrollOffset,
+          phoneBody,
+          toastMessage,
+          isScrolledDown,
+          isDarkText,
+          navHeaderStyle,
+          customSearchBg,
+          handlePhoneScroll,
+          toggleSearch,
+          onSearchModeChange,
+          setTitlePosition,
+          setNavTheme,
+          showToast
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

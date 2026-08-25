@@ -1,0 +1,715 @@
+/* ==========================================================================
+   前台类目管理 & 分类装修 - 样式表
+   ========================================================================== */
+
+.category-manager-container {
+  padding: 20px 24px 40px;
+  background-color: #f0f2f5;
+  min-height: calc(100vh - 64px);
+}
+
+.category-manager-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 20px 24px;
+}
+
+/* 顶部导航与操作栏 */
+.category-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.category-nav-tabs {
+  display: flex;
+  gap: 32px;
+}
+
+.category-nav-tab-item {
+  font-size: 15px;
+  font-weight: 500;
+  color: #595959;
+  cursor: pointer;
+  padding: 8px 0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.category-nav-tab-item:hover {
+  color: #1677ff;
+}
+
+.category-nav-tab-item.active {
+  color: #1677ff;
+  font-weight: 600;
+}
+
+.category-nav-tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -13px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #1677ff;
+  border-radius: 2px;
+}
+
+.category-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* 提示条 */
+.category-alert-bar {
+  margin-bottom: 20px;
+  background: #e6f4ff;
+  border: 1px solid #91caff;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #1677ff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-alert-bar a {
+  color: #1677ff;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  margin: 0 4px;
+}
+
+/* 工具栏 */
+.category-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* 树形表格样式 */
+.category-tree-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+  font-size: 13px;
+}
+
+.category-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-level-tag {
+  font-size: 11px;
+  padding: 0 5px;
+  line-height: 18px;
+  border-radius: 3px;
+}
+
+.level-1-tag {
+  background: #e6f4ff;
+  color: #1677ff;
+  border: 1px solid #91caff;
+}
+
+.level-2-tag {
+  background: #f9f0ff;
+  color: #722ed1;
+  border: 1px solid #d3adf7;
+}
+
+.level-3-tag {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.category-thumb-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.category-thumb-img:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.category-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.mode-hotspot {
+  background: #fff7e6;
+  color: #d46b08;
+  border: 1px solid #ffd591;
+}
+
+.mode-banner {
+  background: #e6f4ff;
+  color: #0958d9;
+  border: 1px solid #91caff;
+}
+
+.mode-group {
+  background: #f9f0ff;
+  color: #531dab;
+  border: 1px solid #d3adf7;
+}
+
+.mode-leaf {
+  background: #f6ffed;
+  color: #389e0d;
+  border: 1px solid #b7eb8f;
+}
+
+.mode-page {
+  background: #e6fffb;
+  color: #08979c;
+  border: 1px solid #87e8de;
+}
+
+/* 行内操作按钮 */
+.category-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-row-actions button {
+  padding: 0 4px;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   热区编辑器（核心交互）
+   ========================================================================== */
+.hotspot-editor-wrapper {
+  display: flex;
+  gap: 20px;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.hotspot-canvas-container {
+  flex: 0 0 280px;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+}
+
+.hotspot-canvas-header {
+  padding: 8px 12px;
+  background: #f0f0f0;
+  font-size: 12px;
+  color: #595959;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.hotspot-canvas-board {
+  position: relative;
+  width: 280px;
+  min-height: 380px;
+  cursor: crosshair;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.hotspot-bg-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+}
+
+.hotspot-rect-box {
+  position: absolute;
+  border: 2px dashed #1677ff;
+  background: rgba(22, 119, 255, 0.18);
+  box-sizing: border-box;
+  cursor: move;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  transition: background 0.15s;
+}
+
+.hotspot-rect-box:hover,
+.hotspot-rect-box.selected {
+  border-color: #0958d9;
+  background: rgba(22, 119, 255, 0.3);
+  box-shadow: 0 0 8px rgba(22, 119, 255, 0.4);
+}
+
+.hotspot-rect-badge {
+  background: #1677ff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 1px 5px;
+  border-radius: 0 0 4px 0;
+  line-height: 14px;
+}
+
+.hotspot-rect-delete-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  background: #ff4d4f;
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* 热区右侧列表 */
+.hotspot-list-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.hotspot-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.hotspot-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.hotspot-item-card {
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.hotspot-item-card:hover,
+.hotspot-item-card.active {
+  border-color: #1677ff;
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.12);
+}
+
+.hotspot-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hotspot-tag-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   分类装修 Tab（真机模拟器 + 右侧配置）
+   ========================================================================== */
+.decoration-tab-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  padding: 10px 0;
+}
+
+/* 手机外壳容器 */
+.phone-simulator-frame {
+  width: 375px;
+  height: 680px;
+  background: #f8f8f8;
+  border-radius: 40px;
+  border: 12px solid #222;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.phone-status-bar {
+  height: 38px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+}
+
+.phone-nav-bar {
+  height: 44px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.phone-nav-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.phone-search-box {
+  background: #f2f2f2;
+  border-radius: 16px;
+  height: 30px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 8px 12px;
+}
+
+/* 手机内部分类页面主体 */
+.phone-category-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* 手机端左侧一级菜单 */
+.phone-left-menu {
+  width: 86px;
+  background: #f7f8fa;
+  overflow-y: auto;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-left-menu-item {
+  padding: 14px 8px;
+  font-size: 12px;
+  color: #595959;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  line-height: 1.3;
+}
+
+.phone-left-menu-item:hover {
+  color: #1677ff;
+}
+
+.phone-left-menu-item.active {
+  background: #ffffff;
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.phone-left-menu-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  background: #ff4d4f;
+  border-radius: 0 2px 2px 0;
+}
+
+/* 手机端右侧内容区 */
+.phone-right-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 右侧大图热区渲染 */
+.phone-hotspot-view {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.phone-hotspot-img {
+  width: 100%;
+  display: block;
+}
+
+.phone-hotspot-spot {
+  position: absolute;
+  border: 1.5px dashed rgba(255, 255, 255, 0.8);
+  background: rgba(22, 119, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.2);
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+/* 手机端 Banner */
+.phone-banner-img {
+  width: 100%;
+  height: 80px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* 手机端二级分类 Tab（商品平铺模式） */
+.phone-sub-tabs-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.phone-sub-tab-pill {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 12px;
+  background: #f5f5f5;
+  color: #595959;
+  white-space: nowrap;
+}
+
+.phone-sub-tab-pill.active {
+  background: #ff4d4f;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* 商品平铺列表 */
+.phone-goods-item {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #fafafa;
+}
+
+.phone-goods-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.phone-goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.phone-goods-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #262626;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.phone-goods-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.phone-goods-price {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ff4d4f;
+}
+
+.phone-goods-origin-price {
+  font-size: 11px;
+  color: #bfbfbf;
+  text-decoration: line-through;
+  margin-left: 4px;
+}
+
+.phone-buy-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* 三级网格分类展示 */
+.phone-sub-group-block {
+  margin-bottom: 12px;
+}
+
+.phone-sub-group-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #262626;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.phone-grid-3-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.phone-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.phone-grid-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #f5f5f5;
+}
+
+.phone-grid-text {
+  font-size: 11px;
+  color: #595959;
+  text-align: center;
+}
+
+/* 右侧配置面板 */
+.decoration-config-panel {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  border: 1px solid #f0f0f0;
+}
+
+.config-section-item {
+  margin-bottom: 24px;
+}
+
+.config-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.config-section-title.required::before {
+  content: '*';
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+/* 链接选择器 */
+.link-selector-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #262626;
+}
+
+.link-selector-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 13px;
+  color: #1677ff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.link-selector-empty:hover {
+  border-color: #1677ff;
+  background: #f0f7ff;
+}

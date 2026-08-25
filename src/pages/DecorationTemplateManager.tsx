@@ -439,12 +439,6 @@ const DecorationTemplateManager: React.FC = () => {
                <div style={{ width: '220px', background: 'white', borderRight: '1px solid var(--border)', padding: '16px', overflowY: 'auto' }}>
                  <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '16px' }}>组件库</div>
                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                   <div style={{ textAlign: 'center', padding: '12px 0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: 'var(--gray-1)' }}><div style={{ fontSize: '20px', marginBottom: '4px' }}>🖼</div><div style={{ fontSize: '12px' }}>轮播图</div></div>
-                   <div style={{ textAlign: 'center', padding: '12px 0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: 'var(--gray-1)' }}><div style={{ fontSize: '20px', marginBottom: '4px' }}>🗂</div><div style={{ fontSize: '12px' }}>导航组</div></div>
-                   <div style={{ textAlign: 'center', padding: '12px 0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: 'var(--gray-1)' }}><div style={{ fontSize: '20px', marginBottom: '4px' }}>🛍</div><div style={{ fontSize: '12px' }}>商品列表</div></div>
-                   <div style={{ textAlign: 'center', padding: '12px 0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: 'var(--gray-1)' }}><div style={{ fontSize: '20px', marginBottom: '4px' }}>📝</div><div style={{ fontSize: '12px' }}>图文</div></div>
-                   <div style={{ textAlign: 'center', padding: '12px 0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: 'var(--gray-1)' }}><div style={{ fontSize: '20px', marginBottom: '4px' }}>📢</div><div style={{ fontSize: '12px' }}>公告栏</div></div>
-                   <div style={{ textAlign: 'center', padding: '12px 0', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', background: 'var(--gray-1)' }}><div style={{ fontSize: '20px', marginBottom: '4px' }}>🎁</div><div style={{ fontSize: '12px' }}>优惠券</div></div>
                  </div>
                </div>
                {/*  center  */}
