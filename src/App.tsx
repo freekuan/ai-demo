@@ -3703,32 +3703,106 @@ function KocInteractiveEditor({ aiInteractiveEnabled, openAiAuditModal }: KocInt
   )
 }
 
-export default function App() {
-  const [railKey, setRailKey] = useState<PrimaryKey>('shop')
-  const [secondaryKey, setSecondaryKey] = useState<string>(
-    defaultSecondaryKey.shop,
-  )
+// 页面路由快捷别名映射
+const PAGE_ALIAS_MAP: Record<string, { rail: PrimaryKey; menu: string }> = {
+  // 分类管理 / 分类装修 (当前核心)
+  category: { rail: 'shop', menu: 'shop-product-category' },
+  'category-manager': { rail: 'shop', menu: 'shop-product-category' },
+  'front-category': { rail: 'shop', menu: 'shop-product-category' },
+  'category-decoration': { rail: 'shop', menu: 'shop-category-decoration' },
+  // 店铺导航 / 装修
+  navigation: { rail: 'shop', menu: 'shop-navigation' },
+  template: { rail: 'shop', menu: 'shop-template-manager' },
+  'template-manager': { rail: 'shop', menu: 'shop-template-manager' },
+  'home-decoration': { rail: 'shop', menu: 'shop-homepage-decoration' },
+  // 营销活动
+  'golden-egg': { rail: 'shop', menu: 'shop-golden-egg' },
+  lottery: { rail: 'shop', menu: 'shop-points-lottery' },
+  'lottery-rules': { rail: 'shop', menu: 'shop-points-lottery-rules' },
+  task: { rail: 'shop', menu: 'shop-points-task' },
+  invite: { rail: 'shop', menu: 'shop-invite-reward' },
+  'group-buy': { rail: 'shop', menu: 'shop-group-buy' },
+  'order-conversion': { rail: 'shop', menu: 'shop-order-conversion' },
+  // 积分与应用
+  'points-prod': { rail: 'shop', menu: 'shop-points-prod' },
+  'points-mkt': { rail: 'shop', menu: 'shop-points-mkt' },
+  'mkt-tools': { rail: 'shop', menu: 'shop-mkt-tools-home' },
+  apps: { rail: 'apps', menu: 'dash-apps-market' },
+}
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const page = params.get('page')
-    if (page === 'group-buy') {
-      setRailKey('shop')
-      setSecondaryKey('shop-group-buy')
+// 解析当前 URL 返回初始路由状态
+function getInitialRoute(): { rail: PrimaryKey; menu: string } {
+  if (typeof window === 'undefined') {
+    return { rail: 'shop', menu: defaultSecondaryKey.shop }
+  }
+  const params = new URLSearchParams(window.location.search)
+  const page = params.get('page')
+  const railParam = params.get('rail') as PrimaryKey | null
+  const menuParam = params.get('menu')
+
+  if (page && PAGE_ALIAS_MAP[page]) {
+    return PAGE_ALIAS_MAP[page]
+  }
+  if (railParam && menuParam) {
+    return { rail: railParam, menu: menuParam }
+  }
+  if (menuParam) {
+    if (menuParam.startsWith('shop-')) return { rail: 'shop', menu: menuParam }
+    if (menuParam.startsWith('dash-apps')) return { rail: 'apps', menu: menuParam }
+    return { rail: 'shop', menu: menuParam }
+  }
+  return { rail: 'shop', menu: defaultSecondaryKey.shop }
+}
+
+export default function App() {
+  const initialRoute = useMemo(() => getInitialRoute(), [])
+  const [railKey, setRailKey] = useState<PrimaryKey>(initialRoute.rail)
+  const [secondaryKey, setSecondaryKey] = useState<string>(initialRoute.menu)
+
+  // 路由切换与地址栏双向同步
+  const updateRoute = useCallback((rKey: PrimaryKey, sKey: string) => {
+    setRailKey(rKey)
+    setSecondaryKey(sKey)
+
+    // 找到匹配的简短 page alias 或生成通用参数
+    const matchedAlias = Object.keys(PAGE_ALIAS_MAP).find(
+      (alias) => PAGE_ALIAS_MAP[alias].rail === rKey && PAGE_ALIAS_MAP[alias].menu === sKey
+    )
+    const newParams = new URLSearchParams(window.location.search)
+    if (matchedAlias) {
+      newParams.set('page', matchedAlias)
+      newParams.delete('rail')
+      newParams.delete('menu')
+    } else {
+      newParams.set('rail', rKey)
+      newParams.set('menu', sKey)
+      newParams.delete('page')
     }
+    const newUrl = `${window.location.pathname}?${newParams.toString()}`
+    window.history.replaceState(null, '', newUrl)
   }, [])
 
-  const params = new URLSearchParams(window.location.search);
-  const isBossTaobaoPage = params.get('page') === 'boss-taobao';
+  // 监听浏览器前进/后退
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = getInitialRoute()
+      setRailKey(route.rail)
+      setSecondaryKey(route.menu)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  const params = new URLSearchParams(window.location.search)
+  const isBossTaobaoPage = params.get('page') === 'boss-taobao'
 
   if (isBossTaobaoPage) {
-    return <BossAdminTaobaoSync />;
+    return <BossAdminTaobaoSync />
   }
 
   const selectPrimary = useCallback((key: PrimaryKey) => {
-    setRailKey(key)
-    setSecondaryKey(defaultSecondaryKey[key])
-  }, [])
+    updateRoute(key, defaultSecondaryKey[key])
+  }, [updateRoute])
 
   const menuItems = useMemo(
     () => placeholderMenus[railKey],
@@ -3759,9 +3833,9 @@ export default function App() {
 
   const handleToolClick = useCallback((key: string) => {
     if (key === 'group') {
-      setSecondaryKey('shop-group-buy')
+      updateRoute('shop', 'shop-group-buy')
     }
-  }, [])
+  }, [updateRoute])
   
   // 基础主题色
   const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage || isCategoryManagerPage) ? 'blue' : 'orange'
@@ -3822,7 +3896,7 @@ export default function App() {
             defaultOpenKeys={menuDefaultOpenKeys}
             style={{ borderInlineEnd: 0, paddingTop: 12 }}
             items={menuItems}
-            onSelect={({ key }) => setSecondaryKey(key)}
+            onSelect={({ key }) => updateRoute(railKey, key)}
           />
         </Sider>
 
@@ -3882,7 +3956,7 @@ export default function App() {
               ) : isInviteRewardPage ? (
                 <InviteReward />
               ) : isHomeDecorationPage ? (
-                <HomeDecoration onBack={() => setSecondaryKey('shop-template-manager')} />
+                <HomeDecoration onBack={() => updateRoute('shop', 'shop-template-manager')} />
               ) : isNavigationPage ? (
                 <NavigationEditor />
               ) : isTemplateManagerPage ? (
