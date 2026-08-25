@@ -365,7 +365,6 @@ export default function CategoryManager() {
 
   // 状态数据
   const [categories, setCategories] = useState<CategoryNode[]>(INITIAL_CATEGORIES)
-  const [searchText, setSearchText] = useState('')
   const [selectedMobileCatId, setSelectedMobileCatId] = useState<string>('c1')
 
   // 分类装修全局配置
@@ -648,7 +647,7 @@ export default function CategoryManager() {
         status: newStatus,
       }))
     )
-    message.success(`已${checked ? '显示' : '隐藏'}分类「${record.name}」`)
+    message.success(`已${checked ? '开启' : '隐藏'}分类「${record.name}」`)
   }
 
   // 删除节点
@@ -796,17 +795,7 @@ export default function CategoryManager() {
           )
         }
         if (record.level === 2) {
-          return (
-            <span style={{ color: '#595959', fontSize: 13 }}>
-              {record.goodsCount ? (
-                <span>
-                  <strong>{record.goodsCount}</strong> 件在售商品
-                </span>
-              ) : (
-                <span style={{ color: '#bfbfbf' }}>暂无关联商品</span>
-              )}
-            </span>
-          )
+          return <span style={{ color: '#bfbfbf' }}>-</span>
         }
         // 三级：网格导航 (多级模式生效)
         const cleanName = record.linkInfo?.linkName.replace('后台类目: ', '') || '未配置'
@@ -870,7 +859,7 @@ export default function CategoryManager() {
         <Switch
           checked={record.status === 'SHOW'}
           onChange={(checked) => handleToggleStatus(record, checked)}
-          checkedChildren="显示"
+          checkedChildren="开启"
           unCheckedChildren="隐藏"
           size="small"
         />
@@ -961,27 +950,6 @@ export default function CategoryManager() {
     },
   ]
 
-  // 过滤后的分类树
-  const filteredCategories = useMemo(() => {
-    if (!searchText) return categories
-    const filterFn = (nodes: CategoryNode[]): CategoryNode[] => {
-      return nodes
-        .map((n) => {
-          const match = n.name.toLowerCase().includes(searchText.toLowerCase())
-          const filteredChildren = n.children ? filterFn(n.children) : []
-          if (match || filteredChildren.length > 0) {
-            return {
-              ...n,
-              children: filteredChildren,
-            }
-          }
-          return null
-        })
-        .filter(Boolean) as CategoryNode[]
-    }
-    return filterFn(categories)
-  }, [categories, searchText])
-
   // 当前在手机预览中选中的一级分类对象
   const activeMobileCat = useMemo(() => {
     return categories.find((c) => c.id === selectedMobileCatId) || categories[0]
@@ -1062,28 +1030,16 @@ export default function CategoryManager() {
           <div>
             {/* 工具栏 */}
             <div className="category-toolbar">
-              <Space>
-                <Button type="primary" icon={<PlusOutlined />} onClick={handleAddNewRoot}>
-                  新建一级分类
-                </Button>
-              </Space>
-              <Space>
-                <Input
-                  placeholder="搜索分类名称..."
-                  prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  style={{ width: 220 }}
-                  allowClear
-                />
-              </Space>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleAddNewRoot}>
+                新建一级分类
+              </Button>
             </div>
 
             {/* 树形表格 */}
             <Table
               className="category-tree-table"
               columns={columns}
-              dataSource={filteredCategories}
+              dataSource={categories}
               rowKey="id"
               pagination={false}
               defaultExpandAllRows
@@ -1724,7 +1680,7 @@ export default function CategoryManager() {
           )}
 
           {/* -------------------------------------------------------------
-              类目状态：竖向排列 + 清晰引导
+              类目状态：开启 / 隐藏
               ------------------------------------------------------------- */}
           <Form.Item
             name="status"
@@ -1733,18 +1689,8 @@ export default function CategoryManager() {
             style={{ marginBottom: 16 }}
           >
             <Radio.Group style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <Radio value="SHOW">
-                <strong>开启显示</strong>
-                <span style={{ color: '#8c8c8c', fontSize: 12, marginLeft: 8 }}>
-                  在前台小程序分类菜单中正常展示
-                </span>
-              </Radio>
-              <Radio value="HIDE">
-                <strong>暂时隐藏</strong>
-                <span style={{ color: '#8c8c8c', fontSize: 12, marginLeft: 8 }}>
-                  在前台下架此分类（其下子分类也将一同隐藏）
-                </span>
-              </Radio>
+              <Radio value="SHOW">开启</Radio>
+              <Radio value="HIDE">隐藏</Radio>
             </Radio.Group>
           </Form.Item>
 
