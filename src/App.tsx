@@ -163,6 +163,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-member-info', label: '会员信息' },
       { key: 'shop-member-level', label: '会员等级' },
       { key: 'shop-member-benefit', label: '会员权益' },
+      { key: 'shop-birthday-history-prototype', label: <a href="/customer_birthday_history_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>生日修改记录原型(独立页)</a> },
     ],
   },
   {

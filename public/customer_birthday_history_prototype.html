@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客户画像 - 生日修改记录 (极简版设计稿)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=PingFang+SC:wght@400;500;600;700&display=swap');
+    body {
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      background-color: #f0f2f5;
+      color: #333333;
+    }
+    [x-cloak] { display: none !important; }
+    
+    .watermark-text {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='100px' width='160px'><text transform='translate(20, 80) rotate(-20)' fill='rgba(0, 0, 0, 0.03)' font-size='13' font-family='sans-serif'>freekuan</text></svg>");
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-gray-800" x-data="birthdayHistoryDemo()">
+
+  <!-- 顶部全局导航栏 -->
+  <header class="h-12 bg-white border-b border-gray-200 px-6 flex items-center justify-between z-20 shrink-0 shadow-sm">
+    <div class="flex items-center space-x-3">
+      <div class="w-7 h-7 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm">
+        <i class="fa-solid fa-users"></i>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="text-sm font-semibold text-gray-800">客户画像管理系统</span>
+        <span class="text-gray-300">/</span>
+        <span class="text-sm text-gray-500">客户详情 (ID: 1000122800304821)</span>
+      </div>
+    </div>
+
+    <!-- 演示场景切换 -->
+    <div class="flex items-center space-x-2 bg-blue-50/80 px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs">
+      <span class="text-blue-700 font-medium">数据模拟：</span>
+      <button 
+        @click="switchScenario('multiple')" 
+        :class="activeScenario === 'multiple' ? 'bg-blue-600 text-white font-medium' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'"
+        class="px-2.5 py-1 rounded transition">
+        有修改记录
+      </button>
+      <button 
+        @click="switchScenario('initial_only')" 
+        :class="activeScenario === 'initial_only' ? 'bg-blue-600 text-white font-medium' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'"
+        class="px-2.5 py-1 rounded transition">
+        仅1条记录
+      </button>
+      <button 
+        @click="switchScenario('empty')" 
+        :class="activeScenario === 'empty' ? 'bg-blue-600 text-white font-medium' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'"
+        class="px-2.5 py-1 rounded transition">
+        无记录/无生日
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体工作区 -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- 客户画像主体内容区 -->
+    <main class="flex-1 overflow-y-auto bg-gray-100 p-5 watermark-text relative">
+      <div class="max-w-6xl mx-auto space-y-4">
+        
+        <!-- 顶部功能 Tab -->
+        <div class="bg-white rounded-t border-b border-gray-200 px-6 flex space-x-8 text-sm font-medium">
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600">动态</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600">企微档案</a>
+          <a href="javascript:void(0)" class="py-3 text-blue-600 border-b-2 border-blue-600 font-semibold flex items-center">
+            小店会员
+          </a>
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600">触达信息</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600">订单信息</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600 flex items-center">
+            标签 <span class="ml-1 px-1.5 py-0.2 bg-gray-100 text-gray-500 text-xs rounded-full border border-gray-200">99+</span>
+          </a>
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600">所属成员</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600">奶卡订单</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-500 hover:text-blue-600">订单转换</a>
+        </div>
+
+        <!-- 客户主档案卡片 (与用户截图 1:1 还原) -->
+        <div class="bg-white rounded-b shadow-xs p-6 border border-t-0 border-gray-200 space-y-6">
+          
+          <!-- 会员基础信息 Header -->
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+            <div class="flex items-center space-x-4">
+              <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-200 to-orange-300 flex items-center justify-center text-xl shadow-xs border-2 border-white overflow-hidden">
+                <i class="fa-regular fa-user text-amber-700"></i>
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex items-center space-x-2">
+                  <span class="text-base font-bold text-gray-900">青藏高原的freekuan奔至尼古拉山</span>
+                  <span class="text-blue-500 text-xs bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 flex items-center">
+                    <i class="fa-solid fa-cloud mr-1"></i> 企微
+                  </span>
+                </div>
+                <div class="flex items-center space-x-5 text-xs text-gray-500">
+                  <span class="flex items-center">
+                    迁移手机号：<strong class="text-gray-700 ml-1 font-mono">153****8783</strong>
+                    <i class="fa-regular fa-copy ml-1.5 text-gray-400 hover:text-blue-600 cursor-pointer" title="复制"></i>
+                    <i class="fa-solid fa-pencil ml-1 text-gray-400 hover:text-blue-600 cursor-pointer" title="修改"></i>
+                  </span>
+                  <span>所属分销员：<strong class="text-gray-700 font-mono">15382328783</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-right text-xs text-gray-400 flex items-center">
+              <i class="fa-regular fa-clock mr-1"></i> 最近登录时间：2026-08-25 11:21
+            </div>
+          </div>
+
+          <!-- 4 项资产核心指标卡片 -->
+          <div class="grid grid-cols-4 gap-4">
+            <div class="bg-gradient-to-b from-blue-50/50 to-white p-4 rounded-lg border border-blue-100 flex items-center justify-between">
+              <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 tracking-tight font-mono">6,950</div>
+                <div class="text-xs text-gray-500 flex items-center">
+                  <i class="fa-solid fa-coins text-amber-500 mr-1.5"></i> 可用积分
+                </div>
+              </div>
+              <i class="fa-solid fa-ellipsis text-gray-300 hover:text-gray-600 cursor-pointer"></i>
+            </div>
+
+            <div class="bg-gradient-to-b from-indigo-50/50 to-white p-4 rounded-lg border border-indigo-100 flex items-center justify-between">
+              <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 tracking-tight font-mono">3</div>
+                <div class="text-xs text-gray-500 flex items-center">
+                  <i class="fa-solid fa-ticket text-indigo-500 mr-1.5"></i> 可用优惠券
+                </div>
+              </div>
+              <i class="fa-solid fa-ellipsis text-gray-300 hover:text-gray-600 cursor-pointer"></i>
+            </div>
+
+            <div class="bg-gradient-to-b from-sky-50/50 to-white p-4 rounded-lg border border-sky-100 flex items-center justify-between">
+              <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 tracking-tight font-mono">0</div>
+                <div class="text-xs text-gray-500 flex items-center">
+                  <i class="fa-solid fa-credit-card text-sky-500 mr-1.5"></i> 可用返现卡
+                </div>
+              </div>
+              <i class="fa-solid fa-ellipsis text-gray-300 hover:text-gray-600 cursor-pointer"></i>
+            </div>
+
+            <div class="bg-gradient-to-b from-cyan-50/50 to-white p-4 rounded-lg border border-cyan-100 flex items-center justify-between">
+              <div class="space-y-1">
+                <div class="text-2xl font-bold text-gray-900 tracking-tight font-mono">13,593</div>
+                <div class="text-xs text-gray-500 flex items-center">
+                  <i class="fa-solid fa-chart-line text-cyan-500 mr-1.5"></i> 成长值
+                </div>
+              </div>
+              <i class="fa-solid fa-ellipsis text-gray-300 hover:text-gray-600 cursor-pointer"></i>
+            </div>
+          </div>
+
+          <!-- 模块一：会员信息 -->
+          <div class="pt-2">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-2">
+                <div class="w-1 h-3.5 bg-blue-600 rounded-sm"></div>
+                <h3 class="text-sm font-bold text-gray-900">会员信息</h3>
+              </div>
+              <button class="text-xs text-blue-600 hover:underline">编辑</button>
+            </div>
+
+            <!-- 会员详细属性网格 (3列布局) -->
+            <div class="grid grid-cols-3 gap-y-3.5 text-xs text-gray-700 bg-gray-50/50 p-4 rounded-md border border-gray-100">
+              <div class="flex items-center">
+                <span class="w-20 text-gray-400">会员编号</span>
+                <span class="font-mono text-gray-800">1000122800304821</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-20 text-gray-400">会员等级</span>
+                <span class="font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-xs inline-flex items-center">
+                  <i class="fa-solid fa-crown mr-1 text-amber-500"></i> PLUS会员
+                </span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-20 text-gray-400">入会时间</span>
+                <span class="font-mono text-gray-800">2023-04-24 14:28</span>
+              </div>
+
+              <div class="flex items-center">
+                <span class="w-20 text-gray-400">性　　别</span>
+                <span class="text-gray-800">男</span>
+              </div>
+
+              <!-- ★★★ 生日字段 + 图标入口 ★★★ -->
+              <div class="flex items-center relative group">
+                <span class="w-20 text-gray-400">生　　日</span>
+                
+                <!-- 状态 A：有生日 -->
+                <template x-if="activeScenario !== 'empty'">
+                  <div class="flex items-center">
+                    <span class="font-mono text-gray-900 font-medium" x-text="currentBirthday">1990-05-23</span>
+                    
+                    <!-- 极简修改记录图标入口 -->
+                    <div class="relative group/tip inline-flex items-center ml-2">
+                      <button 
+                        @click="openHistoryModal()" 
+                        class="w-5 h-5 rounded flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition cursor-pointer"
+                        aria-label="查看生日修改记录">
+                        <i class="fa-solid fa-clock-rotate-left text-[11px]"></i>
+                      </button>
+
+                      <!-- Tooltip -->
+                      <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/tip:flex flex-col items-center z-30 pointer-events-none">
+                        <div class="bg-gray-800 text-white text-[11px] px-2 py-0.8 rounded shadow-md whitespace-nowrap">
+                          查看修改记录
+                        </div>
+                        <div class="w-1.5 h-1.5 bg-gray-800 rotate-45 -mt-0.5"></div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- 状态 B：无生日 -->
+                <template x-if="activeScenario === 'empty'">
+                  <div class="flex items-center space-x-2">
+                    <span class="text-gray-400">-</span>
+                  </div>
+                </template>
+              </div>
+
+              <div class="flex items-center">
+                <span class="w-20 text-gray-400">渠道列表</span>
+                <span class="text-gray-800">大连东升、天猫销售</span>
+              </div>
+
+              <div class="col-span-3 flex items-start pt-1">
+                <span class="w-20 text-gray-400 shrink-0">收货地址</span>
+                <div class="flex items-center space-x-2 text-gray-800">
+                  <span class="bg-gray-100 text-gray-500 text-[10px] px-1.5 py-0.2 rounded border border-gray-200">默认使用</span>
+                  <span>河北省秦皇岛市海港区经济技术开发区天鹅堡小区5号楼1单元602</span>
+                  <i class="fa-regular fa-copy text-gray-400 hover:text-blue-600 cursor-pointer" title="复制完整地址"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 模块二：订单转换数据 -->
+          <div class="pt-2">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-2">
+                <div class="w-1 h-3.5 bg-blue-600 rounded-sm"></div>
+                <h3 class="text-sm font-bold text-gray-900">订单转换数据</h3>
+              </div>
+              <a href="javascript:void(0)" class="text-xs text-blue-600 hover:underline flex items-center">
+                查看转换记录 <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+              </a>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-gray-50/70 p-3.5 rounded border border-gray-100">
+                <div class="text-xs text-gray-500 mb-1">转换成功订单数</div>
+                <div class="text-xl font-bold text-gray-900 font-mono">32</div>
+              </div>
+              <div class="bg-gray-50/70 p-3.5 rounded border border-gray-100">
+                <div class="text-xs text-gray-500 mb-1">转换成功总积分</div>
+                <div class="text-xl font-bold text-gray-900 font-mono">8035</div>
+              </div>
+              <div class="bg-gray-50/70 p-3.5 rounded border border-gray-100">
+                <div class="text-xs text-gray-500 mb-1">冻结积分</div>
+                <div class="text-xl font-bold text-gray-900 font-mono">1108</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 模块三：交易信息 -->
+          <div class="pt-2">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-2">
+                <div class="w-1 h-3.5 bg-blue-600 rounded-sm"></div>
+                <h3 class="text-sm font-bold text-gray-900">交易信息</h3>
+              </div>
+              <a href="javascript:void(0)" class="text-xs text-blue-600 hover:underline flex items-center">
+                查看订单 <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+              </a>
+            </div>
+            <div class="grid grid-cols-3 gap-y-4 gap-x-4 bg-gray-50/70 p-4 rounded border border-gray-100">
+              <div>
+                <div class="text-xs text-gray-500 mb-1 flex items-center">
+                  小店累计消费金额(元) <i class="fa-regular fa-circle-question ml-1 text-gray-400"></i>
+                </div>
+                <div class="text-xl font-bold text-gray-900 font-mono">435.46</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-500 mb-1">小店累计消费订单数</div>
+                <div class="text-xl font-bold text-gray-900 font-mono">219</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-500 mb-1 flex items-center">
+                  小店累计积分订单数 <i class="fa-regular fa-circle-question ml-1 text-gray-400"></i>
+                </div>
+                <div class="text-xl font-bold text-gray-900 font-mono">59</div>
+              </div>
+
+              <div>
+                <div class="text-xs text-gray-500 mb-1 flex items-center">
+                  小店累计退款金额(元) <i class="fa-regular fa-circle-question ml-1 text-gray-400"></i>
+                </div>
+                <div class="text-xl font-bold text-gray-900 font-mono">90.1</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-500 mb-1">小店累计退款订单数</div>
+                <div class="text-xl font-bold text-gray-900 font-mono">134</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-500 mb-1 flex items-center">
+                  小店最近下单时间 <i class="fa-regular fa-circle-question ml-1 text-gray-400"></i>
+                </div>
+                <div class="text-sm font-medium text-gray-800 font-mono pt-1">2026-08-12 11:21</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ★★★ 核心设计：极简生日修改记录弹窗 (时间去掉秒，仅保留 YYYY-MM-DD HH:mm) ★★★ -->
+  <!-- ========================================================================= -->
+  <div 
+    x-show="modalOpen" 
+    x-cloak 
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-x-hidden overflow-y-auto bg-black/45 backdrop-blur-xs transition-opacity"
+    @keydown.escape.window="modalOpen = false">
+    
+    <!-- 弹窗容器 -->
+    <div 
+      @click.outside="modalOpen = false"
+      x-show="modalOpen"
+      x-transition:enter="transition ease-out duration-150"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="transition ease-in duration-100"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      class="relative w-full max-w-[560px] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex flex-col max-h-[85vh]">
+      
+      <!-- 1. 弹窗头部 -->
+      <div class="px-5 py-3.5 border-b border-gray-200 flex items-center justify-between bg-white shrink-0">
+        <h3 class="text-sm font-bold text-gray-900">生日修改记录</h3>
+        <button 
+          @click="modalOpen = false" 
+          class="w-6 h-6 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- 2. 业务说明提示条 (暂时仅支持25年9月之后的变更记录) -->
+      <div class="px-5 pt-3 shrink-0">
+        <div class="px-3 py-2 bg-blue-50/80 border border-blue-100 rounded text-xs text-blue-700 flex items-center">
+          <i class="fa-solid fa-circle-info mr-2 text-blue-500 text-xs shrink-0"></i>
+          <span>说明：暂时仅支持查看 2025 年 9 月之后的变更记录。</span>
+        </div>
+      </div>
+
+      <!-- 3. 表格列表展示区 (修改时间去掉秒：YYYY-MM-DD HH:mm) -->
+      <div class="px-5 py-3 flex-1 overflow-y-auto min-h-[160px]">
+        <div class="border border-gray-200 rounded overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200 text-xs text-left">
+            <thead class="bg-gray-50 font-medium text-gray-500">
+              <tr>
+                <th scope="col" class="py-2.5 px-3.5 w-36">修改时间</th>
+                <th scope="col" class="py-2.5 px-3.5">变更内容 (前 ➔ 后)</th>
+                <th scope="col" class="py-2.5 px-3.5 w-32">操作人</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+              
+              <!-- 列表有数据 -->
+              <template x-for="(record, index) in historyRecords" :key="index">
+                <tr class="hover:bg-gray-50 transition">
+                  <!-- 修改时间 (不带秒) -->
+                  <td class="py-2.5 px-3.5 whitespace-nowrap font-mono text-gray-600" x-text="record.time"></td>
+
+                  <!-- 变更内容 (前 -> 后) -->
+                  <td class="py-2.5 px-3.5 whitespace-nowrap">
+                    <div class="flex items-center space-x-1.5 font-mono text-xs">
+                      <span class="text-gray-500" x-text="record.before"></span>
+                      <span class="text-gray-400">-></span>
+                      <span class="text-gray-900 font-medium" x-text="record.after"></span>
+                    </div>
+                  </td>
+
+                  <!-- 操作人 -->
+                  <td class="py-2.5 px-3.5 whitespace-nowrap text-gray-700 font-medium" x-text="record.operator"></td>
+                </tr>
+              </template>
+
+              <!-- 空数据状态 -->
+              <tr x-show="historyRecords.length === 0">
+                <td colspan="3" class="py-8 text-center text-gray-400">
+                  <i class="fa-regular fa-folder-open text-2xl mb-1 text-gray-300 block"></i>
+                  暂无 2025 年 9 月之后的变更记录
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. 弹窗底部操作栏 -->
+      <div class="px-5 py-3 bg-gray-50/80 border-t border-gray-200 flex items-center justify-between shrink-0">
+        <div class="text-xs text-gray-500">
+          共 <span class="font-medium text-gray-800 font-mono" x-text="historyRecords.length"></span> 条记录
+        </div>
+        <button 
+          @click="modalOpen = false" 
+          class="px-4 py-1.5 text-xs font-medium bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-50 transition shadow-2xs">
+          关闭
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function birthdayHistoryDemo() {
+      return {
+        modalOpen: true, // 默认打开弹窗供审阅
+        activeScenario: 'multiple',
+        currentBirthday: '1990-05-23',
+
+        // 场景数据 (修改时间不带秒，精确到分：YYYY-MM-DD HH:mm)
+        scenarios: {
+          multiple: {
+            birthday: '1990-05-23',
+            records: [
+              {
+                time: '2026-05-10 14:32',
+                before: '1992-06-15',
+                after: '1990-05-23',
+                operator: '李店长(0082)'
+              },
+              {
+                time: '2025-11-20 09:40',
+                before: '1992-06-01',
+                after: '1992-06-15',
+                operator: '客户本人'
+              },
+              {
+                time: '2025-09-15 16:20',
+                before: '-',
+                after: '1992-06-01',
+                operator: '王导购(15382328783)'
+              }
+            ]
+          },
+          initial_only: {
+            birthday: '1990-05-23',
+            records: [
+              {
+                time: '2025-10-01 10:00',
+                before: '-',
+                after: '1990-05-23',
+                operator: '系统自动同步'
+              }
+            ]
+          },
+          empty: {
+            birthday: '-',
+            records: []
+          }
+        },
+
+        get historyRecords() {
+          return this.scenarios[this.activeScenario].records;
+        },
+
+        switchScenario(type) {
+          this.activeScenario = type;
+          this.currentBirthday = this.scenarios[type].birthday;
+          if (type === 'empty') {
+            this.modalOpen = false;
+          } else {
+            this.modalOpen = true;
+          }
+        },
+
+        openHistoryModal() {
+          if (this.activeScenario === 'empty') return;
+          this.modalOpen = true;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
