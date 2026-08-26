@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品分组配置项升级设计稿 - 高保真交互原型 v2.2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+    }
+    /* 手机滚动条隐藏与美化 */
+    .phone-scroll::-webkit-scrollbar {
+      width: 3px;
+    }
+    .phone-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    /* 脉冲光效 */
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+    }
+    .badge-pulse {
+      animation: pulse-glow 2s infinite;
+    }
+    /* 玻璃拟态 */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-800 antialiased">
+  <div id="app" class="h-full flex flex-col">
+    <!-- 顶部主导航栏 -->
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 z-30 shadow-sm">
+      <div class="flex items-center space-x-4">
+        <a href="/" class="flex items-center text-slate-500 hover:text-blue-600 transition text-sm font-medium">
+          <i class="fa-solid fa-arrow-left mr-2"></i> 返回后台系统
+        </a>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <div class="flex items-center space-x-2">
+          <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shadow-blue-200">
+            <i class="fa-solid fa-layer-group"></i>
+          </span>
+          <div>
+            <h1 class="text-base font-bold text-slate-900 leading-tight">商品分组配置项升级设计稿</h1>
+            <p class="text-xs text-slate-400">SaaS 后台配置项重构 & 移动端高保真商品流 (v2.2 优化版)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 快捷标签与视角切换 -->
+      <div class="flex items-center space-x-3">
+        <!-- 视角切换器 -->
+        <div class="bg-slate-100 p-1 rounded-lg flex items-center text-xs font-semibold">
+          <button 
+            @click="activeViewMode = 'PROTOTYPE'"
+            :class="activeViewMode === 'PROTOTYPE' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+            class="px-3 py-1.5 rounded-md transition flex items-center"
+          >
+            <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> 新版交互工作台
+          </button>
+          <button 
+            @click="activeViewMode = 'COMPARE'"
+            :class="activeViewMode === 'COMPARE' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+            class="px-3 py-1.5 rounded-md transition flex items-center"
+          >
+            <i class="fa-solid fa-code-compare mr-1.5"></i> 新旧方案全景对比
+          </button>
+          <button 
+            @click="activeViewMode = 'SPEC'"
+            :class="activeViewMode === 'SPEC' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
+            class="px-3 py-1.5 rounded-md transition flex items-center"
+          >
+            <i class="fa-solid fa-book-bookmark mr-1.5"></i> 需求与技术规范 (PRD)
+          </button>
+        </div>
+
+        <button 
+          @click="showNotification('设计稿与配置已成功保存！')"
+          class="px-4 py-1.5 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-sm shadow-blue-200 flex items-center"
+        >
+          <i class="fa-solid fa-check mr-2"></i> 保存并发布分组
+        </button>
+      </div>
+    </header>
+
+    <!-- 主体区域 -->
+    <main class="flex-1 flex overflow-hidden">
+      
+      <!-- ================= 模式 1: 新版交互配置工作台 ================= -->
+      <div v-if="activeViewMode === 'PROTOTYPE'" class="flex-1 flex overflow-hidden">
+        
+        <!-- 左侧：升级后的结构化配置表单 -->
+        <div class="w-[620px] bg-white border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto p-6 space-y-6">
+          
+          <!-- 模块 1: 基础与头部展示配置 -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div class="flex items-center space-x-2">
+                <span class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                <h3 class="font-bold text-slate-800 text-sm">基础与头部展示配置</h3>
+              </div>
+              <span class="text-xs text-slate-400">基础内容</span>
+            </div>
+
+            <!-- 分组名称 -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+                <span class="text-red-500 mr-1">*</span>商品分组名称
+              </label>
+              <input 
+                type="text" 
+                v-model="groupConfig.name"
+                class="w-full px-3.5 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="例如：全场热销爆款 / 当季新品专区"
+                maxlength="20"
+              />
+              <p class="text-[11px] text-slate-400 mt-1">展示在买家端顶部标题栏与分类导航中（最多20字）</p>
+            </div>
+
+            <!-- 搜索框配置 (默认圆角胶囊) -->
+            <div class="bg-white border border-blue-200 rounded-lg p-4 space-y-3 shadow-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <i class="fa-solid fa-magnifying-glass text-blue-600 text-sm"></i>
+                  <span class="text-xs font-bold text-slate-800">页面搜索框配置</span>
+                  <span class="text-[10px] bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">默认圆角胶囊</span>
+                </div>
+                <!-- 开关 -->
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" v-model="groupConfig.showSearch" class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+
+              <!-- 搜索框展开项 -->
+              <div v-if="groupConfig.showSearch" class="pt-2 border-t border-slate-100 space-y-2">
+                <div>
+                  <label class="block text-[11px] font-medium text-slate-600 mb-1">搜索框占位提示词 (Placeholder)</label>
+                  <input 
+                    type="text" 
+                    v-model="groupConfig.searchPlaceholder"
+                    class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="例如：搜索本组精选好物..."
+                  />
+                </div>
+                <div class="text-[11px] text-slate-400">
+                  💡 默认采用圆角胶囊样式常驻页面顶部，买家输入即可快捷搜索分组内商品。
+                </div>
+              </div>
+            </div>
+
+            <!-- 头图升级为轮播广告（默认速度，支持跳转） -->
+            <div class="bg-white border border-slate-200 rounded-lg p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <i class="fa-solid fa-images text-orange-500 text-sm"></i>
+                  <span class="text-xs font-bold text-slate-800">顶部轮播广告 (原头图升级)</span>
+                  <span class="text-[10px] bg-orange-100 text-orange-700 font-semibold px-2 py-0.5 rounded">支持跳转</span>
+                </div>
+                <button 
+                  @click="addNewBanner" 
+                  :disabled="groupConfig.banners.length >= 5"
+                  class="text-xs text-blue-600 hover:text-blue-700 font-semibold disabled:text-slate-300 flex items-center"
+                >
+                  <i class="fa-solid fa-plus mr-1"></i> 添加广告图 ({{ groupConfig.banners.length }}/5)
+                </button>
+              </div>
+
+              <!-- 轮播图列表 -->
+              <div class="space-y-2">
+                <div 
+                  v-for="(banner, idx) in groupConfig.banners" 
+                  :key="banner.id"
+                  class="flex items-center space-x-3 p-2.5 bg-slate-50 border border-slate-200 rounded-lg hover:border-blue-300 transition"
+                >
+                  <span class="text-xs font-bold text-slate-400 w-4 text-center">{{ idx + 1 }}</span>
+                  <img :src="banner.imageUrl" class="w-14 h-9 object-cover rounded border border-slate-200 shrink-0" />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-slate-800 truncate">{{ banner.title }}</p>
+                    <div class="flex items-center mt-1 space-x-1">
+                      <span class="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded flex items-center truncate max-w-[200px]">
+                        <i class="fa-solid fa-link text-[8px] mr-1"></i> {{ banner.linkName }}
+                      </span>
+                    </div>
+                  </div>
+                  <!-- 操作按钮 -->
+                  <div class="flex items-center space-x-1 text-slate-400">
+                    <button @click="moveBanner(idx, -1)" :disabled="idx === 0" class="p-1 hover:text-blue-600 disabled:opacity-30">
+                      <i class="fa-solid fa-chevron-up text-xs"></i>
+                    </button>
+                    <button @click="moveBanner(idx, 1)" :disabled="idx === groupConfig.banners.length - 1" class="p-1 hover:text-blue-600 disabled:opacity-30">
+                      <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
+                    <button @click="editBannerLink(idx)" class="p-1 hover:text-blue-600" title="编辑跳转">
+                      <i class="fa-solid fa-pen-to-square text-xs"></i>
+                    </button>
+                    <button @click="removeBanner(idx)" class="p-1 hover:text-red-600" title="删除">
+                      <i class="fa-solid fa-trash text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 模块 2: 商品排序与排版规则 (保留一行二/一行一，去掉前台切换栏) -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div class="flex items-center space-x-2">
+                <span class="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+                <h3 class="font-bold text-slate-800 text-sm">商品排序与展示排版</h3>
+              </div>
+              <span class="text-xs text-slate-400">展示定制</span>
+            </div>
+
+            <!-- 商品排序 (默认综合推荐) -->
+            <div class="space-y-2">
+              <label class="block text-xs font-semibold text-slate-700">
+                默认商品排序规则 (前台严格按此顺序排列)
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button 
+                  v-for="sort in sortOptions" 
+                  :key="sort.value"
+                  @click="groupConfig.goodsSortRule = sort.value"
+                  :class="groupConfig.goodsSortRule === sort.value ? 'border-blue-600 bg-blue-50 text-blue-700 font-bold shadow-xs' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'"
+                  class="p-2.5 text-left text-xs border rounded-lg transition flex items-center justify-between"
+                >
+                  <div>
+                    <div class="font-semibold">{{ sort.label }}</div>
+                    <div class="text-[10px] text-slate-400 font-normal">{{ sort.desc }}</div>
+                  </div>
+                  <i v-if="groupConfig.goodsSortRule === sort.value" class="fa-solid fa-circle-check text-blue-600 text-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 保留：排版样式 (一行2个 vs 一行1个) -->
+            <div class="space-y-2 pt-2 border-t border-slate-200">
+              <label class="block text-xs font-semibold text-slate-700">
+                商品列表排版样式 (保留一行二与一行一)
+              </label>
+              <div class="grid grid-cols-2 gap-3">
+                <div 
+                  @click="groupConfig.layoutStyle = 'TWO_COLUMNS'"
+                  :class="groupConfig.layoutStyle === 'TWO_COLUMNS' ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500/20' : 'border-slate-200 bg-white'"
+                  class="border rounded-xl p-3 cursor-pointer transition"
+                >
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-800 flex items-center">
+                      <i class="fa-solid fa-table-cells text-blue-600 mr-1.5"></i> 一行 2 个 (双列 1:1 正方形图)
+                    </span>
+                    <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded">推荐</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500">主流电商标准，高屏效与视觉兼备。</p>
+                </div>
+
+                <div 
+                  @click="groupConfig.layoutStyle = 'ONE_COLUMN'"
+                  :class="groupConfig.layoutStyle === 'ONE_COLUMN' ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500/20' : 'border-slate-200 bg-white'"
+                  class="border rounded-xl p-3 cursor-pointer transition"
+                >
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-bold text-slate-800 flex items-center">
+                      <i class="fa-solid fa-bars text-blue-600 mr-1.5"></i> 一行 1 个 (单列 1:1 正方形大图)
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-500">直接沿用商品主图，无需单独维护长图。</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 购买按钮样式选择 -->
+            <div class="space-y-3 pt-2 border-t border-slate-200">
+              <label class="block text-xs font-semibold text-slate-700">
+                购买按钮样式
+              </label>
+              <div class="grid grid-cols-2 gap-2.5">
+                <!-- 加号图标 -->
+                <div 
+                  @click="groupConfig.cartBtnStyle = 'PLUS_ICON'"
+                  :class="groupConfig.cartBtnStyle === 'PLUS_ICON' ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500/20' : 'border-slate-200 bg-white'"
+                  class="border rounded-xl p-2.5 cursor-pointer transition flex items-center space-x-3"
+                >
+                  <span class="w-7 h-7 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-sm shrink-0">+</span>
+                  <div>
+                    <div class="text-xs font-bold text-slate-800">加号图标 (+)</div>
+                    <div class="text-[10px] text-slate-400">极简圆钮，轻量快捷</div>
+                  </div>
+                </div>
+
+                <!-- 购物车图标 -->
+                <div 
+                  @click="groupConfig.cartBtnStyle = 'CART_ICON'"
+                  :class="groupConfig.cartBtnStyle === 'CART_ICON' ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500/20' : 'border-slate-200 bg-white'"
+                  class="border rounded-xl p-2.5 cursor-pointer transition flex items-center space-x-3"
+                >
+                  <span class="w-7 h-7 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs shrink-0">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                  </span>
+                  <div>
+                    <div class="text-xs font-bold text-slate-800">购物车图标</div>
+                    <div class="text-[10px] text-slate-400">经典超市购物车</div>
+                  </div>
+                </div>
+
+                <!-- 选规格胶囊 -->
+                <div 
+                  @click="groupConfig.cartBtnStyle = 'SPEC_BTN'"
+                  :class="groupConfig.cartBtnStyle === 'SPEC_BTN' ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500/20' : 'border-slate-200 bg-white'"
+                  class="border rounded-xl p-2.5 cursor-pointer transition flex items-center space-x-3"
+                >
+                  <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shrink-0">选规格</span>
+                  <div>
+                    <div class="text-xs font-bold text-slate-800">选规格胶囊</div>
+                    <div class="text-[10px] text-slate-400">多规格商品选配</div>
+                  </div>
+                </div>
+
+                <!-- 抢购胶囊 -->
+                <div 
+                  @click="groupConfig.cartBtnStyle = 'BUY_BTN'"
+                  :class="groupConfig.cartBtnStyle === 'BUY_BTN' ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500/20' : 'border-slate-200 bg-white'"
+                  class="border rounded-xl p-2.5 cursor-pointer transition flex items-center space-x-3"
+                >
+                  <span class="bg-gradient-to-r from-red-500 to-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shrink-0 flex items-center">
+                    <i class="fa-solid fa-bag-shopping mr-1 text-[8px]"></i> 抢购
+                  </span>
+                  <div>
+                    <div class="text-xs font-bold text-slate-800">立即购买/抢购</div>
+                    <div class="text-[10px] text-slate-400">促销感强，引导下单</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 显示划线原价 -->
+              <div class="pt-1">
+                <label class="flex items-center space-x-1.5 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" v-model="groupConfig.showOriginPrice" class="rounded text-blue-600">
+                  <span>显示划线原价</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 模块 3: 弱化排序字段，下移至高级与属性配置 -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div class="flex items-center space-x-2">
+                <span class="w-6 h-6 rounded-full bg-slate-400 text-white text-xs font-bold flex items-center justify-center">3</span>
+                <h3 class="font-bold text-slate-800 text-sm">高级属性与页面样式 (已弱化排序)</h3>
+              </div>
+              <span class="text-[11px] bg-slate-200 text-slate-600 font-semibold px-2 py-0.5 rounded">排序已降权下移</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+              <!-- 弱化排序 -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                  分组排序 (权重值)
+                </label>
+                <input 
+                  type="number" 
+                  v-model.number="groupConfig.sort" 
+                  min="0" 
+                  max="9999"
+                  class="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                />
+                <p class="text-[10px] text-slate-400 mt-1">越小越靠前，默认 0</p>
+              </div>
+
+              <!-- 背景颜色 -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">页面背景色</label>
+                <div class="flex items-center space-x-2">
+                  <input 
+                    type="color" 
+                    v-model="groupConfig.backgroundColor" 
+                    class="w-7 h-7 p-0.5 border border-slate-300 rounded cursor-pointer"
+                  />
+                  <span class="text-xs text-slate-600 font-mono uppercase">{{ groupConfig.backgroundColor }}</span>
+                </div>
+              </div>
+
+              <!-- 分组状态 -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">分组状态</label>
+                <div class="flex items-center space-x-3 pt-1 text-xs">
+                  <label class="flex items-center space-x-1 cursor-pointer">
+                    <input type="radio" value="NORMAL" v-model="groupConfig.status" class="text-blue-600">
+                    <span class="text-slate-700 font-medium">正常</span>
+                  </label>
+                  <label class="flex items-center space-x-1 cursor-pointer">
+                    <input type="radio" value="DISABLED" v-model="groupConfig.status" class="text-slate-400">
+                    <span class="text-slate-500">禁用</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧：高保真 iPhone 16 Pro 手机实时预览 (无前台切换栏，支持一行二与一行一) -->
+        <div class="flex-1 bg-slate-100 flex flex-col items-center justify-center p-6 overflow-y-auto relative">
+          
+          <!-- 悬浮指示标牌 -->
+          <div class="absolute top-6 left-6 bg-white/90 backdrop-blur border border-slate-200 px-4 py-2 rounded-xl shadow-sm flex items-center space-x-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 badge-pulse"></span>
+            <div>
+              <span class="text-xs font-bold text-slate-800">右侧前台实时预览容器</span>
+              <span class="text-[11px] text-slate-400 block">排版与排序规则严格同步展示</span>
+            </div>
+          </div>
+
+          <!-- iPhone 16 Pro 外壳 -->
+          <div class="w-[375px] h-[720px] bg-slate-900 rounded-[48px] p-3 shadow-2xl shadow-slate-900/30 border-4 border-slate-700 flex flex-col relative shrink-0">
+            
+            <!-- 灵动岛 (Dynamic Island) -->
+            <div class="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-40 flex items-center justify-end px-2 space-x-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700"></span>
+            </div>
+
+            <!-- 手机屏幕内容容器 -->
+            <div 
+              class="flex-1 rounded-[38px] overflow-hidden flex flex-col relative transition-colors duration-300"
+              :style="{ backgroundColor: groupConfig.backgroundColor || '#f8fafc' }"
+            >
+              <!-- 顶部状态栏 -->
+              <div class="h-11 px-7 flex items-center justify-between text-xs font-semibold text-slate-900 shrink-0 z-30 pt-2">
+                <span>09:41</span>
+                <div class="flex items-center space-x-1.5 text-[11px]">
+                  <i class="fa-solid fa-signal"></i>
+                  <i class="fa-solid fa-wifi"></i>
+                  <i class="fa-solid fa-battery-full text-sm"></i>
+                </div>
+              </div>
+
+              <!-- 微信小程序/H5 导航头 -->
+              <div class="h-10 px-4 flex items-center justify-between glass-effect border-b border-slate-100 shrink-0 z-20">
+                <i class="fa-solid fa-chevron-left text-slate-700 text-sm cursor-pointer"></i>
+                <h2 class="text-sm font-bold text-slate-900 truncate max-w-[170px]">{{ groupConfig.name || '商品分组' }}</h2>
+                <div class="flex items-center space-x-1 bg-black/5 px-2 py-1 rounded-full border border-black/10 text-[10px] text-slate-700">
+                  <span>···</span>
+                  <span class="text-slate-300">|</span>
+                  <i class="fa-regular fa-circle-dot text-xs"></i>
+                </div>
+              </div>
+
+              <!-- 手机可滚动页面内容 -->
+              <div class="flex-1 overflow-y-auto phone-scroll pb-16">
+                
+                <!-- 顶部默认圆角胶囊搜索框 -->
+                <div 
+                  v-if="groupConfig.showSearch"
+                  class="px-3 pt-2.5 pb-2 sticky top-0 z-20 transition-all bg-white/95 backdrop-blur-md border-b border-slate-100"
+                >
+                  <div class="flex items-center px-3.5 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs mr-2"></i>
+                    <input 
+                      type="text" 
+                      v-model="previewKeyword"
+                      :placeholder="groupConfig.searchPlaceholder || '搜索本组精选好物...'" 
+                      class="flex-1 bg-transparent text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
+                    />
+                    <button v-if="previewKeyword" @click="previewKeyword = ''" class="text-slate-400 hover:text-slate-600 text-xs">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 顶部轮播广告 (默认平滑轮播与指示点) -->
+                <div v-if="groupConfig.banners.length > 0" class="px-3 pt-2 pb-1">
+                  <div class="relative h-28 w-full rounded-xl overflow-hidden shadow-sm group">
+                    <img 
+                      :src="groupConfig.banners[currentBannerIdx]?.imageUrl" 
+                      class="w-full h-full object-cover transition-opacity duration-300"
+                    />
+                    <!-- 跳转提示浮条 -->
+                    <div 
+                      v-if="groupConfig.banners[currentBannerIdx]?.linkType !== 'NONE'"
+                      @click="showNotification('【模拟跳转】' + groupConfig.banners[currentBannerIdx]?.linkName)"
+                      class="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full flex items-center space-x-1 cursor-pointer hover:bg-black/80 transition"
+                    >
+                      <i class="fa-solid fa-link text-[8px]"></i>
+                      <span class="truncate max-w-[180px]">{{ groupConfig.banners[currentBannerIdx]?.linkName }}</span>
+                      <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                    </div>
+
+                    <!-- 左右切换按键 -->
+                    <button 
+                      v-if="groupConfig.banners.length > 1"
+                      @click="currentBannerIdx = (currentBannerIdx - 1 + groupConfig.banners.length) % groupConfig.banners.length"
+                      class="absolute left-1.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/40 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                    >
+                      ‹
+                    </button>
+                    <button 
+                      v-if="groupConfig.banners.length > 1"
+                      @click="currentBannerIdx = (currentBannerIdx + 1) % groupConfig.banners.length"
+                      class="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-black/40 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                    >
+                      ›
+                    </button>
+
+                    <!-- 指示器 -->
+                    <div v-if="groupConfig.banners.length > 1" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center space-x-1">
+                      <span 
+                        v-for="(_, i) in groupConfig.banners" 
+                        :key="i"
+                        :class="currentBannerIdx === i ? 'w-3 bg-white' : 'w-1.5 bg-white/50'"
+                        class="h-1.5 rounded-full transition-all duration-300"
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 商品卡片列表 (根据 layoutStyle 切换 一行2个 vs 一行1个) -->
+                <div class="px-3 pt-2">
+                  <!-- 模式 A: 一行 2 个 (双列大图瀑布流) -->
+                  <div v-if="groupConfig.layoutStyle === 'TWO_COLUMNS'" class="grid grid-cols-2 gap-2">
+                    <div 
+                      v-for="item in sortedAndFilteredGoods" 
+                      :key="item.id"
+                      class="bg-white rounded-xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col group border border-slate-100"
+                    >
+                      <!-- 商品主图 -->
+                      <div class="relative aspect-square w-full bg-slate-100 overflow-hidden">
+                        <img :src="item.image" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                        <!-- 营销角标 -->
+                        <span 
+                          v-if="item.tag"
+                          :style="{ backgroundColor: item.tagColor || '#ef4444' }"
+                          class="absolute top-1.5 left-1.5 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs"
+                        >
+                          {{ item.tag }}
+                        </span>
+                      </div>
+
+                      <!-- 商品信息 -->
+                      <div class="p-2.5 flex-1 flex flex-col justify-between">
+                        <h4 class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug mb-2 h-7">
+                          {{ item.title }}
+                        </h4>
+
+                        <!-- 价格与购买按钮 -->
+                        <div class="flex items-baseline justify-between pt-1">
+                          <div class="flex items-baseline">
+                            <span class="text-[10px] text-red-600 font-bold">¥</span>
+                            <span class="text-sm font-extrabold text-red-600">{{ item.price.toFixed(1) }}</span>
+                            <span v-if="groupConfig.showOriginPrice && item.originPrice" class="text-[9px] text-slate-400 line-through ml-1">
+                              ¥{{ item.originPrice.toFixed(0) }}
+                            </span>
+                          </div>
+
+                          <!-- 购买按钮 -->
+                          <template v-if="groupConfig.cartBtnStyle === 'PLUS_ICON'">
+                            <button 
+                              @click="showNotification('已添加「' + item.title.substring(0, 8) + '...」到购物车')"
+                              class="w-5 h-5 rounded-full bg-red-100 text-red-600 font-bold text-xs flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                              title="加购"
+                            >
+                              +
+                            </button>
+                          </template>
+
+                          <template v-else-if="groupConfig.cartBtnStyle === 'CART_ICON'">
+                            <button 
+                              @click="showNotification('已加购「' + item.title.substring(0, 8) + '...」')"
+                              class="w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition text-xs"
+                              title="购物车"
+                            >
+                              <i class="fa-solid fa-cart-shopping text-[10px]"></i>
+                            </button>
+                          </template>
+
+                          <template v-else-if="groupConfig.cartBtnStyle === 'SPEC_BTN'">
+                            <button 
+                              @click="showNotification('已打开「' + item.title.substring(0, 8) + '...」规格选择')"
+                              class="text-[10px] bg-red-600 hover:bg-red-700 text-white font-bold px-2 py-0.5 rounded-full transition shadow-xs"
+                            >
+                              选规格
+                            </button>
+                          </template>
+
+                          <template v-else-if="groupConfig.cartBtnStyle === 'BUY_BTN'">
+                            <button 
+                              @click="showNotification('正在抢购「' + item.title.substring(0, 8) + '...」')"
+                              class="text-[10px] bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold px-2 py-0.5 rounded-full transition shadow-xs flex items-center"
+                            >
+                              <i class="fa-solid fa-bag-shopping mr-1 text-[8px]"></i> 抢购
+                            </button>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 模式 B: 一行 1 个 (单列大图横排) -->
+                  <div v-else class="space-y-2.5">
+                    <div 
+                      v-for="item in sortedAndFilteredGoods" 
+                      :key="item.id"
+                      class="bg-white rounded-xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col border border-slate-100"
+                    >
+                      <!-- 1:1 正方形商品主图大图 (直接沿用商品主图，无需单独维护长图) -->
+                      <div class="relative w-full aspect-square bg-slate-100 overflow-hidden">
+                        <img :src="item.image" class="w-full h-full object-cover" />
+                        <span 
+                          v-if="item.tag"
+                          :style="{ backgroundColor: item.tagColor || '#ef4444' }"
+                          class="absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs"
+                        >
+                          {{ item.tag }}
+                        </span>
+                      </div>
+                      <!-- 信息 -->
+                      <div class="p-3 flex flex-col justify-between">
+                        <h4 class="text-xs font-bold text-slate-800 truncate mb-2">
+                          {{ item.title }}
+                        </h4>
+                        <div class="flex items-baseline justify-between">
+                          <div class="flex items-baseline">
+                            <span class="text-xs text-red-600 font-bold">¥</span>
+                            <span class="text-base font-extrabold text-red-600">{{ item.price.toFixed(1) }}</span>
+                            <span v-if="groupConfig.showOriginPrice && item.originPrice" class="text-xs text-slate-400 line-through ml-1.5">
+                              ¥{{ item.originPrice.toFixed(0) }}
+                            </span>
+                          </div>
+
+                          <template v-if="groupConfig.cartBtnStyle === 'PLUS_ICON'">
+                            <button 
+                              @click="showNotification('已添加「' + item.title.substring(0, 8) + '...」到购物车')"
+                              class="w-6 h-6 rounded-full bg-red-100 text-red-600 font-bold text-sm flex items-center justify-center hover:bg-red-600 hover:text-white transition"
+                            >
+                              +
+                            </button>
+                          </template>
+
+                          <template v-else-if="groupConfig.cartBtnStyle === 'CART_ICON'">
+                            <button 
+                              @click="showNotification('已加购「' + item.title.substring(0, 8) + '...」')"
+                              class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition text-xs"
+                            >
+                              <i class="fa-solid fa-cart-shopping text-xs"></i>
+                            </button>
+                          </template>
+
+                          <template v-else-if="groupConfig.cartBtnStyle === 'SPEC_BTN'">
+                            <button 
+                              @click="showNotification('已打开「' + item.title.substring(0, 8) + '...」规格选择')"
+                              class="text-xs bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1 rounded-full transition shadow-xs"
+                            >
+                              选规格
+                            </button>
+                          </template>
+
+                          <template v-else-if="groupConfig.cartBtnStyle === 'BUY_BTN'">
+                            <button 
+                              @click="showNotification('正在抢购「' + item.title.substring(0, 8) + '...」')"
+                              class="text-xs bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold px-3 py-1 rounded-full transition shadow-xs flex items-center"
+                            >
+                              <i class="fa-solid fa-bag-shopping mr-1 text-[10px]"></i> 立即抢购
+                            </button>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- 底部悬浮购物车栏 (模拟小程序底部) -->
+              <div class="h-12 bg-white/95 backdrop-blur border-t border-slate-200 px-4 flex items-center justify-between shrink-0 z-30">
+                <div class="flex items-center space-x-2">
+                  <div class="relative">
+                    <span class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">
+                      <i class="fa-solid fa-basket-shopping"></i>
+                    </span>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">2</span>
+                  </div>
+                  <div>
+                    <span class="text-xs font-extrabold text-red-600">¥126.4</span>
+                    <span class="text-[9px] text-slate-400 block">已享满减 ￥30</span>
+                  </div>
+                </div>
+                <button class="bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm">
+                  去结算
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= 模式 2: 新旧方案对比模式 ================= -->
+      <div v-else-if="activeViewMode === 'COMPARE'" class="flex-1 bg-slate-100 p-8 overflow-y-auto">
+        <div class="max-w-6xl mx-auto space-y-6">
+          <div class="text-center space-y-2 mb-8">
+            <h2 class="text-2xl font-extrabold text-slate-900">商品分组配置项：新旧方案全方位重构对比</h2>
+            <p class="text-sm text-slate-500">直观呈现 5 大核心痛点的升级前与升级后效果</p>
+          </div>
+
+          <!-- 对比卡片 Grid -->
+          <div class="grid grid-cols-2 gap-8">
+            <!-- 左：旧版方案 -->
+            <div class="bg-white border-2 border-red-200 rounded-2xl p-6 shadow-sm space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <span class="px-3 py-1 bg-red-100 text-red-700 font-bold text-xs rounded-full">调整前·旧版配置项 (痛点)</span>
+                <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+              </div>
+              <ul class="space-y-3 text-sm text-slate-700">
+                <li class="flex items-start">
+                  <i class="fa-solid fa-xmark text-red-500 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">无搜索框配置：</strong>买家在分组列表里无法快速查找本组商品，流失率高。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-xmark text-red-500 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">排序字段居顶：</strong>“排序”字段放在分组名称下方第二行，强行抢占黄金视觉，逻辑本末倒置。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-xmark text-red-500 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">单张静态头图无跳转：</strong>仅支持单图上传，不支持轮播与点击跳转至活动或商品。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-xmark text-red-500 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">缺失商品排序规则：</strong>无法控制该分组下商品的销量优先、价格高低或新品排列。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-xmark text-red-500 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">右侧预览空白：</strong>手机预览只展示头图，下方完全是一片空白，非所见即所得。
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- 右：新版方案 -->
+            <div class="bg-white border-2 border-emerald-300 rounded-2xl p-6 shadow-md space-y-4 ring-2 ring-emerald-500/10">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 font-bold text-xs rounded-full">调整后·新版设计方案 (推荐)</span>
+                <i class="fa-solid fa-circle-check text-emerald-500"></i>
+              </div>
+              <ul class="space-y-3 text-sm text-slate-700">
+                <li class="flex items-start">
+                  <i class="fa-solid fa-check text-emerald-600 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">1. 搜索框默认圆角胶囊：</strong>极简配置，支持显隐与占位词，手机端顶部吸顶搜索。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-check text-emerald-600 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">2. 弱化排序字段并下移：</strong>移至底部高级属性区，配以辅助说明，聚焦营销主航道。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-check text-emerald-600 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">3. 轮播广告海报+多维跳转：</strong>支持 1~5 张轮播、默认速度平滑过渡、跳转商品/其他分组/领券活动/外链。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-check text-emerald-600 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">4. 默认综合推荐商品排序：</strong>默认综合推荐（后台权重），并支持销量/上新/价格升降序。
+                  </div>
+                </li>
+                <li class="flex items-start">
+                  <i class="fa-solid fa-check text-emerald-600 mt-1 mr-2 shrink-0"></i>
+                  <div>
+                    <strong class="text-slate-900">5. 排版支持一行二与一行一：</strong>保留大图双列与单列横排，购买按钮支持加号/购物车/选规格/抢购，销量已去除。
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= 模式 3: 需求与技术规范 (PRD) ================= -->
+      <div v-else-if="activeViewMode === 'SPEC'" class="flex-1 bg-white p-8 overflow-y-auto">
+        <div class="max-w-4xl mx-auto space-y-6 text-slate-800">
+          <div class="border-b border-slate-200 pb-4">
+            <h2 class="text-2xl font-bold text-slate-900">商品分组升级需求规格与交互设计规范</h2>
+            <p class="text-xs text-slate-400 mt-1">版本: v2.2 · 适用端: B端商户工作台 & C端小程序/H5</p>
+          </div>
+
+          <!-- JSON 数据模型结构 -->
+          <div class="space-y-2">
+            <h3 class="text-base font-bold text-slate-900 flex items-center">
+              <i class="fa-solid fa-code text-blue-600 mr-2"></i> 前后端数据协议模型定义 (TypeScript Interface)
+            </h3>
+            <pre class="bg-slate-900 text-slate-100 text-xs p-4 rounded-xl overflow-x-auto leading-relaxed font-mono">
+export interface ProductGroupConfig {
+  id: string;
+  name: string;                   // 分组名称 (最多20字)
+  status: 'NORMAL' | 'DISABLED';  // 正常/禁用
+  sort: number;                   // 分组排序 (已弱化下移，越小越靠前)
+  
+  // 1. 搜索框配置 (默认圆角胶囊)
+  showSearch: boolean;            // 是否显示搜索框
+  searchPlaceholder: string;      // 搜索提示文案
+  
+  // 2. 轮播广告配置 (默认3秒轮播，支持跳转)
+  banners: Array<{
+    id: string;
+    imageUrl: string;
+    title: string;
+    linkType: 'GOODS' | 'GROUP' | 'ACTIVITY' | 'CUSTOM_URL' | 'NONE';
+    linkName: string;
+    targetValue?: string;
+  }>;
+
+  // 3. 商品排序配置 (默认使用综合推荐，前台按此顺序直接排列)
+  goodsSortRule: 'DEFAULT' | 'SALES_DESC' | 'NEWEST' | 'PRICE_ASC' | 'PRICE_DESC';
+
+  // 4. 排版样式与购买按钮
+  layoutStyle: 'TWO_COLUMNS' | 'ONE_COLUMN'; // 保留：一行2个 vs 一行1个
+  cartBtnStyle: 'PLUS_ICON' | 'CART_ICON' | 'SPEC_BTN' | 'BUY_BTN' | 'NONE';
+  showOriginPrice: boolean;
+  backgroundColor: string;
+}</pre>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Toast 通知浮层 -->
+    <div 
+      v-if="toastMessage" 
+      class="fixed bottom-6 right-6 bg-slate-900/90 backdrop-blur-md text-white text-xs px-4 py-2.5 rounded-xl shadow-xl z-50 flex items-center space-x-2 border border-slate-700 animate-bounce"
+    >
+      <i class="fa-solid fa-circle-check text-emerald-400"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed } = Vue
+
+    createApp({
+      setup() {
+        const activeViewMode = ref('PROTOTYPE')
+        const toastMessage = ref('')
+        const currentBannerIdx = ref(0)
+        const previewKeyword = ref('')
+
+        const groupConfig = ref({
+          name: '全场热销爆款',
+          status: 'NORMAL',
+          sort: 10,
+          showSearch: true,
+          searchPlaceholder: '搜索本组热销好物 / 关键字...',
+          banners: [
+            {
+              id: 'b1',
+              imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+              title: '秋日火锅节·4人肉食狂欢套餐立减50元',
+              linkType: 'GOODS',
+              linkName: '【商品】甄选肉卷套餐',
+              targetValue: 'p1',
+            },
+            {
+              id: 'b2',
+              imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+              title: '领券中心·全场满199减40元神券限量抢',
+              linkType: 'ACTIVITY',
+              linkName: '【营销活动】限时领券中心',
+              targetValue: 'act_coupon_01',
+            },
+            {
+              id: 'b3',
+              imageUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80',
+              title: '当季新品首发·手打鲜虾滑尝鲜专场',
+              linkType: 'GROUP',
+              linkName: '【商品分组】当季新品专区',
+              targetValue: 'grp_002',
+            },
+          ],
+          goodsSortRule: 'DEFAULT', // 默认综合推荐
+          layoutStyle: 'TWO_COLUMNS', // 默认一行2个
+          cartBtnStyle: 'PLUS_ICON', // 加号图标
+          showOriginPrice: true,
+          backgroundColor: '#F8FAFC',
+        })
+
+        const sortOptions = [
+          { value: 'DEFAULT', label: '🎯 综合推荐 (默认)', desc: '后台运营权重优先' },
+          { value: 'SALES_DESC', label: '🔥 销量优先 (降序)', desc: '爆款打头，转化率最高' },
+          { value: 'NEWEST', label: '✨ 新品优先 (上新倒序)', desc: '突出当季首发新品' },
+          { value: 'PRICE_ASC', label: '💰 价格由低到高', desc: '引流促销，低价吸客' },
+          { value: 'PRICE_DESC', label: '💎 价格由高到低', desc: '主推高客单价品质好货' },
+        ]
+
+        const goodsList = ref([
+          {
+            id: 'g1',
+            title: '【热销爆款】一次过瘾4盒甄选原切肉卷超值组合',
+            image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80',
+            price: 89.9,
+            originPrice: 158.0,
+            sales: 3840,
+            createTime: '2026-08-20',
+            tag: '热销TOP1',
+            tagColor: '#ef4444',
+          },
+          {
+            id: 'g2',
+            title: '【现捞鲜切】脆嫩大刀鲜毛肚 净重250g/份 爽脆多汁',
+            image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=80',
+            price: 58.0,
+            originPrice: 88.0,
+            sales: 2980,
+            createTime: '2026-08-22',
+            tag: '镇店招牌',
+            tagColor: '#f97316',
+          },
+          {
+            id: 'g3',
+            title: '【手打纯虾】95%纯虾肉爆汁手打鲜虾滑 200g含籽',
+            image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&auto=format&fit=crop&q=80',
+            price: 36.5,
+            originPrice: 48.0,
+            sales: 2150,
+            createTime: '2026-08-26',
+            tag: '新品尝鲜',
+            tagColor: '#10b981',
+          },
+          {
+            id: 'g4',
+            title: '【谷饲甄选】M7级澳洲雪花肥牛片 涮烤皆宜 鲜嫩多汁',
+            image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&auto=format&fit=crop&q=80',
+            price: 118.0,
+            originPrice: 168.0,
+            sales: 1420,
+            createTime: '2026-08-24',
+            tag: '品质甄选',
+            tagColor: '#8b5cf6',
+          },
+          {
+            id: 'g5',
+            title: '【秘熬养生】8小时慢炖原汁鲜菌菇浓汤底包 500ml',
+            image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=500&auto=format&fit=crop&q=80',
+            price: 28.0,
+            originPrice: 38.0,
+            sales: 4210,
+            createTime: '2026-08-15',
+            tag: '满减立省',
+            tagColor: '#3b82f6',
+          },
+          {
+            id: 'g6',
+            title: '【拉丝诱惑】手工流心爆浆芝士夹心年糕 300g袋装',
+            image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=500&auto=format&fit=crop&q=80',
+            price: 19.9,
+            originPrice: 29.9,
+            sales: 1890,
+            createTime: '2026-08-25',
+            tag: '今日特惠',
+            tagColor: '#ec4899',
+          },
+        ])
+
+        const sortedAndFilteredGoods = computed(() => {
+          let list = [...goodsList.value]
+          const rule = groupConfig.value.goodsSortRule
+
+          if (rule === 'SALES_DESC') {
+            list.sort((a, b) => b.sales - a.sales)
+          } else if (rule === 'NEWEST') {
+            list.sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime())
+          } else if (rule === 'PRICE_ASC') {
+            list.sort((a, b) => a.price - b.price)
+          } else if (rule === 'PRICE_DESC') {
+            list.sort((a, b) => b.price - a.price)
+          }
+
+          if (previewKeyword.value) {
+            list = list.filter(g => g.title.includes(previewKeyword.value))
+          }
+          return list
+        })
+
+        const showNotification = (msg) => {
+          toastMessage.value = msg
+          setTimeout(() => {
+            toastMessage.value = ''
+          }, 2400)
+        }
+
+        const addNewBanner = () => {
+          if (groupConfig.value.banners.length >= 5) return
+          const bannersPresets = [
+            {
+              imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80',
+              title: '限时火锅狂欢·鲜毛肚特惠专区',
+              linkType: 'GOODS',
+              linkName: '【商品】鲜切大刀毛肚',
+            },
+            {
+              imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&auto=format&fit=crop&q=80',
+              title: '大促满减·全场每满200减30',
+              linkType: 'ACTIVITY',
+              linkName: '【活动】全场大促活动页',
+            },
+          ]
+          const chosen = bannersPresets[groupConfig.value.banners.length % bannersPresets.length]
+          groupConfig.value.banners.push({
+            id: 'b_' + Date.now(),
+            ...chosen,
+          })
+          showNotification('已成功添加新轮播广告')
+        }
+
+        const moveBanner = (idx, step) => {
+          const target = idx + step
+          if (target < 0 || target >= groupConfig.value.banners.length) return
+          const item = groupConfig.value.banners[idx]
+          groupConfig.value.banners[idx] = groupConfig.value.banners[target]
+          groupConfig.value.banners[target] = item
+        }
+
+        const removeBanner = (idx) => {
+          groupConfig.value.banners.splice(idx, 1)
+          if (currentBannerIdx.value >= groupConfig.value.banners.length) {
+            currentBannerIdx.value = Math.max(0, groupConfig.value.banners.length - 1)
+          }
+          showNotification('已移除轮播图')
+        }
+
+        const editBannerLink = (idx) => {
+          const types = ['【商品】4盒甄选肉卷', '【活动】限时领券中心', '【分组】当季新品专区', 'https://mall.com/h5']
+          const nextLink = types[(idx + 1) % types.length]
+          groupConfig.value.banners[idx].linkName = nextLink
+          showNotification(`广告位 ${idx + 1} 跳转目标已更新为：${nextLink}`)
+        }
+
+        return {
+          activeViewMode,
+          toastMessage,
+          currentBannerIdx,
+          previewKeyword,
+          groupConfig,
+          sortOptions,
+          goodsList,
+          sortedAndFilteredGoods,
+          showNotification,
+          addNewBanner,
+          moveBanner,
+          removeBanner,
+          editBannerLink,
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>

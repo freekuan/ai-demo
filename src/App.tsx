@@ -84,6 +84,7 @@ import GroupBuyPage from './pages/GroupBuyPage'
 import OrderConversion from './pages/OrderConversion'
 import BossAdminTaobaoSync from './pages/BossAdminTaobaoSync'
 import CategoryManager from './pages/CategoryManager'
+import ProductGroupManager from './pages/ProductGroupManager'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -129,8 +130,10 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
     label: '商品管理',
     children: [
       { key: 'shop-product-list', label: '商品列表' },
+      { key: 'shop-product-grouping-mgr', label: '商品分组 (新版设计稿)' },
       { key: 'shop-product-category', label: '商品分类' },
       { key: 'shop-product-shelf', label: '商品上架' },
+      { key: 'shop-product-group-prototype', label: <a href="/product_group_redesign_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>商品分组原型(独立页)</a> },
       { key: 'shop-virtual-product-prototype', label: <a href="/saas_prototype_v2.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>虚拟商品原型(卡密)</a> },
     ],
   },
@@ -3831,6 +3834,7 @@ export default function App() {
   const isGroupBuyPage = railKey === 'shop' && secondaryKey === 'shop-group-buy'
   const isOrderConversionPage = railKey === 'shop' && secondaryKey === 'shop-order-conversion'
   const isCategoryManagerPage = railKey === 'shop' && (secondaryKey === 'shop-product-category' || secondaryKey === 'shop-category-decoration')
+  const isProductGroupPage = railKey === 'shop' && (secondaryKey === 'shop-product-grouping-mgr' || secondaryKey === 'shop-product-list')
 
   const handleToolClick = useCallback((key: string) => {
     if (key === 'group') {
@@ -3839,7 +3843,7 @@ export default function App() {
   }, [updateRoute])
   
   // 基础主题色
-  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage || isCategoryManagerPage) ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage || isCategoryManagerPage || isProductGroupPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -3970,6 +3974,8 @@ export default function App() {
                 <GroupBuyPage />
               ) : isOrderConversionPage ? (
                 <OrderConversion />
+              ) : isProductGroupPage ? (
+                <ProductGroupManager />
               ) : isCategoryManagerPage ? (
                 <CategoryManager />
               ) : (

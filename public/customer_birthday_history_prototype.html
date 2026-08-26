@@ -336,7 +336,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- ★★★ 核心设计：极简生日修改记录弹窗 (时间去掉秒，仅保留 YYYY-MM-DD HH:mm) ★★★ -->
+  <!-- ★★★ 核心设计：极简生日修改记录弹窗 (操作人替换为操作来源：用户操作 / 商家修改) ★★★ -->
   <!-- ========================================================================= -->
   <div 
     x-show="modalOpen" 
@@ -374,7 +374,7 @@
         </div>
       </div>
 
-      <!-- 3. 表格列表展示区 (修改时间去掉秒：YYYY-MM-DD HH:mm) -->
+      <!-- 3. 表格列表展示区 (列名：修改时间、变更内容、操作来源) -->
       <div class="px-5 py-3 flex-1 overflow-y-auto min-h-[160px]">
         <div class="border border-gray-200 rounded overflow-hidden">
           <table class="min-w-full divide-y divide-gray-200 text-xs text-left">
@@ -382,7 +382,7 @@
               <tr>
                 <th scope="col" class="py-2.5 px-3.5 w-36">修改时间</th>
                 <th scope="col" class="py-2.5 px-3.5">变更内容 (前 ➔ 后)</th>
-                <th scope="col" class="py-2.5 px-3.5 w-32">操作人</th>
+                <th scope="col" class="py-2.5 px-3.5 w-32">操作来源</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 bg-white">
@@ -402,8 +402,14 @@
                     </div>
                   </td>
 
-                  <!-- 操作人 -->
-                  <td class="py-2.5 px-3.5 whitespace-nowrap text-gray-700 font-medium" x-text="record.operator"></td>
+                  <!-- 操作来源 (用户操作 / 商家修改) -->
+                  <td class="py-2.5 px-3.5 whitespace-nowrap">
+                    <span 
+                      :class="record.source === '用户操作' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-blue-700 bg-blue-50 border-blue-200'"
+                      class="px-2 py-0.5 rounded text-[11px] font-medium border inline-block"
+                      x-text="record.source">
+                    </span>
+                  </td>
                 </tr>
               </template>
 
@@ -441,7 +447,7 @@
         activeScenario: 'multiple',
         currentBirthday: '1990-05-23',
 
-        // 场景数据 (修改时间不带秒，精确到分：YYYY-MM-DD HH:mm)
+        // 场景数据 (操作来源分为：用户操作、商家修改)
         scenarios: {
           multiple: {
             birthday: '1990-05-23',
@@ -450,19 +456,19 @@
                 time: '2026-05-10 14:32',
                 before: '1992-06-15',
                 after: '1990-05-23',
-                operator: '李店长(0082)'
+                source: '商家修改'
               },
               {
                 time: '2025-11-20 09:40',
                 before: '1992-06-01',
                 after: '1992-06-15',
-                operator: '客户本人'
+                source: '用户操作'
               },
               {
                 time: '2025-09-15 16:20',
                 before: '-',
                 after: '1992-06-01',
-                operator: '王导购(15382328783)'
+                source: '商家修改'
               }
             ]
           },
@@ -473,7 +479,7 @@
                 time: '2025-10-01 10:00',
                 before: '-',
                 after: '1990-05-23',
-                operator: '系统自动同步'
+                source: '商家修改'
               }
             ]
           },
