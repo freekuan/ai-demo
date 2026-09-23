@@ -167,6 +167,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-member-level', label: '会员等级' },
       { key: 'shop-member-benefit', label: '会员权益' },
       { key: 'shop-birthday-history-prototype', label: <a href="/customer_birthday_history_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>生日修改记录原型(独立页)</a> },
+      { key: 'shop-field-option-prototype', label: <a href="/single_choice_option_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>单选选项变更与停用原型(独立页)</a> },
     ],
   },
   {
@@ -197,6 +198,7 @@ const placeholderMenus: Record<PrimaryKey, MenuProps['items']> = {
     { key: 'dash-home-overview', label: '数据概览' },
     { key: 'dash-home-shortcut', label: '快捷入口' },
     { key: 'dash-home-excellent-tag', label: <a href="/excellent_tag_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>优秀标签原型</a> },
+    { key: 'dash-home-field-option', label: <a href="/single_choice_option_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>单选选项变更与停用原型</a> },
   ],
   customer: [
     { key: 'dash-customer-assets', label: '客户资产' },
