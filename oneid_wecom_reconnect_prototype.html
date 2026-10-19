@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客户画像 - 企微 OneID 重新打通交互视觉稿</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+
+    /* 还原截图中小店会员头部浅蓝渐变背景 */
+    .member-header-bg {
+      background: linear-gradient(135deg, #f0f6ff 0%, #f5f9ff 65%, #eef5ff 100%);
+      position: relative;
+      overflow: visible;
+    }
+    .member-header-bg::after {
+      content: "";
+      position: absolute;
+      right: 120px;
+      top: -40px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      border: 24px solid rgba(255, 255, 255, 0.55);
+      pointer-events: none;
+    }
+
+    /* ============================================================================
+       核心交互：纯 CSS :hover 驱动的气泡卡片（零 JS 依赖，确保任何环境下 Hover 100% 灵敏生效）
+       ============================================================================ */
+    .wecom-hover-trigger {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 3px 6px;
+      margin: -3px -6px;
+      border-radius: 6px;
+      transition: background-color 0.15s ease;
+    }
+    .wecom-hover-trigger:hover {
+      background-color: rgba(59, 130, 246, 0.08);
+    }
+    .wecom-hover-trigger:hover .wecom-grey-badge {
+      background-color: #64748b;
+      transform: scale(1.08);
+    }
+    .wecom-hover-trigger:hover .wecom-question-icon {
+      color: #2563eb;
+    }
+
+    /* 悬浮气泡卡片本体 */
+    .wecom-popover-card {
+      position: absolute;
+      left: -4px;
+      top: calc(100% + 10px);
+      width: 312px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.06);
+      padding: 14px 16px;
+      z-index: 100;
+      cursor: default;
+      /* 默认隐藏态 */
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(6px);
+      transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.18s;
+      pointer-events: none;
+    }
+
+    /* 顶部透明桥接层：无缝连接图标与气泡之间的 10px 间距，鼠标下移去点「重新打通」按钮时绝不闪烁消失 */
+    .wecom-popover-card::before {
+      content: "";
+      position: absolute;
+      top: -14px;
+      left: 0;
+      width: 100%;
+      height: 14px;
+      background: transparent;
+    }
+
+    /* 气泡顶部小尖角 */
+    .wecom-popover-arrow {
+      position: absolute;
+      top: -6px;
+      left: 18px;
+      width: 10px;
+      height: 10px;
+      background: #ffffff;
+      border-left: 1px solid #e2e8f0;
+      border-top: 1px solid #e2e8f0;
+      transform: rotate(45deg);
+    }
+
+    /* 鼠标移入触发区（图标 / 问号 / 外显文案 / 气泡内部）或开启「固定展开」时，立即浮现气泡 */
+    .wecom-hover-trigger:hover .wecom-popover-card,
+    .wecom-hover-trigger.force-open .wecom-popover-card {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* 鼠标一旦 Hover 到触发区，自动淡出右侧的蓝色操作引导提示 */
+    .wecom-hover-trigger:hover ~ #hoverGuideTip {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    /* 已添加企微（蓝色点亮图标）的纯 CSS Hover 气泡 */
+    .wecom-linked-trigger {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 2px;
+    }
+    .wecom-linked-tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: #ffffff;
+      color: #334155;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+      white-space: nowrap;
+      z-index: 60;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.16s ease;
+      pointer-events: none;
+    }
+    .wecom-linked-trigger:hover .wecom-linked-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Toast 动画 */
+    .toast-enter {
+      animation: toastSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes toastSlideDown {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -12px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- 全局 Toast 容器 -->
+  <div id="toastContainer" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none"></div>
+
+  <!-- 顶部演示控制台 -->
+  <div class="bg-slate-900 text-white px-5 py-2.5 text-xs flex flex-wrap items-center justify-between gap-3 border-b border-slate-700 sticky top-0 z-40">
+    <div class="flex items-center gap-2.5">
+      <span class="px-2 py-0.5 rounded bg-blue-600 text-white font-semibold">方案 1 视觉稿</span>
+      <span class="text-slate-300">去掉外显按钮 · 保留外显问号/提示 + 鼠标 Hover 弹出说明与「重新打通」按钮</span>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-4">
+      <!-- 外显元素微调切换 -->
+      <div class="flex items-center gap-1.5">
+        <span class="text-slate-400">外显样式：</span>
+        <div class="inline-flex rounded bg-slate-800 p-0.5 border border-slate-700">
+          <button id="btnStyleIcon" onclick="setOuterStyle('icon')" class="px-2.5 py-1 rounded bg-blue-600 text-white font-medium transition">
+            样式 1：置灰图标 + 外显「?」问号（推荐）
+          </button>
+          <button id="btnStyleText" onclick="setOuterStyle('text')" class="px-2.5 py-1 rounded text-slate-300 hover:text-white transition">
+            样式 2：置灰图标 + 外显简短说明文字
+          </button>
+        </div>
+      </div>
+
+      <!-- 是否固定展开气泡开关 -->
+      <label class="flex items-center gap-1.5 cursor-pointer select-none text-slate-300 hover:text-white">
+        <input type="checkbox" id="pinPopoverCheckbox" onchange="togglePinPopover(this.checked)" class="rounded border-slate-600 text-blue-500 focus:ring-0 cursor-pointer" />
+        <span>固定展开气泡</span>
+      </label>
+
+      <!-- 异步提示文案切换 -->
+      <div class="flex items-center gap-1.5">
+        <span class="text-slate-400">异步提示文案：</span>
+        <select id="asyncToastCopySelect" class="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs focus:outline-none focus:border-blue-400">
+          <option value="正在尝试重新打通，请稍后刷新页面查看">推荐A：正在尝试重新打通，请稍后刷新页面查看</option>
+          <option value="正在尝试重新打通，请稍后查看">原版B：正在尝试重新打通，请稍后查看</option>
+          <option value="已发起重新打通，匹配成功后将自动合并，请稍后刷新查看">严谨C：已发起重新打通，匹配成功后将自动合并，请稍后刷新查看</option>
+        </select>
+      </div>
+
+      <button onclick="simulateAsyncComplete()" id="btnSimulateRefresh" class="hidden px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition items-center gap-1 cursor-pointer">
+        <i class="fa-solid fa-arrows-rotate"></i> 模拟稍后刷新（查看打通成功效果）
+      </button>
+
+      <button onclick="resetDemo()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 transition flex items-center gap-1 cursor-pointer">
+        <i class="fa-solid fa-rotate-left"></i> 重置状态
+      </button>
+    </div>
+  </div>
+
+  <!-- 还原截图：客户画像主界面 -->
+  <div class="flex-1 flex flex-col bg-white m-3 rounded shadow-xs border border-gray-200">
+
+    <!-- 页面顶栏：客户画像标题 + 右侧操作按钮 -->
+    <div class="h-12 px-5 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+      <div class="text-sm font-semibold text-gray-800">客户画像</div>
+      <div id="topRightActions" class="flex items-center gap-2">
+        <button class="px-3 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">
+          设置黑名单
+        </button>
+      </div>
+    </div>
+
+    <!-- 主体两栏布局 -->
+    <div class="flex-1 flex min-h-[760px]">
+
+      <!-- 左侧栏：客户基础信息 & OneID -->
+      <div class="w-[240px] border-r border-gray-100 p-4 flex flex-col gap-5 shrink-0 bg-white">
+        <!-- 头像与姓名 -->
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <img id="leftAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="avatar" class="w-12 h-12 rounded object-cover border border-gray-200" />
+            <div class="font-medium text-sm text-gray-900" id="leftNickname">我在，你说</div>
+          </div>
+          <div class="space-y-1.5 text-xs text-gray-500">
+            <div class="flex items-center justify-between">
+              <span>手机号</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-700">186****3821 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i></span>
+                <span class="px-1 py-0.2 bg-orange-50 text-orange-500 border border-orange-200 rounded text-[10px]">小店</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>积分</span>
+              <span class="text-blue-600 font-medium">107</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- OneID 身份卡片 -->
+        <div class="rounded-lg border border-blue-100 bg-gradient-to-b from-blue-50/50 to-white p-3 shadow-2xs transition-all duration-300" id="oneIdCard">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-gray-800">OneID</span>
+            <span class="text-[10px] text-gray-400 font-mono truncate max-w-[130px]" id="oneIdCode">w9en72_rDOb6c9_6a5W.6</span>
+          </div>
+          <div class="bg-white rounded border border-gray-100 p-2.5">
+            <div class="flex items-center justify-between text-xs mb-2.5">
+              <span class="text-gray-500" id="oneIdCountText">已关联 2 个身份</span>
+              <a href="javascript:void(0)" class="text-blue-600 hover:underline text-xs">详情</a>
+            </div>
+            <div id="identityList" class="grid grid-cols-2 gap-y-2 gap-x-1 text-xs text-gray-700">
+              <div class="flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded-full bg-amber-400 text-white flex items-center justify-center text-[9px]"><i class="fa-solid fa-crown"></i></span>
+                <span class="text-[11px]">小店会员</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px]"><i class="fa-brands fa-weixin"></i></span>
+                <span class="text-[11px]">服务号粉丝</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 企微标签（打通成功后显示） -->
+        <div id="wecomTagsSection" class="hidden">
+          <div class="text-xs font-semibold text-gray-800 mb-2">企微标签</div>
+          <div class="text-[11px] text-gray-400 mb-1.5">企业标签</div>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[11px]">20240815-1: 企微生产验证11</span>
+            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[11px]">20240815-1: 12</span>
+            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[11px]">20240815-1: 变了变了</span>
+          </div>
+        </div>
+
+        <!-- 小店标签 -->
+        <div>
+          <div class="text-xs font-semibold text-gray-800 mb-4">小店标签</div>
+          <div class="flex flex-col items-center justify-center py-6 text-gray-300">
+            <i class="fa-solid fa-box-open text-3xl mb-1.5 text-gray-200"></i>
+            <span class="text-xs text-gray-400">暂无数据</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧主内容区 -->
+      <div class="flex-1 flex flex-col min-w-0">
+
+        <!-- 顶部 Tab 导航栏 -->
+        <div class="h-11 px-6 border-b border-gray-100 flex items-center gap-7 text-xs font-medium text-gray-600 bg-white">
+          <a href="javascript:void(0)" class="wecom-only-tab hidden py-3 text-gray-600 hover:text-blue-600">动态</a>
+          <a href="javascript:void(0)" class="wecom-only-tab hidden py-3 text-gray-600 hover:text-blue-600">企微信息</a>
+          <a href="javascript:void(0)" class="py-3 text-blue-600 border-b-2 border-blue-600 font-semibold">小店会员</a>
+          <a href="javascript:void(0)" class="wecom-only-tab hidden py-3 text-gray-600 hover:text-blue-600">跟进信息</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-600 hover:text-blue-600">订单信息</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-600 hover:text-blue-600">标签</a>
+          <a href="javascript:void(0)" class="wecom-only-tab hidden py-3 text-gray-600 hover:text-blue-600">所属成员</a>
+          <a href="javascript:void(0)" class="py-3 text-gray-600 hover:text-blue-600">订单转换</a>
+        </div>
+
+        <!-- 主体滚动区 -->
+        <div class="p-5 space-y-6 flex-1">
+
+          <!-- 核心展示区：小店会员蓝色渐变卡片（重点看画圈部位） -->
+          <div class="member-header-bg rounded-lg p-5 border border-blue-100/80">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-start gap-3">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="avatar" class="w-9 h-9 rounded object-cover border border-white shadow-2xs mt-0.5" />
+                <div>
+                  <!-- 昵称 + 企微状态图标 + 外显问号/说明 + Hover 气泡 -->
+                  <div class="flex items-center gap-2 relative">
+                    <span class="text-sm font-semibold text-gray-800">我在，你说</span>
+
+                    <!-- ================= 状态 1：未添加企微（无外显按钮，保留外显问号/问题说明 + 纯 CSS Hover 弹出气泡） ================= -->
+                    <div id="unlinkedWecomArea" class="inline-flex items-center gap-2.5">
+
+                      <!-- Hover 热区：包含「置灰企微图标」+「外显问号/说明」+「悬浮气泡卡片」 -->
+                      <div id="wecomHoverTrigger" class="wecom-hover-trigger">
+
+                        <!-- 1. 置灰企微图标 -->
+                        <span class="wecom-grey-badge w-5 h-5 rounded-full bg-gray-400/90 text-white inline-flex items-center justify-center transition-all duration-150">
+                          <i class="fa-brands fa-weixin text-[11px]"></i>
+                        </span>
+
+                        <!-- 2A. 外显样式 1（默认推荐）：紧跟置灰图标右侧的外显问号图标 -->
+                        <span id="outerQuestionOnly" class="wecom-question-icon text-gray-400 text-xs inline-flex items-center transition-colors">
+                          <i class="fa-regular fa-circle-question"></i>
+                        </span>
+
+                        <!-- 2B. 外显样式 2（可选对比）：外显简短问题说明（不含外显按钮） -->
+                        <span id="outerShortProblemText" class="hidden items-center gap-1 text-xs text-gray-500 bg-white/75 px-2 py-0.5 rounded border border-gray-200/80">
+                          <i class="fa-regular fa-circle-question text-gray-400 text-[11px]"></i>
+                          <span>未关联企微（若因更换开放平台导致 OneID 未合并，可悬停重新打通）</span>
+                        </span>
+
+                        <!-- 3. Hover 弹出的方案 1 气泡卡片（内含说明与「重新打通」按钮） -->
+                        <div id="reconnectPopover" class="wecom-popover-card">
+                          <!-- 顶部小三角 -->
+                          <div class="wecom-popover-arrow"></div>
+
+                          <!-- 气泡头部状态 -->
+                          <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-1.5">
+                              <span id="popoverStatusDot" class="w-2 h-2 rounded-full bg-gray-400"></span>
+                              <span class="text-xs font-semibold text-gray-800" id="popoverStatusTitle">暂未关联企微身份</span>
+                            </div>
+                            <span id="popoverStatusTag" class="text-[11px] text-gray-400">OneID 未合并</span>
+                          </div>
+
+                          <!-- 方案 1 说明文案 -->
+                          <p class="text-xs text-gray-600 leading-relaxed mb-3">
+                            若客户实际已添加企微，可能因更换开放平台导致 OneID 未正常合并，可尝试重新打通。
+                          </p>
+
+                          <!-- 底部操作按钮（仅在 Hover 气泡内展示，不在外面暴露按钮） -->
+                          <div class="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span id="popoverAsyncHint" class="text-[11px] text-blue-600 hidden items-center gap-1">
+                              <i class="fa-regular fa-clock text-[10px]"></i> 请稍后刷新页面查看
+                            </span>
+                            <div class="ml-auto flex items-center gap-2">
+                              <button id="popoverRetryBtn"
+                                      type="button"
+                                      onclick="triggerReconnect(event)"
+                                      class="px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-medium transition inline-flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                                <i class="fa-solid fa-rotate text-[11px]" id="popoverRetryIcon"></i>
+                                <span id="popoverRetryText">重新打通</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <!-- 旁路视觉引导提示（鼠标移上去时自动隐藏） -->
+                      <span id="hoverGuideTip" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50/90 text-blue-600 border border-blue-200/80 text-[11px] transition-opacity duration-200 pointer-events-none">
+                        <i class="fa-solid fa-hand-pointer text-[10px]"></i> 鼠标移入左侧灰标或「?」体验 Hover
+                      </span>
+
+                    </div>
+
+                    <!-- ================= 状态 2：已添加企微（还原第二张截图点亮效果，Hover 弹出「企微添加」） ================= -->
+                    <div id="linkedWecomArea" class="hidden items-center">
+                      <div class="wecom-linked-trigger">
+                        <!-- 顶部白色 Tooltip：企微添加 -->
+                        <div class="wecom-linked-tooltip">
+                          企微添加
+                          <div class="w-2 h-2 bg-white border-r border-b border-gray-200 rotate-45 absolute -bottom-1 left-1/2 -translate-x-1/2"></div>
+                        </div>
+                        <!-- 点亮蓝色企微图标 -->
+                        <span class="w-5 h-5 rounded-full bg-blue-500 hover:bg-blue-600 hover:scale-110 text-white inline-flex items-center justify-center shadow-2xs transition-all duration-150">
+                          <i class="fa-brands fa-weixin text-[11px]"></i>
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- 注册手机号 -->
+                  <div class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                    <span>注册手机号：186****3821</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-blue-500 cursor-pointer"></i>
+                    <i class="fa-solid fa-pen text-[10px] text-blue-500 cursor-pointer"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右上角最近登录时间 -->
+              <div class="text-xs text-gray-400 flex items-center gap-1">
+                <i class="fa-regular fa-clock"></i>
+                <span>最近登录时间：2026-10-19</span>
+              </div>
+            </div>
+
+            <!-- 5个资产数据白卡 -->
+            <div class="grid grid-cols-5 gap-3.5 relative z-10">
+              <div class="bg-white rounded-md p-3.5 shadow-2xs border border-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                    <i class="fa-solid fa-coins text-sm"></i>
+                  </div>
+                  <div>
+                    <div class="text-base font-semibold text-gray-900">107</div>
+                    <div class="text-[11px] text-gray-400">可用积分</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-ellipsis text-xs text-blue-400 self-start cursor-pointer"></i>
+              </div>
+
+              <div class="bg-white rounded-md p-3.5 shadow-2xs border border-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                    <i class="fa-solid fa-wallet text-sm"></i>
+                  </div>
+                  <div>
+                    <div class="text-base font-semibold text-gray-900">¥ 80.<span class="text-xs">08</span></div>
+                    <div class="text-[11px] text-gray-400">可用余额</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-ellipsis text-xs text-blue-400 self-start cursor-pointer"></i>
+              </div>
+
+              <div class="bg-white rounded-md p-3.5 shadow-2xs border border-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                    <i class="fa-solid fa-ticket text-sm"></i>
+                  </div>
+                  <div>
+                    <div class="text-base font-semibold text-gray-900">0</div>
+                    <div class="text-[11px] text-gray-400">可用优惠券</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-ellipsis text-xs text-blue-400 self-start cursor-pointer"></i>
+              </div>
+
+              <div class="bg-white rounded-md p-3.5 shadow-2xs border border-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                    <i class="fa-solid fa-credit-card text-sm"></i>
+                  </div>
+                  <div>
+                    <div class="text-base font-semibold text-gray-900">0</div>
+                    <div class="text-[11px] text-gray-400">可用礼品卡</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-ellipsis text-xs text-blue-400 self-start cursor-pointer"></i>
+              </div>
+
+              <div class="bg-white rounded-md p-3.5 shadow-2xs border border-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                    <i class="fa-solid fa-gem text-sm"></i>
+                  </div>
+                  <div>
+                    <div class="text-base font-semibold text-gray-900">0</div>
+                    <div class="text-[11px] text-gray-400">成长值</div>
+                  </div>
+                </div>
+                <i class="fa-solid fa-ellipsis text-xs text-blue-400 self-start cursor-pointer"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- 会员信息模块 -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-1 h-3.5 bg-blue-600 rounded-full"></span>
+                <span class="text-xs font-semibold text-gray-800">会员信息</span>
+              </div>
+              <div class="text-xs text-blue-600 space-x-2">
+                <a href="javascript:void(0)" class="hover:underline">编辑</a>
+                <span class="text-gray-300">|</span>
+                <a href="javascript:void(0)" class="hover:underline">展开 <i class="fa-solid fa-chevron-down text-[10px]"></i></a>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-y-3 text-xs text-gray-600 px-2 py-2">
+              <div><span class="text-gray-400 mr-4">会员编号</span> 1000174226205741</div>
+              <div><span class="text-gray-400 mr-4">会员等级</span> 初级会员</div>
+              <div><span class="text-gray-400 mr-4">入会时间</span> 2026-09-11 19:52:47</div>
+              <div><span class="text-gray-400 mr-4">性别</span> -</div>
+              <div><span class="text-gray-400 mr-4">生日</span> -</div>
+              <div><span class="text-gray-400 mr-4">婚姻</span> -</div>
+            </div>
+            <div class="mt-2 bg-gray-50/80 rounded px-3 py-2.5 text-xs text-gray-600 flex items-center gap-2">
+              <span class="text-gray-400">收货地址：</span>
+              <span class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[11px] text-gray-500">默认地址</span>
+              <span>(浙江省杭州市上城区小营街道上城区九星里甘露伍号8号)</span>
+              <i class="fa-regular fa-copy text-gray-400 cursor-pointer hover:text-gray-600"></i>
+            </div>
+          </div>
+
+          <!-- 订单转换数据 -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-1 h-3.5 bg-blue-600 rounded-full"></span>
+                <span class="text-xs font-semibold text-gray-800">订单转换数据</span>
+              </div>
+              <a href="javascript:void(0)" class="text-xs text-blue-600 hover:underline">查看转换记录 <i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+            </div>
+            <div class="grid grid-cols-3 gap-4 px-2 py-2">
+              <div>
+                <div class="text-xs text-gray-400 mb-1">转换成功订单数</div>
+                <div class="text-sm font-semibold text-gray-800">0</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 mb-1">转换成功总积分</div>
+                <div class="text-sm font-semibold text-gray-800">0</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 mb-1">活动积分</div>
+                <div class="text-sm font-semibold text-gray-800">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 交易信息 -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-1.5">
+                <span class="w-1 h-3.5 bg-blue-600 rounded-full"></span>
+                <span class="text-xs font-semibold text-gray-800">交易信息</span>
+              </div>
+              <a href="javascript:void(0)" class="text-xs text-blue-600 hover:underline">查看订单 <i class="fa-solid fa-chevron-right text-[10px]"></i></a>
+            </div>
+            <div class="grid grid-cols-3 gap-y-5 gap-x-4 px-2 py-2">
+              <div>
+                <div class="text-xs text-gray-400 mb-1">小店累计消费金额(元) <i class="fa-regular fa-circle-question text-[11px]"></i></div>
+                <div class="text-sm font-semibold text-gray-800">51.94</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 mb-1">小店累计消费订单笔数 <i class="fa-regular fa-circle-question text-[11px]"></i></div>
+                <div class="text-sm font-semibold text-gray-800">4</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 mb-1">小店累计积分订单数 <i class="fa-regular fa-circle-question text-[11px]"></i></div>
+                <div class="text-sm font-semibold text-gray-800">0</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 mb-1">小店累计退款金额(元) <i class="fa-regular fa-circle-question text-[11px]"></i></div>
+                <div class="text-sm font-semibold text-gray-800">51</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 mb-1">小店累计退款订单笔数 <i class="fa-regular fa-circle-question text-[11px]"></i></div>
+                <div class="text-sm font-semibold text-gray-800">1</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 mb-1">小店最近下单时间 <i class="fa-regular fa-circle-question text-[11px]"></i></div>
+                <div class="text-sm font-semibold text-gray-800">2026-10-15 17:41:03</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isReconnecting = false;
+
+    // 切换外显样式：样式 1（置灰图标 + 外显 ? 问号） vs 样式 2（置灰图标 + 外显简短说明文字），均无外显按钮
+    function setOuterStyle(style) {
+      const btnIcon = document.getElementById('btnStyleIcon');
+      const btnText = document.getElementById('btnStyleText');
+      const outerQuestionOnly = document.getElementById('outerQuestionOnly');
+      const outerShortProblemText = document.getElementById('outerShortProblemText');
+
+      if (style === 'icon') {
+        btnIcon.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-medium transition';
+        btnText.className = 'px-2.5 py-1 rounded text-slate-300 hover:text-white transition';
+        outerQuestionOnly.classList.remove('hidden');
+        outerQuestionOnly.classList.add('inline-flex');
+        outerShortProblemText.classList.add('hidden');
+        outerShortProblemText.classList.remove('inline-flex');
+      } else {
+        btnText.className = 'px-2.5 py-1 rounded bg-blue-600 text-white font-medium transition';
+        btnIcon.className = 'px-2.5 py-1 rounded text-slate-300 hover:text-white transition';
+        outerQuestionOnly.classList.add('hidden');
+        outerQuestionOnly.classList.remove('inline-flex');
+        outerShortProblemText.classList.remove('hidden');
+        outerShortProblemText.classList.add('inline-flex');
+      }
+    }
+
+    // 切换是否固定展开气泡（方便截图）
+    function togglePinPopover(pinned) {
+      const trigger = document.getElementById('wecomHoverTrigger');
+      const guideTip = document.getElementById('hoverGuideTip');
+      if (pinned) {
+        trigger.classList.add('force-open');
+        if (guideTip) guideTip.classList.add('hidden');
+      } else {
+        trigger.classList.remove('force-open');
+      }
+    }
+
+    let hasSubmittedAsync = false;
+
+    // 触发「重新打通」（异步提交）
+    function triggerReconnect(e) {
+      if (e) e.stopPropagation();
+      if (isReconnecting || hasSubmittedAsync) return;
+      isReconnecting = true;
+
+      const trigger = document.getElementById('wecomHoverTrigger');
+      trigger.classList.add('force-open'); // 提交过程中保持气泡展开
+
+      const popIcon = document.getElementById('popoverRetryIcon');
+      const popText = document.getElementById('popoverRetryText');
+      const popBtn = document.getElementById('popoverRetryBtn');
+
+      popIcon.className = 'fa-solid fa-spinner fa-spin text-[11px]';
+      popText.textContent = '提交中...';
+      popBtn.classList.add('opacity-80', 'cursor-wait');
+
+      setTimeout(() => {
+        isReconnecting = false;
+        hasSubmittedAsync = true;
+
+        // 1. 弹出异步处理 Toast 提示
+        const toastMsg = document.getElementById('asyncToastCopySelect').value;
+        showToast('info', toastMsg);
+
+        // 2. 气泡内状态更新为「已发起异步打通」（防止短时间重复狂点，并给予明确状态预期）
+        document.getElementById('popoverStatusDot').className = 'w-2 h-2 rounded-full bg-blue-500 animate-pulse';
+        document.getElementById('popoverStatusTag').textContent = '打通处理中';
+        document.getElementById('popoverStatusTag').className = 'text-[11px] text-blue-600 font-medium';
+
+        const asyncHint = document.getElementById('popoverAsyncHint');
+        asyncHint.classList.remove('hidden');
+        asyncHint.classList.add('inline-flex');
+
+        popIcon.className = 'fa-solid fa-check text-[11px]';
+        popText.textContent = '已发起打通';
+        popBtn.className = 'px-3 py-1.5 rounded bg-gray-100 text-gray-400 border border-gray-200 text-xs font-medium inline-flex items-center gap-1.5 cursor-not-allowed';
+
+        // 3. 顶部演示栏显示「模拟稍后刷新」按钮，方便演示异步完成后的点亮效果
+        const btnSimRefresh = document.getElementById('btnSimulateRefresh');
+        btnSimRefresh.classList.remove('hidden');
+        btnSimRefresh.classList.add('inline-flex');
+
+        const isPinned = document.getElementById('pinPopoverCheckbox').checked;
+        if (!isPinned) {
+          setTimeout(() => {
+            trigger.classList.remove('force-open');
+          }, 900);
+        }
+      }, 350);
+    }
+
+    // 模拟稍后刷新页面后异步打通已完成的效果
+    function simulateAsyncComplete() {
+      applyLinkedState();
+      document.getElementById('btnSimulateRefresh').classList.add('hidden');
+      document.getElementById('btnSimulateRefresh').classList.remove('inline-flex');
+      showToast('success', '页面已刷新：OneID 合并完成，已关联企微客户身份');
+    }
+
+    // 切换到「已添加企微」状态（还原截图 2）
+    function applyLinkedState() {
+      document.getElementById('unlinkedWecomArea').classList.add('hidden');
+      const linkedArea = document.getElementById('linkedWecomArea');
+      linkedArea.classList.remove('hidden');
+      linkedArea.classList.add('inline-flex');
+
+      document.getElementById('oneIdCountText').textContent = '已关联 3 个身份';
+      const oneIdCard = document.getElementById('oneIdCard');
+      oneIdCard.classList.add('ring-2', 'ring-blue-400');
+      setTimeout(() => oneIdCard.classList.remove('ring-2', 'ring-blue-400'), 1800);
+
+      document.getElementById('identityList').innerHTML = `
+        <div class="flex items-center gap-1.5 text-blue-600 font-medium">
+          <span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px]"><i class="fa-brands fa-weixin"></i></span>
+          <span class="text-[11px]">企微客户</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-4 h-4 rounded-full bg-amber-400 text-white flex items-center justify-center text-[9px]"><i class="fa-solid fa-crown"></i></span>
+          <span class="text-[11px]">小店会员</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px]"><i class="fa-brands fa-weixin"></i></span>
+          <span class="text-[11px]">服务号粉丝</span>
+        </div>
+      `;
+
+      document.getElementById('wecomTagsSection').classList.remove('hidden');
+      document.querySelectorAll('.wecom-only-tab').forEach(el => el.classList.remove('hidden'));
+      document.getElementById('topRightActions').innerHTML = `
+        <button class="px-3 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">刷新客户信息</button>
+        <button class="px-3 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">标记为免打扰</button>
+        <button class="px-3 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">设置黑名单</button>
+        <button class="px-3 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">聊天工具栏设置</button>
+      `;
+    }
+
+    // 重置回「未添加企微」初始态
+    function resetDemo() {
+      hasSubmittedAsync = false;
+      isReconnecting = false;
+
+      document.getElementById('unlinkedWecomArea').classList.remove('hidden');
+      const linkedArea = document.getElementById('linkedWecomArea');
+      linkedArea.classList.add('hidden');
+      linkedArea.classList.remove('inline-flex');
+
+      // 恢复气泡内初始状态
+      document.getElementById('popoverStatusDot').className = 'w-2 h-2 rounded-full bg-gray-400';
+      document.getElementById('popoverStatusTag').textContent = 'OneID 未合并';
+      document.getElementById('popoverStatusTag').className = 'text-[11px] text-gray-400';
+
+      const asyncHint = document.getElementById('popoverAsyncHint');
+      asyncHint.classList.add('hidden');
+      asyncHint.classList.remove('inline-flex');
+
+      const popIcon = document.getElementById('popoverRetryIcon');
+      const popText = document.getElementById('popoverRetryText');
+      const popBtn = document.getElementById('popoverRetryBtn');
+      popIcon.className = 'fa-solid fa-rotate text-[11px]';
+      popText.textContent = '重新打通';
+      popBtn.className = 'px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-medium transition inline-flex items-center gap-1.5 shadow-2xs cursor-pointer';
+
+      document.getElementById('btnSimulateRefresh').classList.add('hidden');
+      document.getElementById('btnSimulateRefresh').classList.remove('inline-flex');
+
+      document.getElementById('oneIdCountText').textContent = '已关联 2 个身份';
+      document.getElementById('identityList').innerHTML = `
+        <div class="flex items-center gap-1.5">
+          <span class="w-4 h-4 rounded-full bg-amber-400 text-white flex items-center justify-center text-[9px]"><i class="fa-solid fa-crown"></i></span>
+          <span class="text-[11px]">小店会员</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px]"><i class="fa-brands fa-weixin"></i></span>
+          <span class="text-[11px]">服务号粉丝</span>
+        </div>
+      `;
+
+      document.getElementById('wecomTagsSection').classList.add('hidden');
+      document.querySelectorAll('.wecom-only-tab').forEach(el => el.classList.add('hidden'));
+      document.getElementById('topRightActions').innerHTML = `
+        <button class="px-3 py-1 text-xs text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition">设置黑名单</button>
+      `;
+    }
+
+    // 全局 Toast 提示
+    function showToast(type, message) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const isSuccess = type === 'success';
+      toast.className = `toast-enter mb-2 px-4 py-2.5 rounded-lg shadow-lg border flex items-center gap-2 text-xs font-medium bg-white ${
+        isSuccess ? 'border-emerald-200 text-gray-800' : 'border-blue-200 text-gray-800'
+      }`;
+      toast.innerHTML = `
+        <i class="fa-solid ${isSuccess ? 'fa-circle-check text-emerald-500' : 'fa-circle-info text-blue-500'} text-sm"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 3600);
+    }
+  </script>
+</body>
+</html>
