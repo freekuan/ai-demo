@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>营销合规与税务存证对账后台 - 宁波新空网络 × 星云SaaS</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <!-- 顶部系统导航 -->
+  <nav class="bg-slate-900 text-white px-6 py-3.5 flex items-center justify-between border-b border-slate-800 sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
+        <i class="fa-solid fa-scale-balanced text-sm"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-base tracking-tight">营销津贴合规与税务存证对账系统</span>
+          <span class="bg-blue-500/20 text-blue-300 text-[11px] px-2 py-0.5 rounded border border-blue-400/30">金税四期 · 税务稽查底稿标准</span>
+        </div>
+        <div class="text-[11px] text-slate-400">运营主体：宁波新空网络科技有限公司 · SaaS技术支持：星云平台</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-xs text-slate-300">
+      <div class="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>实时存证节点正常</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="fa-regular fa-user"></i>
+        <span>审计专员 (税务合规组)</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-6 space-y-6">
+
+    <!-- 顶部核心数据概览 (税务局/财务稽查最关心的指标) -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-semibold text-slate-500">本月累计发放津贴金额</span>
+          <span class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-yen-sign"></i>
+          </span>
+        </div>
+        <div class="mt-3">
+          <div class="text-2xl font-black text-slate-900 tracking-tight">¥ 1,284,520.00</div>
+          <div class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>环比上月 +12.5%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-semibold text-slate-500">已留存营销履约任务数</span>
+          <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-list-check"></i>
+          </span>
+        </div>
+        <div class="mt-3">
+          <div class="text-2xl font-black text-slate-900 tracking-tight">328,491 <span class="text-xs font-normal text-slate-500">笔</span></div>
+          <div class="text-[11px] text-slate-500 mt-1">100% 具备任务事实凭据</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-semibold text-slate-500">完税申报与协议签署率</span>
+          <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-shield-check"></i>
+          </span>
+        </div>
+        <div class="mt-3">
+          <div class="text-2xl font-black text-emerald-600 tracking-tight">100.0%</div>
+          <div class="text-[11px] text-slate-500 mt-1">均通过微信免确认授权</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div class="flex justify-between items-start">
+          <span class="text-xs font-semibold text-slate-500">受票商家 (租户) 数</span>
+          <span class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-shop"></i>
+          </span>
+        </div>
+        <div class="mt-3">
+          <div class="text-2xl font-black text-slate-900 tracking-tight">142 <span class="text-xs font-normal text-slate-500">家</span></div>
+          <div class="text-[11px] text-slate-500 mt-1">对应已开具 6% 推广专票</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 筛选过滤与导出操作区 -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-sm text-slate-900">营销津贴发放台账明细</span>
+          <span class="text-xs text-slate-400">（供税务稽查穿透核验资金与业务真实对价）</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="exportAuditExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>导出税务稽查底稿 (Excel)</span>
+          </button>
+          <button onclick="alert('系统已生成《2026年9月营销推广劳务个税全员全额明细申报表（金税标准版）》，可直接导入金税系统！')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-cloud-arrow-down"></i>
+            <span>生成金税申报数据包</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 检索控件 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+        <div>
+          <label class="block text-slate-500 mb-1">营销场景</label>
+          <select id="filter-scene" onchange="applyFilter()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-blue-400">
+            <option value="all">全部营销场景</option>
+            <option value="scene1">场景一：订单晒单推广激励</option>
+            <option value="scene2">场景二：直播广告预告推广津贴</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-500 mb-1">租户商家 (活动发起方)</label>
+          <select id="filter-tenant" onchange="applyFilter()" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-blue-400">
+            <option value="all">全部租户商家</option>
+            <option value="宝洁官方旗舰店">宝洁官方旗舰店</option>
+            <option value="星云数码专营店">星云数码专营店</option>
+            <option value="飞利浦个护馆">飞利浦个护馆</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-500 mb-1">完税与核验状态</label>
+          <select class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-blue-400">
+            <option value="all">全部状态</option>
+            <option value="success">微信转账成功 · 已申报个税</option>
+            <option value="verified">FORCE_CHECK 实名核验通过</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-500 mb-1">时间范围</label>
+          <input type="text" value="2026-09-01 至 2026-09-14" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-blue-400 font-mono text-[11px]">
+        </div>
+
+        <div>
+          <label class="block text-slate-500 mb-1">检索关键词</label>
+          <input id="filter-keyword" oninput="applyFilter()" type="text" placeholder="搜姓名/订单号/微信单号" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-blue-400">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 数据表格：资金明细与对应任务详情 -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-50/80 text-slate-600 border-b border-slate-200 font-semibold select-none">
+            <tr>
+              <th class="py-3.5 px-4">系统流水单号 / 微信单号</th>
+              <th class="py-3.5 px-4">收款人 (C端用户)</th>
+              <th class="py-3.5 px-4">关联租户商家</th>
+              <th class="py-3.5 px-4">发放金额</th>
+              <th class="py-3.5 px-4">对应营销任务类型</th>
+              <th class="py-3.5 px-4">履约业务凭据与证据</th>
+              <th class="py-3.5 px-4">签署协议与授权</th>
+              <th class="py-3.5 px-4">状态</th>
+              <th class="py-3.5 px-4 text-center">操作</th>
+            </tr>
+          </thead>
+          <tbody id="table-body" class="divide-y divide-slate-100">
+            <!-- 动态行内容见下方 JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 分页控制 -->
+      <div class="p-4 bg-slate-50/50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+        <div>
+          显示第 1 到 5 条，共计 <span class="font-bold text-slate-800">328,491</span> 条全量真实证据记录
+        </div>
+        <div class="flex items-center gap-1">
+          <button class="px-2.5 py-1 border border-slate-200 rounded bg-white hover:bg-slate-50">上一页</button>
+          <button class="px-2.5 py-1 border border-blue-500 bg-blue-50 text-blue-600 font-bold rounded">1</button>
+          <button class="px-2.5 py-1 border border-slate-200 rounded bg-white hover:bg-slate-50">2</button>
+          <button class="px-2.5 py-1 border border-slate-200 rounded bg-white hover:bg-slate-50">3</button>
+          <span class="px-1 text-slate-400">...</span>
+          <button class="px-2.5 py-1 border border-slate-200 rounded bg-white hover:bg-slate-50">6570</button>
+          <button class="px-2.5 py-1 border border-slate-200 rounded bg-white hover:bg-slate-50">下一页</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 证据链详情查看模态框 (税务穿透审计穿透弹窗) -->
+  <div id="modal-evidence" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto custom-scrollbar space-y-5 animate-slide-up">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-fingerprint text-blue-600"></i>
+            税务合规穿透存证全景链条
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">存证编号：<span id="modal-proof-id" class="font-mono text-slate-600"></span></p>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- 五重证据链树状图 -->
+      <div class="space-y-3.5 text-xs">
+        
+        <!-- 链条 1 -->
+        <div class="p-3.5 bg-blue-50/50 rounded-2xl border border-blue-100 space-y-1.5">
+          <div class="font-bold text-blue-900 flex items-center justify-between">
+            <span>① 上游资金与协议链 (租户 ➔ 宁波新空)</span>
+            <span class="text-[10px] bg-blue-200/60 text-blue-800 px-2 py-0.5 rounded">进项合规</span>
+          </div>
+          <div class="text-slate-600 grid grid-cols-2 gap-2 text-[11px] pt-1">
+            <div>采购商家：<strong id="modal-tenant" class="text-slate-800"></strong></div>
+            <div>协议名称：《私域互动营销推广采购合同》</div>
+            <div>结算发票：增值税专用发票 (税率6% · 市场推广服务)</div>
+            <div>公对公到账流水：BANK2026090100912</div>
+          </div>
+        </div>
+
+        <!-- 链条 2 -->
+        <div class="p-3.5 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-1.5">
+          <div class="font-bold text-indigo-900 flex items-center justify-between">
+            <span>② 用户授权与推广对价链 (消费者 ➔ 宁波新空)</span>
+            <span class="text-[10px] bg-indigo-200/60 text-indigo-800 px-2 py-0.5 rounded">劳务对价成立</span>
+          </div>
+          <div class="text-slate-600 grid grid-cols-2 gap-2 text-[11px] pt-1">
+            <div>签署协议：<strong>《活动激励服务协议》v2.1</strong></div>
+            <div>勾选授权时间：<span id="modal-auth-time" class="font-mono"></span></div>
+            <div>IP地址：121.34.89.102 (中国浙江)</div>
+            <div>签署主体：用户自愿作为推广体验官并授权内容</div>
+          </div>
+        </div>
+
+        <!-- 链条 3 -->
+        <div class="p-3.5 bg-amber-50/50 rounded-2xl border border-amber-100 space-y-1.5">
+          <div class="font-bold text-amber-900 flex items-center justify-between">
+            <span>③ 任务真实履约证据快照 (做实业务事实)</span>
+            <span class="text-[10px] bg-amber-200/60 text-amber-800 px-2 py-0.5 rounded">拒绝虚假返现</span>
+          </div>
+          <div class="text-slate-600 space-y-1 text-[11px] pt-1">
+            <div id="modal-task-desc"></div>
+            <div class="p-2.5 bg-white rounded-xl border border-amber-200 font-mono text-[10px] text-slate-700" id="modal-task-detail"></div>
+          </div>
+        </div>
+
+        <!-- 链条 4 -->
+        <div class="p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100 space-y-1.5">
+          <div class="font-bold text-emerald-900 flex items-center justify-between">
+            <span>④ 微信底层打款与实名匹配凭证 (资金流)</span>
+            <span class="text-[10px] bg-emerald-200/60 text-emerald-800 px-2 py-0.5 rounded">直达微信零钱</span>
+          </div>
+          <div class="text-slate-600 grid grid-cols-2 gap-2 text-[11px] pt-1">
+            <div>出资商户：<strong>宁波新空网络科技有限公司</strong></div>
+            <div>收款人实名：<span id="modal-user-name" class="font-bold text-slate-800"></span></div>
+            <div>身份证号：<span id="modal-user-idcard" class="font-mono text-slate-800"></span></div>
+            <div>微信实名核验：FORCE_CHECK 匹配一致</div>
+            <div>免确认授权接口：微信官方标准组件 4015901167 已签约</div>
+            <div>微信转账单号：<span id="modal-wx-order" class="font-mono text-emerald-700 font-bold"></span></div>
+          </div>
+        </div>
+
+        <!-- 链条 5 -->
+        <div class="p-3.5 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-1.5">
+          <div class="font-bold text-purple-900 flex items-center justify-between">
+            <span>⑤ 税务申报与个税代扣代缴凭据 (税务局底稿)</span>
+            <span class="text-[10px] bg-purple-200/60 text-purple-800 px-2 py-0.5 rounded">完税闭环</span>
+          </div>
+          <div class="text-slate-600 grid grid-cols-2 gap-2 text-[11px] pt-1">
+            <div>税款申报主体：宁波新空网络科技有限公司</div>
+            <div>申报税目：营销推广劳务报酬所得 (全额明细申报)</div>
+            <div>个税完税凭证号：TAX202609NB99201</div>
+            <div>留存备查期限：法定 5 年 (数据永久加密冷备)</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pt-2 border-t border-slate-100 flex justify-end">
+        <button onclick="closeModal()" class="px-5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold active:scale-95">
+          确认关闭
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // 模拟数据源 (完整涵盖两个场景的真实证据结构)
+    const auditData = [
+      {
+        id: "TK20260914001",
+        wxOrder: "WX20260914839210",
+        scene: "scene1",
+        sceneName: "淘宝订单晒单推广激励",
+        user: "张*明",
+        idcard: "330203********3456",
+        openid: "oUpF8uMuA901jklsdf902",
+        tenant: "宝洁官方旗舰店",
+        amount: "10.00",
+        taskProof: "淘宝订单号：389201948271038",
+        taskDetail: "核销实付金额：¥128.00 | 订单状态：已确认收货 | 授权内容：订单好评及晒单图文同步至推广社区",
+        agreement: "《活动激励服务协议》v2.1",
+        wechatAuth: "已签署免确认授权",
+        authTime: "2026-09-14 09:12:45",
+        status: "微信已到账 · 已申报个税"
+      },
+      {
+        id: "TK20260914002",
+        wxOrder: "WX20260914839211",
+        scene: "scene2",
+        sceneName: "直播间广告预告推广津贴",
+        user: "李*华",
+        idcard: "330106********0819",
+        openid: "oUpF8uKks8912hsdjf910",
+        tenant: "星云数码专营店",
+        amount: "0.30",
+        taskProof: "企微员工[范双飞]直播预告曝光",
+        taskDetail: "推广广告位：今晚19:00品牌专场直播预告 | 广告展示时长：5.2秒 | 曝光来源：企客1v1私聊卡片",
+        agreement: "《活动激励服务协议》v2.1",
+        wechatAuth: "已签署免确认授权",
+        authTime: "2026-09-14 09:15:10",
+        status: "微信已到账 · 已申报个税"
+      },
+      {
+        id: "TK20260914003",
+        wxOrder: "WX20260914839212",
+        scene: "scene1",
+        sceneName: "淘宝订单晒单推广激励",
+        user: "王*强",
+        idcard: "320102********5521",
+        openid: "oUpF8uYyd7719lkasf881",
+        tenant: "飞利浦个护馆",
+        amount: "20.00",
+        taskProof: "淘宝订单号：981029481726354",
+        taskDetail: "核销实付金额：¥216.50 | 订单状态：已确认收货 | 授权内容：多图晒单体验授权",
+        agreement: "《活动激励服务协议》v2.1",
+        wechatAuth: "已签署免确认授权",
+        authTime: "2026-09-14 09:18:22",
+        status: "微信已到账 · 已申报个税"
+      },
+      {
+        id: "TK20260914004",
+        wxOrder: "WX20260914839213",
+        scene: "scene2",
+        sceneName: "直播间广告预告推广津贴",
+        user: "陈*丽",
+        idcard: "330212********1102",
+        openid: "oUpF8uQqw1129asdfg771",
+        tenant: "宝洁官方旗舰店",
+        amount: "0.30",
+        taskProof: "企微员工[范双飞]直播预告曝光",
+        taskDetail: "推广广告位：今晚19:00品牌专场直播预告 | 广告展示时长：4.8秒 | 曝光来源：社群福利专区",
+        agreement: "《活动激励服务协议》v2.1",
+        wechatAuth: "已签署免确认授权",
+        authTime: "2026-09-14 09:22:01",
+        status: "微信已到账 · 已申报个税"
+      },
+      {
+        id: "TK20260914005",
+        wxOrder: "WX20260914839214",
+        scene: "scene2",
+        sceneName: "直播间广告预告推广津贴",
+        user: "赵*国",
+        idcard: "330302********9912",
+        openid: "oUpF8uPlm8812zxcas990",
+        tenant: "星云数码专营店",
+        amount: "0.50",
+        taskProof: "企微员工[范双飞]直播预告曝光",
+        taskDetail: "推广广告位：专场大促直播间预告 | 广告展示时长：6.1秒 | 点击查看预告详情",
+        agreement: "《活动激励服务协议》v2.1",
+        wechatAuth: "已签署免确认授权",
+        authTime: "2026-09-14 09:25:30",
+        status: "微信已到账 · 已申报个税"
+      }
+    ];
+
+    // 渲染表格
+    function renderTable(data) {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">未检索到符合条件的存证记录</td></tr>`;
+        return;
+      }
+
+      data.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/80 transition-colors";
+        
+        const sceneBadge = item.scene === 'scene1' 
+          ? `<span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-medium border border-indigo-200">满返·晒单推广</span>`
+          : `<span class="bg-red-50 text-red-600 px-2 py-0.5 rounded font-medium border border-red-200">私域·直播广告</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-mono font-bold text-slate-900">${item.id}</div>
+            <div class="font-mono text-[10px] text-slate-400">${item.wxOrder}</div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-800">${item.user}</div>
+            <div class="font-mono text-[10px] text-slate-500">${item.idcard}</div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-medium text-slate-800">${item.tenant}</div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="text-sm font-black text-slate-900">¥${item.amount}</span>
+          </td>
+          <td class="py-3 px-4">
+            ${sceneBadge}
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-medium text-slate-800 max-w-[200px] truncate" title="${item.taskProof}">${item.taskProof}</div>
+            <div class="text-[10px] text-slate-400 max-w-[200px] truncate" title="${item.taskDetail}">${item.taskDetail}</div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="text-blue-600 font-medium">${item.agreement}</div>
+            <div class="text-[10px] text-emerald-600"><i class="fa-solid fa-check mr-0.5"></i>免确认授权有效</div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-medium border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              已完税到账
+            </span>
+          </td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="viewEvidence('${item.id}')" class="px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 rounded-lg text-xs font-medium transition-all">
+              查看证据链
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 过滤逻辑
+    function applyFilter() {
+      const scene = document.getElementById('filter-scene').value;
+      const tenant = document.getElementById('filter-tenant').value;
+      const keyword = document.getElementById('filter-keyword').value.trim().toLowerCase();
+
+      const filtered = auditData.filter(item => {
+        const matchScene = (scene === 'all' || item.scene === scene);
+        const matchTenant = (tenant === 'all' || item.tenant === tenant);
+        const matchKeyword = (!keyword || 
+          item.id.toLowerCase().includes(keyword) || 
+          item.wxOrder.toLowerCase().includes(keyword) || 
+          item.user.includes(keyword) || 
+          item.taskProof.includes(keyword));
+        return matchScene && matchTenant && matchKeyword;
+      });
+
+      renderTable(filtered);
+    }
+
+    // 查看模态框证据链
+    function viewEvidence(id) {
+      const item = auditData.find(d => d.id === id);
+      if (!item) return;
+
+      document.getElementById('modal-proof-id').innerText = item.id + " (存证哈希: 0x8f29...b41c)";
+      document.getElementById('modal-tenant').innerText = item.tenant;
+      document.getElementById('modal-auth-time').innerText = item.authTime;
+      document.getElementById('modal-user-name').innerText = item.user;
+      document.getElementById('modal-user-idcard').innerText = item.idcard;
+      document.getElementById('modal-wx-order').innerText = item.wxOrder;
+
+      document.getElementById('modal-task-desc').innerHTML = `<strong>任务类型：</strong>${item.sceneName}（发放金额：¥${item.amount}）`;
+      document.getElementById('modal-task-detail').innerText = item.taskDetail;
+
+      document.getElementById('modal-evidence').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-evidence').classList.add('hidden');
+    }
+
+    // 导出 Excel 模拟
+    function exportAuditExcel() {
+      alert("【税务审计底稿已生成】\n已将当前 328,491 笔发放明细导出为《宁波新空网络-营销推广津贴发放与任务履约对账表（金税审计格式）.xlsx》！\n包含：用户实名、身份证号、淘宝订单核销凭据、直播广告位曝光日志及微信转账单号！");
+    }
+
+    // 初始化渲染
+    renderTable(auditData);
+  </script>
+</body>
+</html>

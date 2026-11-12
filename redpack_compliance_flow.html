@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>红包营销合规方案（含实名认证与免确认收款授权）全流程演示</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#FF4D4F',
+              orange: '#FF5722',
+              blue: '#1989FA',
+              shield: '#4F78FE',
+              wechat: '#07C160',
+              dark: '#1F2329'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .phone-shadow {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 10px #1e293b, 0 0 0 12px #475569;
+    }
+    .screen-fade {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .step-active {
+      border-color: #3b82f6 !important;
+      background-color: #eff6ff !important;
+    }
+    .step-active .step-num {
+      background-color: #3b82f6 !important;
+      color: white !important;
+    }
+    @keyframes pulse-soft {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(255, 77, 79, 0.35); }
+      50% { transform: scale(1.04); box-shadow: 0 6px 16px rgba(255, 77, 79, 0.55); }
+    }
+    .btn-pulse {
+      animation: pulse-soft 2s infinite ease-in-out;
+    }
+    /* 微信半屏弹窗入场动画 */
+    @keyframes slide-up {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .animate-slide-up {
+      animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
+
+  <!-- 顶部导航栏 -->
+  <header class="max-w-7xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+    <div>
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-semibold rounded-full border border-emerald-200">合规方案 3.0 完全体</span>
+        <h1 class="text-2xl font-bold text-slate-900">红包营销合规方案全流程（实名认证 + 免确认收款授权）</h1>
+      </div>
+      <p class="text-sm text-slate-500 mt-1">
+        涉及主体：<strong>租户商家</strong> ➔ <strong>星云SaaS</strong> ➔ <strong>用户 (消费者)</strong> ➔ <strong>宁波新空网络 (合规出资方)</strong>
+      </p>
+    </div>
+    <!-- 快速跳转控制按钮 -->
+    <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 text-sm">
+      <button onclick="switchTab('flow')" id="tab-flow-btn" class="px-4 py-2 rounded-lg font-medium transition-all bg-white text-blue-600 shadow-sm">
+        <i class="fa-solid fa-network-wired mr-1.5"></i> 全景流程时序图
+      </button>
+      <button onclick="switchTab('prototype')" id="tab-proto-btn" class="px-4 py-2 rounded-lg font-medium transition-all text-slate-600 hover:text-slate-900">
+        <i class="fa-solid fa-mobile-screen-button mr-1.5"></i> 手机端交互原型演示
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto">
+
+    <!-- ======================================================== -->
+    <!-- 视图 1：全景流程与时序架构图 (Flow View)                     -->
+    <!-- ======================================================== -->
+    <div id="view-flow" class="space-y-6">
+
+      <!-- 核心业务流卡片 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-4 border-b border-slate-100 gap-2">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+              全流程端到端业务闭环（领奖前双重合规关卡：实名认证 + 免确认收款）
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">严格契合微信支付官方 V3 商家转账规范与金税四期个税申报要求</p>
+          </div>
+          <span class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg font-medium border border-emerald-200 self-start md:self-auto">
+            <i class="fa-solid fa-shield-halved mr-1"></i> FORCE_CHECK 姓名强校验 + 微信免确认收款授权
+          </span>
+        </div>
+
+        <!-- 流程图步骤节点 (6大核心阶段) -->
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-3.5 relative">
+
+          <!-- 步骤 1 -->
+          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">1</span>
+                <span class="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded font-medium">事前资金</span>
+              </div>
+              <h3 class="font-bold text-xs text-slate-900 mb-1">预算充值与协议</h3>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                <strong>租户</strong>公对公划拨营销预算至<strong>宁波新空网络</strong>，签订营销服务合同，新空开具营销推广发票。
+              </p>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-200 text-[10px] text-slate-500">
+              <i class="fa-solid fa-check text-emerald-500 mr-1"></i> 解决资金源与进项
+            </div>
+          </div>
+
+          <!-- 步骤 2 -->
+          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">2</span>
+                <span class="text-[10px] text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded font-medium">活动参与</span>
+              </div>
+              <h3 class="font-bold text-xs text-slate-900 mb-1">输入单号与授权</h3>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                用户在租户小程序进入满返活动，输入淘宝单号并<strong>勾选《活动激励服务协议》</strong>，完成晒单推广授权。
+              </p>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-200 text-[10px] text-slate-500">
+              <i class="fa-solid fa-check text-emerald-500 mr-1"></i> 定性由返现转为营销对价
+            </div>
+          </div>
+
+          <!-- 步骤 3 -->
+          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">3</span>
+                <span class="text-[10px] text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-medium">同页点亮</span>
+              </div>
+              <h3 class="font-bold text-xs text-slate-900 mb-1">累计金额与点亮</h3>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                同页面更新累计金额（如¥198），达标卡片上的<strong>【立即领取】按钮直接高亮点亮</strong>，用户点击触发领奖。
+              </p>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-200 text-[10px] text-slate-500">
+              <i class="fa-solid fa-check text-emerald-500 mr-1"></i> 无需跳页，体验顺畅
+            </div>
+          </div>
+
+          <!-- 步骤 4 (前置关卡A：实名认证) -->
+          <div class="bg-amber-50/70 rounded-xl p-3.5 border-2 border-amber-300 flex flex-col justify-between shadow-sm">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">4-A</span>
+                <span class="text-[10px] text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded font-bold">关卡 1</span>
+              </div>
+              <h3 class="font-bold text-xs text-slate-900 mb-1">前置实名认证</h3>
+              <p class="text-[11px] text-slate-700 leading-relaxed">
+                首次领奖前置拦截，用户录入<strong>真实姓名 + 身份证号</strong>，校验与微信实名一致，存入个税申报库。
+              </p>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-amber-200 text-[10px] text-amber-800 font-medium">
+              <i class="fa-solid fa-shield-check mr-1 text-amber-600"></i> FORCE_CHECK 强核验
+            </div>
+          </div>
+
+          <!-- 步骤 5 (前置关卡B：微信免确认收款授权 - 新增) -->
+          <div class="bg-emerald-50/80 rounded-xl p-3.5 border-2 border-emerald-400 flex flex-col justify-between shadow-sm">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">4-B</span>
+                <span class="text-[10px] text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded font-bold">⭐ 新增关卡</span>
+              </div>
+              <h3 class="font-bold text-xs text-slate-900 mb-1">免确认收款授权</h3>
+              <p class="text-[11px] text-slate-700 leading-relaxed">
+                调起<strong>微信支付原生半屏授权</strong>，用户点击“同意”，授权新空商户号转账直达零钱（无需每次手动确认）。
+              </p>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-emerald-200 text-[10px] text-emerald-800 font-medium">
+              <i class="fa-brands fa-weixin mr-1 text-emerald-600"></i> 微信官方 4015901167 规范
+            </div>
+          </div>
+
+          <!-- 步骤 6 -->
+          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">5</span>
+                <span class="text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded font-medium">零钱到账</span>
+              </div>
+              <h3 class="font-bold text-xs text-slate-900 mb-1">微信零钱实时到账</h3>
+              <p class="text-[11px] text-slate-600 leading-relaxed">
+                微信底层核验通过，资金秒级打入用户微信零钱，页面<strong>已完结金额同步累加</strong>，形成完整资金闭环。
+              </p>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-200 text-[10px] text-slate-500">
+              <i class="fa-solid fa-check text-emerald-500 mr-1"></i> 秒级直达微信零钱
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 微信官方接口规范与合规背景分析 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- 为什么微信支付必须发起“免确认收款授权”？ -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+          <h3 class="font-bold text-base text-slate-900 mb-4 flex items-center gap-2">
+            <i class="fa-brands fa-weixin text-emerald-600"></i> 为什么必须发起“免确认收款授权”？
+          </h3>
+          <div class="space-y-3.5 text-xs text-slate-600 leading-relaxed">
+            <div class="border-l-4 border-emerald-500 pl-3 py-1">
+              <div class="font-bold text-slate-800">1. 微信防诈骗与资金安全机制（2023起全量施行）</div>
+              <p class="text-slate-500 mt-0.5">微信支付《商家转账到零钱》官方规定：为防范灰产洗钱与未经同意的恶意代付，商户向个人转账时，默认资金处于“待收款”状态，需用户在24小时内手动点击确认收款。若用户未确认，资金将原路退回商户。</p>
+            </div>
+            <div class="border-l-4 border-blue-500 pl-3 py-1">
+              <div class="font-bold text-slate-800">2. 调用接口前置签署免确认协议（接口文档 4015901167）</div>
+              <p class="text-slate-500 mt-0.5">商户在首次发奖前，通过小程序接口 <code>wx.openBusinessView({ businessType: 'confirmReceipt' })</code> 唤起微信原生半屏弹窗。用户点击“同意”后，该用户与宁波新空网络商户号即建立免确认收款契约，后续打款全部自动入账零钱。</p>
+            </div>
+            <div class="border-l-4 border-amber-500 pl-3 py-1">
+              <div class="font-bold text-slate-800">3. 必须在发钱前完成，否则接口返回 NOT_CONFIRM_USER 错误</div>
+              <p class="text-slate-500 mt-0.5">商户号若未配置强制确认模式，直接调用转账接口会报错“收款用户未确认”；因此在“实名认证通过后 ➔ 调起打款接口前”，前置完成该授权是资金能够顺利打出的唯一技术通道。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 完整合规证据链（应对微信支付巡检与税务稽查） -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+          <h3 class="font-bold text-base text-slate-900 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-blue-600"></i> 本方案构建的 5 重合规证据链
+          </h3>
+          <div class="space-y-2.5 text-xs">
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+              <div>
+                <span class="font-bold text-slate-800">① 资金采购链：</span>
+                <span class="text-slate-600">租户与新空签订营销推广采购协议，有公对公转账凭证与 6% 现代服务专票。</span>
+              </div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+              <div>
+                <span class="font-bold text-slate-800">② 推广对价链：</span>
+                <span class="text-slate-600">用户勾选《活动激励服务协议》，授权订单晒单，红包在法律上定性为劳务推广佣金。</span>
+              </div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+              <div>
+                <span class="font-bold text-slate-800">③ 身份核验链：</span>
+                <span class="text-slate-600">收集真实姓名+身份证号，微信 FORCE_CHECK 比对通过，杜绝羊毛党与冒名收款。</span>
+              </div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+              <div>
+                <span class="font-bold text-slate-800">④ 微信官方授权链：</span>
+                <span class="text-slate-600">微信原生半屏弹窗签署“免确认收款协议”，微信支付官方底层备案，合规无封号风险。</span>
+              </div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2.5">
+              <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+              <div>
+                <span class="font-bold text-slate-800">⑤ 税务申报链：</span>
+                <span class="text-slate-600">宁波新空网络在金税系统按劳务报酬或偶然所得全额申报，账实、票款、身份三相符。</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 视图 2：高保真手机交互原型 (Interactive Prototype View)      -->
+    <!-- ======================================================== -->
+    <div id="view-prototype" class="hidden">
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- 左侧：原型流程状态切换控制器 (5 cols) -->
+        <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-gamepad text-blue-600"></i> 交互步骤控制器
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">点击下方卡片，右侧手机屏幕将实时演练对应界面的交互状态：</p>
+          </div>
+
+          <!-- 步骤选择器 (共4个核心阶段) -->
+          <div class="space-y-2.5 text-sm">
+
+            <!-- Step 1 按钮 -->
+            <button onclick="setPhoneScreen(1)" id="ctrl-step-1" class="w-full text-left p-3.5 rounded-xl border-2 step-active transition-all flex items-start gap-3">
+              <div class="step-num w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-2">
+                  <span>活动主页：单页点亮【立即领取】</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">显示累计¥198.00与已完结¥99.00，满99元红包卡片【立即领取】已高亮点亮。</div>
+              </div>
+            </button>
+
+            <!-- Step 2 按钮 -->
+            <button onclick="setPhoneScreen(2)" id="ctrl-step-2" class="w-full text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-slate-300 transition-all flex items-start gap-3">
+              <div class="step-num w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-2">
+                  <span>实名认证页：1:1 还原设计稿</span>
+                  <span class="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded font-bold">关卡 1</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">点击“立即领取”调出实名认证，输入姓名身份证满足 FORCE_CHECK 强校验。</div>
+              </div>
+            </button>
+
+            <!-- Step 3 按钮 (微信免确认收款授权 - 新增) -->
+            <button onclick="setPhoneScreen(3)" id="ctrl-step-3" class="w-full text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-slate-300 transition-all flex items-start gap-3">
+              <div class="step-num w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+              <div>
+                <div class="font-bold text-slate-900 flex items-center gap-2">
+                  <span>微信免确认收款授权弹窗</span>
+                  <span class="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded font-bold">关卡 2</span>
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">1:1复刻微信支付官方半屏组件，用户点击微信绿“同意”开通零钱直付。</div>
+              </div>
+            </button>
+
+            <!-- Step 4 按钮 -->
+            <button onclick="setPhoneScreen(4)" id="ctrl-step-4" class="w-full text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-slate-300 transition-all flex items-start gap-3">
+              <div class="step-num w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</div>
+              <div>
+                <div class="font-bold text-slate-900">打款成功：微信零钱实时到账</div>
+                <div class="text-xs text-slate-500 mt-0.5">宁波新空网络商户号打款成功，返回主页后已完结金额同步累加为 ¥109.00。</div>
+              </div>
+            </button>
+
+          </div>
+
+          <!-- 快速体验状态切换开关 -->
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div class="text-xs font-bold text-slate-700 flex items-center justify-between">
+              <span>活动主页数据状态切换：</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <button onclick="toggleMainPageState(true)" id="btn-state-active" class="py-2 px-3 rounded-lg font-bold bg-blue-600 text-white shadow-sm transition-all">
+                已达标态 (金额¥198/点亮)
+              </button>
+              <button onclick="toggleMainPageState(false)" id="btn-state-empty" class="py-2 px-3 rounded-lg font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition-all">
+                初始态 (金额¥0/置灰)
+              </button>
+            </div>
+          </div>
+
+          <!-- 当前步骤说明卡片 -->
+          <div id="step-description-box" class="p-4 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900 space-y-1">
+            <div class="font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-info text-blue-600"></i> 当前状态设计说明
+            </div>
+            <p id="step-tech-note" class="text-slate-600 leading-relaxed">
+              无需跳转新页面！活动主页顶部直接展示“累计转换金额：¥198.00”与“已完结金额：¥99.00”。下方满99元红包满足门槛，【立即领取】按钮点亮变为红橙渐变色高亮态，点击直接调起实名认证。
+            </p>
+          </div>
+        </div>
+
+        <!-- 右侧：手机高保真模拟容器 (7 cols) -->
+        <div class="lg:col-span-7 flex justify-center">
+
+          <div class="w-[375px] h-[780px] bg-white rounded-[44px] phone-shadow overflow-hidden flex flex-col relative border-4 border-slate-800">
+
+            <!-- 手机顶部状态栏 -->
+            <div class="h-10 bg-transparent px-6 flex justify-between items-center text-xs font-semibold shrink-0 z-30 select-none">
+              <span id="phone-time" class="text-slate-800">21:48</span>
+              <!-- 灵动岛区域 -->
+              <div class="w-20 h-4 bg-black rounded-full mx-auto"></div>
+              <div class="flex items-center gap-1.5 text-slate-800 text-[11px]">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full text-xs"></i>
+              </div>
+            </div>
+
+            <!-- 手机内容屏幕区域 (可滚动) -->
+            <div id="phone-screen-container" class="flex-1 overflow-y-auto custom-scrollbar relative bg-[#F4F8F9]">
+
+              <!-- ============================================ -->
+              <!-- SCREEN 1: 满返活动主页 (金额展示 + 按钮单页点亮)   -->
+              <!-- ============================================ -->
+              <div id="screen-1" class="screen-fade block min-h-full pb-6">
+                <!-- 小程序顶部导航栏 -->
+                <div class="flex items-center justify-between px-4 py-2 bg-transparent text-slate-800">
+                  <i class="fa-solid fa-house text-sm"></i>
+                  <span class="font-bold text-sm">双11满返节</span>
+                  <div class="flex items-center gap-2 bg-white/80 px-2 py-0.5 rounded-full border border-slate-200 text-xs">
+                    <i class="fa-solid fa-ellipsis"></i>
+                    <span class="text-slate-300">|</span>
+                    <i class="fa-regular fa-circle-dot"></i>
+                  </div>
+                </div>
+
+                <!-- 顶部 Banner -->
+                <div class="px-4 pt-1">
+                  <div class="relative bg-gradient-to-b from-[#FCE4E4] to-[#FCECEC] rounded-2xl p-4 text-center overflow-hidden border border-red-100 shadow-sm">
+                    <div class="absolute right-3 top-2 flex flex-col gap-1 text-[10px]">
+                      <span class="bg-black/40 text-white px-2 py-0.5 rounded-full">活动规则</span>
+                      <span class="bg-black/40 text-white px-2 py-0.5 rounded-full">我的奖品</span>
+                    </div>
+                    <div class="text-2xl mt-1 font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
+                      订单转换兑好礼
+                    </div>
+                    <span class="inline-block mt-1 bg-black text-white text-[10px] tracking-widest px-2 py-0.5 font-bold rounded">SURPRISE</span>
+                  </div>
+                </div>
+
+                <!-- 订单输入与统计卡片 (金额展示在此) -->
+                <div class="m-4 bg-white rounded-2xl p-4 shadow-sm">
+                  <div class="grid grid-cols-2 text-center border-b border-slate-100 pb-3 mb-3">
+                    <div>
+                      <div class="text-2xl font-black text-slate-900 tracking-tight">
+                        ¥ <span id="val-total" class="text-red-500">198.00</span>
+                      </div>
+                      <div class="text-[11px] text-slate-400 mt-0.5">累计转换金额 &gt;</div>
+                    </div>
+                    <div>
+                      <div class="text-2xl font-black text-slate-900 tracking-tight">
+                        ¥ <span id="val-completed">99.00</span>
+                      </div>
+                      <div class="text-[11px] text-slate-400 mt-0.5">已完结金额</div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-3">
+                    <input id="input-order" type="text" placeholder="请输入已确认收货的淘宝订单号" value="389201948271038" 
+                           class="w-full bg-slate-50 border border-slate-200 text-xs px-3.5 py-2.5 rounded-full text-center outline-none focus:border-red-400">
+                    
+                    <button onclick="submitOrderMock()" class="w-full bg-gradient-to-r from-[#FF5722] to-[#FF453A] text-white py-2.5 rounded-full font-bold text-xs shadow-md shadow-red-200 active:scale-95 transition-all">
+                      提交订单
+                    </button>
+
+                    <!-- 勾选与协议展示（合规核心点） -->
+                    <div class="flex items-center justify-center gap-1.5 text-[11px] pt-1">
+                      <input type="checkbox" id="chk-agreement" checked class="w-3.5 h-3.5 text-blue-600 rounded focus:ring-0 cursor-pointer">
+                      <label for="chk-agreement" class="text-slate-500 cursor-pointer select-none">
+                        同意授权晒单并阅读
+                        <span onclick="alert('《活动激励服务协议》核心要点：\n1. 缔约主体：宁波新空网络与消费者；\n2. 消费者授权订单晒单信息用于推广；\n3. 宁波新空网络提供现金推广激励并负责发票申报。')" class="text-blue-600 hover:underline">《活动激励服务协议》</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 奖品列表 -->
+                <div class="px-4">
+                  <div class="text-xs font-bold text-slate-800 mb-2 flex items-center justify-between">
+                    <span>活动奖品</span>
+                    <span class="text-slate-400 font-normal">可领取 <span id="val-prize-count" class="text-red-500 font-bold">1</span> 件奖品</span>
+                  </div>
+
+                  <!-- 奖品卡片 1 (点亮可领取态) -->
+                  <div id="card-prize-1" class="bg-white rounded-2xl p-3.5 mb-3 shadow-sm flex items-center justify-between border-2 border-red-200 transition-all">
+                    <div class="flex items-center gap-3">
+                      <!-- 红包图 -->
+                      <div class="w-14 h-18 bg-gradient-to-b from-[#FF415B] to-[#FF2D55] rounded-xl p-2 text-center text-white flex flex-col justify-between shadow-sm relative shrink-0">
+                        <div class="w-5 h-5 bg-[#FFE182] text-[#D32F2F] rounded-full mx-auto flex items-center justify-center font-bold text-[10px] shadow-sm">開</div>
+                        <div class="text-[9px] opacity-80">微信红包</div>
+                      </div>
+                      <div>
+                        <div class="flex items-center gap-1.5">
+                          <span class="font-bold text-xs text-slate-900">微信红包</span>
+                          <span id="badge-card-1" class="text-[9px] bg-red-100 text-red-600 font-bold px-1.5 py-0.2 rounded-full">已达标</span>
+                        </div>
+                        <div class="flex gap-1.5 mt-1">
+                          <span class="text-[10px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded border border-red-100">满99元领取</span>
+                          <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">仅剩10件</span>
+                        </div>
+                        <div class="text-xs font-bold text-slate-800 mt-1">红包金额: <span class="text-red-500 font-black">¥10</span></div>
+                        <div id="status-card-1" class="text-[10px] text-emerald-600 font-bold mt-1">
+                          <i class="fa-solid fa-circle-check text-[9px] mr-0.5"></i>门槛已满足，可立即领取
+                        </div>
+                      </div>
+                    </div>
+                    <!-- 点亮的高亮领取按钮，点击直接进入实名认证 -->
+                    <button id="btn-claim-1" onclick="setPhoneScreen(2)" 
+                            class="px-3.5 py-1.5 bg-gradient-to-r from-[#FF5722] to-[#FF3B30] text-white text-xs rounded-full font-bold shadow-md shadow-red-200 active:scale-95 transition-all btn-pulse shrink-0">
+                      立即领取
+                    </button>
+                  </div>
+
+                  <!-- 奖品卡片 2 (仅差1元态) -->
+                  <div class="bg-white rounded-2xl p-3.5 mb-4 shadow-sm flex items-center justify-between border border-slate-100">
+                    <div class="flex items-center gap-3">
+                      <div class="w-14 h-18 bg-gradient-to-b from-[#FF415B] to-[#FF2D55] rounded-xl p-2 text-center text-white flex flex-col justify-between shadow-sm opacity-80 shrink-0">
+                        <div class="w-5 h-5 bg-[#FFE182] text-[#D32F2F] rounded-full mx-auto flex items-center justify-center font-bold text-[10px]">開</div>
+                        <div class="text-[9px] opacity-80">微信红包</div>
+                      </div>
+                      <div>
+                        <div class="font-bold text-xs text-slate-900">微信红包</div>
+                        <div class="flex gap-1.5 mt-1">
+                          <span class="text-[10px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded border border-red-100">满199元领取</span>
+                          <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">仅剩10件</span>
+                        </div>
+                        <div class="text-xs font-bold text-slate-800 mt-1">红包金额: <span class="text-red-500 font-black">¥20</span></div>
+                        <div class="text-[10px] text-slate-400 mt-1">
+                          仅差 <span class="text-red-500 font-bold">1</span> 元可解锁
+                        </div>
+                      </div>
+                    </div>
+                    <button disabled class="px-3.5 py-1.5 bg-slate-100 text-slate-400 text-xs rounded-full font-medium cursor-not-allowed shrink-0">
+                      立即领取
+                    </button>
+                  </div>
+
+                  <!-- 底部合规声明（宁波新空网络） -->
+                  <div class="text-center text-[10px] text-slate-400 py-2">
+                    本活动营销激励由 宁波新空网络 提供支持
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- ============================================ -->
+              <!-- SCREEN 2: 实名认证页面 (1:1 还原截图设计稿)        -->
+              <!-- ============================================ -->
+              <div id="screen-2" class="screen-fade hidden min-h-full bg-gradient-to-b from-[#3E7BFA] via-[#6095FF] to-[#EFF5FF] p-4 flex flex-col justify-between">
+
+                <div>
+                  <!-- 顶部返回 (返回活动主页) -->
+                  <div class="flex items-center text-white text-sm mb-4">
+                    <button onclick="setPhoneScreen(1)" class="w-8 h-8 flex items-center justify-center rounded-full active:bg-white/20">
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                  </div>
+
+                  <!-- 标题与盾牌设计 (1:1 还原) -->
+                  <div class="flex items-center justify-between px-2 mb-6">
+                    <div>
+                      <h2 class="text-2xl font-bold text-white tracking-wide">实名认证</h2>
+                      <p class="text-xs text-white/80 mt-1">更加真实，更受欢迎</p>
+                    </div>
+                    <!-- 3D立体的盾牌对勾图标 -->
+                    <div class="w-20 h-20 bg-gradient-to-tr from-white/30 to-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/40 shadow-inner relative">
+                      <div class="w-14 h-16 bg-gradient-to-b from-blue-400 to-blue-600 rounded-b-full rounded-t-lg flex items-center justify-center shadow-lg border border-white/60">
+                        <i class="fa-solid fa-check text-2xl text-white"></i>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 实名输入卡片 -->
+                  <div class="bg-white rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="font-bold text-sm text-slate-900">
+                      请输入真实姓名进行实名认证
+                    </div>
+
+                    <!-- 姓名输入 -->
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3 flex items-center gap-4 border border-slate-100 focus-within:border-blue-400 focus-within:bg-white transition-all">
+                      <span class="text-xs text-slate-700 w-16 font-medium">姓名</span>
+                      <input id="input-realname" type="text" placeholder="请输入真实姓名" value="张小明" class="bg-transparent text-xs text-slate-800 outline-none flex-1">
+                    </div>
+
+                    <!-- 身份证输入 -->
+                    <div class="bg-slate-50 rounded-2xl px-4 py-3 flex items-center gap-4 border border-slate-100 focus-within:border-blue-400 focus-within:bg-white transition-all">
+                      <span class="text-xs text-slate-700 w-16 font-medium">身份证号</span>
+                      <input id="input-idcard" type="text" placeholder="请输入身份证号" value="330203199508123456" class="bg-transparent text-xs text-slate-800 outline-none flex-1 font-mono">
+                    </div>
+
+                    <!-- 认证并前往微信授权 -->
+                    <button onclick="submitRealnameAndNext()" class="w-full bg-gradient-to-r from-[#6A78FF] to-[#5564FE] text-white py-3 rounded-full font-bold text-sm shadow-lg shadow-indigo-200 active:scale-95 transition-all mt-2">
+                      立即认证
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 底部提示文字 (1:1 还原) -->
+                <div class="my-6 bg-white/90 rounded-2xl p-4 backdrop-blur-sm border border-white/60 text-slate-600 text-xs flex items-start gap-2 shadow-sm">
+                  <span class="w-4 h-4 rounded-full bg-slate-300 text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">i</span>
+                  <p class="text-[11px] leading-relaxed text-slate-500">
+                    实名认证仅用于微信红包打款使用，请确保填写的姓名、身份证号与微信实名完全一致
+                  </p>
+                </div>
+
+              </div>
+
+
+              <!-- ============================================ -->
+              <!-- SCREEN 3: 微信免确认收款授权半屏弹窗 (1:1 原生还原) -->
+              <!-- ============================================ -->
+              <div id="screen-3" class="screen-fade hidden min-h-full relative overflow-hidden flex flex-col justify-end">
+
+                <!-- 背景模糊虚化层 (透出底下的活动/抽奖页面) -->
+                <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] z-10"></div>
+
+                <!-- 底部的活动背景剪影 -->
+                <div class="absolute inset-0 p-4 opacity-30 select-none pointer-events-none">
+                  <div class="text-center pt-8 text-white font-black text-xl">幸运大抽奖</div>
+                  <div class="bg-white/20 h-64 rounded-3xl mt-4"></div>
+                </div>
+
+                <!-- 微信官方半屏弹窗主体 (1:1 像素级复刻用户上传设计稿) -->
+                <div class="relative z-20 bg-white rounded-t-[28px] p-6 shadow-2xl animate-slide-up flex flex-col justify-between min-h-[460px]">
+
+                  <!-- 关闭叉号 -->
+                  <div>
+                    <div class="flex justify-between items-center mb-4">
+                      <button onclick="setPhoneScreen(2)" class="text-slate-500 hover:text-slate-800 text-lg w-8 h-8 flex items-center justify-start">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                      <div class="w-8"></div>
+                    </div>
+
+                    <!-- 商户 Logo 与标题 -->
+                    <div class="text-center mb-6">
+                      <div class="flex items-center justify-center gap-1 text-base font-extrabold text-[#0084FF] mb-2 tracking-tight">
+                        <span class="text-lg">B</span><span class="text-xs text-slate-700 font-bold ml-0.5">mall</span>
+                      </div>
+                      <h3 class="text-base font-bold text-slate-900 tracking-tight">
+                        在企客工具通过微信支付收款
+                      </h3>
+                    </div>
+
+                    <!-- 授权详情条目 -->
+                    <div class="border-t border-slate-100 py-3 space-y-3 text-xs">
+                      <div class="flex items-start">
+                        <span class="text-slate-400 w-20 shrink-0">转账类型</span>
+                        <span class="text-slate-800 font-medium">现金奖励</span>
+                      </div>
+                      <div class="flex items-start">
+                        <span class="text-slate-400 w-20 shrink-0">转账说明</span>
+                        <span class="text-slate-600 leading-relaxed">同意后商家可转账至你选定的收款方式</span>
+                      </div>
+                    </div>
+
+                    <!-- 收款方式 -->
+                    <div class="border-t border-b border-slate-100 py-3 text-xs flex items-center justify-between mb-8">
+                      <span class="text-slate-400 w-20 shrink-0">收款方式</span>
+                      <div class="flex items-center gap-1.5 font-medium text-slate-800">
+                        <span class="w-4 h-4 rounded-full bg-amber-400 text-amber-900 text-[10px] font-bold flex items-center justify-center">¥</span>
+                        <span>零钱</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 微信官方绿色“同意”按钮 -->
+                  <div>
+                    <button onclick="confirmWechatAgreementAndPay()" 
+                            class="w-full bg-[#07C160] hover:bg-[#06AD56] active:scale-[0.98] text-white py-3.5 rounded-xl font-bold text-base shadow-lg shadow-emerald-200/80 transition-all flex items-center justify-center gap-2">
+                      同意
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <!-- ============================================ -->
+              <!-- SCREEN 4: 打款成功状态 (微信零钱到账通知)          -->
+              <!-- ============================================ -->
+              <div id="screen-4" class="screen-fade hidden min-h-full bg-[#F4F8F9] p-6 flex flex-col justify-between">
+                <div class="text-center pt-8">
+                  <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">
+                    <i class="fa-solid fa-check"></i>
+                  </div>
+                  <h3 class="text-lg font-bold text-slate-900">微信红包发放成功</h3>
+                  <p class="text-xs text-slate-500 mt-1">已免确认直达您的微信零钱钱包</p>
+
+                  <div class="my-6 text-3xl font-black text-slate-900">
+                    +10.00 <span class="text-xs font-normal text-slate-500">元</span>
+                  </div>
+
+                  <!-- 到账凭证卡片 -->
+                  <div class="bg-white rounded-2xl p-4 text-left text-xs space-y-2.5 shadow-sm border border-slate-100">
+                    <div class="flex justify-between">
+                      <span class="text-slate-400">付款商户</span>
+                      <span class="font-medium text-slate-800">宁波新空网络科技有限公司</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-400">收款人实名</span>
+                      <span class="font-medium text-slate-800" id="res-name">张*明</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-400">微信核验</span>
+                      <span class="text-emerald-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>实名一致 &amp; 免确认授权生效</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-slate-400">微信转账单号</span>
+                      <span class="font-mono text-slate-600 text-[11px]">WX20260914839210</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button onclick="finishAndBackToMain()" class="w-full bg-slate-900 text-white py-3 rounded-full text-xs font-bold active:scale-95 shadow-lg">
+                  返回活动首页 (查看完结金额更新)
+                </button>
+              </div>
+
+            </div>
+
+            <!-- 手机底部指示条 (Home Bar) -->
+            <div class="h-6 bg-transparent flex items-center justify-center shrink-0 z-30 select-none">
+              <div class="w-32 h-1 bg-slate-400 rounded-full"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // 切换大 Tab (全景时序 vs 原型演示)
+    function switchTab(tab) {
+      const flowView = document.getElementById('view-flow');
+      const protoView = document.getElementById('view-prototype');
+      const flowBtn = document.getElementById('tab-flow-btn');
+      const protoBtn = document.getElementById('tab-proto-btn');
+
+      if (tab === 'flow') {
+        flowView.classList.remove('hidden');
+        protoView.classList.add('hidden');
+        flowBtn.className = "px-4 py-2 rounded-lg font-medium transition-all bg-white text-blue-600 shadow-sm";
+        protoBtn.className = "px-4 py-2 rounded-lg font-medium transition-all text-slate-600 hover:text-slate-900";
+      } else {
+        flowView.classList.add('hidden');
+        protoView.classList.remove('hidden');
+        protoBtn.className = "px-4 py-2 rounded-lg font-medium transition-all bg-white text-blue-600 shadow-sm";
+        flowBtn.className = "px-4 py-2 rounded-lg font-medium transition-all text-slate-600 hover:text-slate-900";
+      }
+    }
+
+    // 手机屏幕切换逻辑 (共4步：1主页点亮 -> 2实名认证 -> 3微信免确认弹窗 -> 4零钱到账)
+    function setPhoneScreen(step) {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`screen-${i}`).classList.add('hidden');
+        const btn = document.getElementById(`ctrl-step-${i}`);
+        if (btn) {
+          btn.classList.remove('step-active');
+          btn.querySelector('.step-num').className = "step-num w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5";
+        }
+      }
+
+      // 显示对应屏幕
+      document.getElementById(`screen-${step}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`ctrl-step-${step}`);
+      if (activeBtn) {
+        activeBtn.classList.add('step-active');
+        activeBtn.querySelector('.step-num').className = "step-num w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5";
+      }
+
+      // 更新技术说明
+      const noteBox = document.getElementById('step-tech-note');
+      const notes = {
+        1: "【活动主页面】：无需跳页！顶部展示“累计转换金额：¥198.00”与“已完结金额：¥99.00”。下方满99元红包满足门槛，【立即领取】按钮已高亮点亮（红橙渐变+呼吸动效），点击直接调起关卡 1（实名认证）。",
+        2: "【前置关卡 1·实名认证】：1:1复刻设计稿。首次点击“立即领取”时进行拦截。录入姓名与身份证号，满足微信支付 FORCE_CHECK 强校验及金税系统全额个税申报凭据。",
+        3: "【前置关卡 2·微信免确认收款授权】：1:1还原微信支付官方标准化半屏组件（官方文档 4015901167）。该弹窗为微信系统底层直接渲染，页面内容不可由开发者自定义增减。用户点击绿色“同意”按钮开通免确认代收，资金方可自动直达零钱（否则为待确认挂起状态）。",
+        4: "【零钱入账凭证】：实名匹配且免确认授权生效后，宁波新空网络商户号调用微信商家转账接口秒级入账。返回主页后，已完结金额将自动增加至 ¥109.00！"
+      };
+      noteBox.innerText = notes[step];
+    }
+
+    // 主页两种数据状态快速切换（已达标态 vs 初始态）
+    function toggleMainPageState(isActive) {
+      const valTotal = document.getElementById('val-total');
+      const valCompleted = document.getElementById('val-completed');
+      const valPrizeCount = document.getElementById('val-prize-count');
+      const cardPrize1 = document.getElementById('card-prize-1');
+      const badge1 = document.getElementById('badge-card-1');
+      const status1 = document.getElementById('status-card-1');
+      const btn1 = document.getElementById('btn-claim-1');
+
+      const btnActive = document.getElementById('btn-state-active');
+      const btnEmpty = document.getElementById('btn-state-empty');
+
+      if (isActive) {
+        // 达标点亮态
+        valTotal.innerText = "198.00";
+        valCompleted.innerText = "99.00";
+        valPrizeCount.innerText = "1";
+        cardPrize1.className = "bg-white rounded-2xl p-3.5 mb-3 shadow-sm flex items-center justify-between border-2 border-red-200 transition-all";
+        badge1.className = "text-[9px] bg-red-100 text-red-600 font-bold px-1.5 py-0.2 rounded-full";
+        badge1.innerText = "已达标";
+        status1.className = "text-[10px] text-emerald-600 font-bold mt-1";
+        status1.innerHTML = '<i class="fa-solid fa-circle-check text-[9px] mr-0.5"></i>门槛已满足，可立即领取';
+        btn1.className = "px-3.5 py-1.5 bg-gradient-to-r from-[#FF5722] to-[#FF3B30] text-white text-xs rounded-full font-bold shadow-md shadow-red-200 active:scale-95 transition-all btn-pulse shrink-0";
+        btn1.disabled = false;
+        btn1.innerText = "立即领取";
+
+        btnActive.className = "py-2 px-3 rounded-lg font-bold bg-blue-600 text-white shadow-sm transition-all";
+        btnEmpty.className = "py-2 px-3 rounded-lg font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition-all";
+      } else {
+        // 初始未达标态
+        valTotal.innerText = "0";
+        valCompleted.innerText = "0";
+        valPrizeCount.innerText = "0";
+        cardPrize1.className = "bg-white rounded-2xl p-3.5 mb-3 shadow-sm flex items-center justify-between border border-slate-100 transition-all";
+        badge1.className = "hidden";
+        status1.className = "text-[10px] text-slate-400 mt-1";
+        status1.innerHTML = '仅差 <span class="text-red-500 font-bold">99</span> 元';
+        btn1.className = "px-3.5 py-1.5 bg-slate-100 text-slate-400 text-xs rounded-full font-medium cursor-not-allowed shrink-0";
+        btn1.disabled = true;
+        btn1.innerText = "立即领取";
+
+        btnEmpty.className = "py-2 px-3 rounded-lg font-bold bg-blue-600 text-white shadow-sm transition-all";
+        btnActive.className = "py-2 px-3 rounded-lg font-medium bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 transition-all";
+      }
+      setPhoneScreen(1);
+    }
+
+    // 提交订单模拟
+    function submitOrderMock() {
+      const order = document.getElementById('input-order').value;
+      const agreed = document.getElementById('chk-agreement').checked;
+
+      if (!order) {
+        alert('请输入有效的订单号！');
+        return;
+      }
+      if (!agreed) {
+        alert('请先勾选并同意《活动激励服务协议》');
+        return;
+      }
+
+      alert('订单提交并核销成功！累计转换金额已增加，红包领取按钮已点亮！');
+      toggleMainPageState(true);
+    }
+
+    // 步骤 2：提交实名认证 ➔ 下一步唤起微信免确认授权弹窗
+    function submitRealnameAndNext() {
+      const name = document.getElementById('input-realname').value.trim();
+      const idcard = document.getElementById('input-idcard').value.trim();
+
+      if (!name || !idcard) {
+        alert('请填写完整的姓名与身份证号！');
+        return;
+      }
+
+      const maskedName = name.length > 2 ? name[0] + '*' + name.slice(-1) : name[0] + '*';
+      document.getElementById('res-name').innerText = maskedName;
+
+      // 进入微信免确认授权半屏弹窗
+      setPhoneScreen(3);
+    }
+
+    // 步骤 3：点击微信官方“同意” ➔ 触发商家转账并打款成功
+    function confirmWechatAgreementAndPay() {
+      alert('已通过微信支付免确认收款协议签约！\n商户主体：宁波新空网络科技有限公司\n微信商家转账到零钱直达成功！');
+      setPhoneScreen(4);
+    }
+
+    // 步骤 4：完成打款返回主页，刷新已完结金额
+    function finishAndBackToMain() {
+      setPhoneScreen(1);
+      // 更新金额
+      document.getElementById('val-completed').innerText = "109.00";
+      const btn1 = document.getElementById('btn-claim-1');
+      btn1.className = "px-3.5 py-1.5 bg-slate-100 text-slate-400 text-xs rounded-full font-medium cursor-not-allowed shrink-0";
+      btn1.disabled = true;
+      btn1.innerText = "已领取";
+      document.getElementById('status-card-1').innerHTML = '<span class="text-slate-400 font-normal">奖励已于微信零钱到账</span>';
+      document.getElementById('badge-card-1').className = "text-[9px] bg-slate-100 text-slate-500 font-medium px-1.5 py-0.2 rounded-full";
+      document.getElementById('badge-card-1').innerText = "已到账";
+      document.getElementById('val-prize-count').innerText = "0";
+    }
+  </script>
+</body>
+</html>

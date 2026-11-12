@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K创社 · S4赛季活动聚合页 — 前后台交互视觉稿</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+      margin: 0;
+    }
+    .phone-frame {
+      width: 382px;
+      height: 820px;
+      background: #f6f7f9;
+      border-radius: 42px;
+      box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.22), 0 0 0 10px #1e293b, 0 0 0 12px #475569;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .phone-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    .phone-scroll::-webkit-scrollbar { width: 4px; }
+    .phone-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 4px; }
+
+    /* 赛季主题渐变（比竞品更克制、精致的暖金深红渐变） */
+    .season-hero-bg {
+      background: linear-gradient(165deg, #1f1726 0%, #351a24 45%, #5c2223 78%, #f6f7f9 100%);
+      position: relative;
+    }
+    .season-pass-card {
+      background: linear-gradient(180deg, #fffcf7 0%, #ffffff 100%);
+      border: 1px solid #fde68a;
+      box-shadow: 0 8px 20px -4px rgba(217, 119, 6, 0.08);
+    }
+    .reward-subcard-active {
+      background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 100%);
+      border: 1px solid #fbbf24;
+    }
+    .badge-ongoing {
+      background-color: #07c160;
+      color: #ffffff;
+    }
+    @keyframes pulse-claim {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35); }
+      50% { transform: scale(1.03); box-shadow: 0 6px 16px rgba(234, 88, 12, 0.55); }
+    }
+    .btn-claim-pulse {
+      animation: pulse-claim 1.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+
+  <!-- 顶部导航与模式切换栏 -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-6 py-3.5 shadow-sm">
+    <div class="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-bold shadow-sm">
+          S4
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-bold text-slate-900">创作者社区「赛季活动聚合」前后台交互效果图</h1>
+            <span class="px-2 py-0.5 text-xs font-medium bg-orange-50 text-orange-600 border border-orange-200 rounded-full">头部规则 + 双维极简奖励进度 + 关联活动列表</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">右侧后台修改配置（赛季名称、发帖篇数XX、评优次数N、赠品A/B、关联子活动）可实时同步至左侧小程序预览</p>
+        </div>
+      </div>
+
+      <!-- 视图切换 Tabs -->
+      <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button onclick="switchMainView('split')" id="tab-split" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition">
+          <i class="fa-solid fa-columns mr-1 text-orange-500"></i>前后台同屏联动
+        </button>
+        <button onclick="switchMainView('frontend')" id="tab-frontend" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+          <i class="fa-solid fa-mobile-screen mr-1"></i>小程序端多状态对比
+        </button>
+        <button onclick="switchMainView('backend')" id="tab-backend" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+          <i class="fa-solid fa-desktop mr-1"></i>管理后台完整视图
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 顶部设计优化亮点说明条 -->
+  <div class="max-w-[1440px] mx-auto px-6 pt-4">
+    <div class="bg-gradient-to-r from-amber-50 via-orange-50/70 to-white border border-amber-200/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-6 text-xs text-slate-700 flex-wrap">
+        <span class="font-bold text-amber-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i>相比竞品图（图2）的极简清晰化升级：
+        </span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-full bg-amber-500 text-white inline-flex items-center justify-center font-bold text-xs">1</span> <b>去除杂乱卡片堆叠</b>：将分散的任务条+灰底竖卡整合为统一的「双维度赛季通行证」</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-full bg-amber-500 text-white inline-flex items-center justify-center font-bold text-xs">2</span> <b>双维目标一目了然</b>：左/上「累计发帖得赠品A」+ 右/下「作品评优得赠品B」，进度条直出</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded-full bg-amber-500 text-white inline-flex items-center justify-center font-bold text-xs">3</span> <b>延续K创社基因</b>：下方关联活动完全复用现有活动广场卡片样式，带「计入S4赛季」角标</span>
+      </div>
+      <!-- 交互状态快捷切换 -->
+      <div class="flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">
+        <span class="text-xs font-medium text-slate-500 mr-1">模拟用户进度:</span>
+        <button onclick="setUserState('init')" id="state-btn-init" class="px-2 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-100">未开始(0/5, 0/2)</button>
+        <button onclick="setUserState('progress')" id="state-btn-progress" class="px-2 py-1 rounded text-xs font-semibold bg-orange-500 text-white">进行中(3/5, 1/2)</button>
+        <button onclick="setUserState('claim')" id="state-btn-claim" class="px-2 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-100">已达标可领奖(5/5, 2/2)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主体内容区 -->
+  <main class="max-w-[1440px] mx-auto px-6 pt-5">
+    <div id="layout-grid" class="flex flex-col lg:flex-row gap-8 items-start justify-center">
+
+      <!-- ==================== 左侧：C端小程序效果图 ==================== -->
+      <div id="frontend-panel" class="flex flex-col items-center w-full lg:w-auto shrink-0">
+        <!-- 手机顶部子页面切换控制 -->
+        <div class="mb-3 flex items-center justify-between w-[382px] bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-2xs">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-bold text-slate-700">小程序端页面:</span>
+            <button onclick="switchMobileScreen('season')" id="mob-tab-season" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white transition">
+              S4赛季聚合页
+            </button>
+            <button onclick="switchMobileScreen('plaza')" id="mob-tab-plaza" class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+              活动广场(聚合入口)
+            </button>
+          </div>
+          <!-- 奖励排布微调切换 -->
+          <button onclick="toggleRewardLayout()" id="reward-layout-btn" class="text-xs text-orange-600 hover:text-orange-700 font-semibold flex items-center gap-1" title="切换双维并列卡/阶梯卡">
+            <i class="fa-solid fa-sliders"></i><span id="reward-layout-label">双卡极简版</span>
+          </button>
+        </div>
+
+        <!-- 手机模拟器外框 -->
+        <div class="phone-frame">
+          <!-- 微信状态栏 & 顶部小程序导航栏 -->
+          <div id="mobile-topbar" class="bg-[#1f1726] text-white pt-3 pb-2.5 px-4 flex items-center justify-between shrink-0 transition-colors duration-200">
+            <div class="flex items-center gap-2">
+              <button onclick="switchMobileScreen('plaza')" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+              </button>
+              <button onclick="switchMobileScreen('plaza')" class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition">
+                <i class="fa-solid fa-house text-xs"></i>
+              </button>
+            </div>
+            <div id="mobile-nav-title" class="text-sm font-bold tracking-wide">S4星耀赛季</div>
+            <!-- 微信小程序胶囊 -->
+            <div class="flex items-center bg-black/25 border border-white/20 rounded-full px-2.5 py-1 gap-2.5">
+              <i class="fa-solid fa-ellipsis text-xs"></i>
+              <span class="w-px h-3 bg-white/25"></span>
+              <i class="fa-regular fa-circle-dot text-xs"></i>
+            </div>
+          </div>
+
+          <!-- ==================== 屏幕 1：S4赛季活动聚合页（核心需求页） ==================== -->
+          <div id="screen-season-detail" class="phone-scroll">
+            <div class="season-hero-bg pt-3 pb-4 px-3.5">
+              <!-- 赛季主视觉 Header -->
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400/20 to-orange-500/20 border border-amber-400/40 text-amber-300 text-xs font-semibold mb-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>赛季进行中</span>
+                    <span class="text-amber-200/60">|</span>
+                    <span id="preview-season-time">2026.10.01 - 2026.12.31</span>
+                  </div>
+                  <h2 id="preview-season-title" class="text-xl font-black text-white tracking-tight leading-snug">
+                    2026年度 · S4星耀赛季
+                  </h2>
+                  <p id="preview-season-subtitle" class="text-xs text-amber-100/80 mt-0.5">
+                    参与本季关联活动发帖 & 冲刺评优，解锁双维限定赠品
+                  </p>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-500 to-orange-600 p-0.5 shadow-lg shrink-0">
+                  <div class="w-full h-full bg-[#2a1820] rounded-[14px] flex flex-col items-center justify-center text-amber-300">
+                    <i class="fa-solid fa-trophy text-sm"></i>
+                    <span class="text-xs font-black leading-none mt-0.5">S4</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 模块一：头部活动规则卡片（对应需求：聚合页面头部先放活动规则） -->
+              <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 text-white mb-3">
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-5 h-5 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center text-xs">
+                      <i class="fa-solid fa-scroll"></i>
+                    </span>
+                    <span class="text-xs font-bold text-amber-200">赛季活动规则</span>
+                  </div>
+                  <button onclick="openRuleModal()" class="text-xs text-amber-300 hover:text-amber-200 flex items-center gap-0.5 font-medium">
+                    <span>完整细则</span>
+                    <i class="fa-solid fa-chevron-right text-xs scale-75"></i>
+                  </button>
+                </div>
+                <div id="preview-rule-list" class="space-y-1 text-xs text-white/90 leading-relaxed">
+                  <!-- 由 JS 渲染规则条目 -->
+                </div>
+              </div>
+
+              <!-- 模块二：赛季奖励完成进度（对应需求：然后是奖励完成进度，比竞品更简洁清晰） -->
+              <div class="season-pass-card rounded-2xl p-3.5 text-slate-800">
+                <!-- 进度卡头部：标题 + 用户当前累计数据概览 -->
+                <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-amber-100">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-5 h-5 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center text-xs shadow-2xs">
+                      <i class="fa-solid fa-gift"></i>
+                    </span>
+                    <span class="text-sm font-extrabold text-slate-900">赛季奖励进度</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200/70 font-medium">
+                      已发帖 <b id="user-post-stat" class="font-extrabold">3</b> 篇
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/70 font-medium">
+                      被评优 <b id="user-exc-stat" class="font-extrabold">1</b> 次
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 动态渲染：双维度奖励卡片容器（支持极简双卡版 / 阶梯版） -->
+                <div id="reward-progress-container"></div>
+              </div>
+            </div>
+
+            <!-- 模块三：关联的赛季活动列表（对应需求：再下面是关联的活动） -->
+            <div class="px-3.5 pt-1 pb-6">
+              <div class="flex items-center justify-between mb-2.5 px-0.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1 h-4 rounded-full bg-red-500"></span>
+                  <h3 class="text-sm font-extrabold text-slate-900">本赛季关联活动</h3>
+                  <span id="assoc-count-badge" class="text-xs font-bold text-slate-500">(3)</span>
+                </div>
+                <span class="text-xs text-slate-500 flex items-center gap-1">
+                  <i class="fa-solid fa-circle-check text-emerald-500"></i>参与任一活动均计入赛季
+                </span>
+              </div>
+
+              <!-- 关联活动卡片列表（100%还原图1 K创社活动广场卡片视觉，并增加赛季计入标识） -->
+              <div id="mobile-associated-list" class="space-y-3"></div>
+            </div>
+          </div>
+
+          <!-- ==================== 屏幕 2：活动广场首页（展示S4赛季聚合入口与普通活动关系） ==================== -->
+          <div id="screen-plaza-home" class="phone-scroll hidden bg-[#f5f6f8]">
+            <!-- 顶部模拟分类 Tab 栏（还原图1） -->
+            <div class="bg-white px-4 pt-2 pb-1 flex items-center justify-between text-sm text-slate-500 border-b border-slate-100 sticky top-0 z-10">
+              <div class="flex flex-col items-center font-bold text-slate-900">
+                <span>全部</span>
+                <span class="w-5 h-1 rounded-full bg-red-500 mt-1"></span>
+              </div>
+              <div onclick="switchMobileScreen('season')" class="flex items-center gap-1 font-bold text-orange-600 cursor-pointer bg-orange-50 px-2 py-0.5 rounded-full text-xs">
+                <i class="fa-solid fa-fire"></i><span>S4赛季专题</span>
+              </div>
+              <span>日常活动</span>
+              <span>无界版</span>
+              <span>口袋派对</span>
+            </div>
+
+            <div class="p-3 space-y-3">
+              <!-- 置顶 S4 赛季聚合总入口卡片 -->
+              <div onclick="switchMobileScreen('season')" class="bg-white rounded-2xl p-3.5 shadow-xs border-2 border-orange-200 cursor-pointer hover:border-orange-400 transition relative overflow-hidden">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white">赛季聚合</span>
+                    <h4 id="plaza-season-card-title" class="text-sm font-bold text-slate-900 truncate max-w-[185px]">2026年度-S4星耀赛季</h4>
+                  </div>
+                  <span class="px-3 py-1 rounded-full border border-orange-300 bg-orange-50 text-orange-600 text-xs font-semibold">进入赛季 &gt;</span>
+                </div>
+                <p id="plaza-season-card-time" class="text-xs text-slate-400 mb-2">活动时间：2026.10.01 - 2026.12.31 · 含 3 个关联活动</p>
+                <div class="relative rounded-xl overflow-hidden h-36 bg-slate-900">
+                  <img id="plaza-hero-img" src="" alt="S4赛季封面" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3">
+                    <div class="flex items-center justify-between text-white">
+                      <div class="flex items-center gap-2 text-xs">
+                        <span class="px-2 py-0.5 rounded bg-amber-500/90 text-slate-950 font-bold">双维奖励</span>
+                        <span>发帖满5篇赠好礼 · 评优满2次赠限定手办</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between mt-2.5 text-xs text-slate-400">
+                  <div class="flex items-center">
+                    <div class="flex -space-x-1.5">
+                      <span class="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">K</span>
+                      <span class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">M</span>
+                      <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">A</span>
+                    </div>
+                    <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs font-semibold">+326</span>
+                    <span class="ml-2 text-orange-600 font-medium">我的进度：发帖 3/5 · 评优 1/2</span>
+                  </div>
+                  <span><i class="fa-regular fa-eye mr-1"></i>2.4w 次浏览</span>
+                </div>
+              </div>
+
+              <!-- 普通活动卡片（还原图1样式） -->
+              <div id="plaza-sub-list" class="space-y-3"></div>
+            </div>
+          </div>
+
+          <!-- 手机端内部弹窗：完整规则弹窗 / 领奖弹窗 -->
+          <div id="mobile-modal-backdrop" class="absolute inset-0 bg-black/60 backdrop-blur-xs z-30 hidden items-end justify-center">
+            <div class="bg-white w-full rounded-t-3xl p-5 max-h-[80%] overflow-y-auto animate-slide-up">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h4 id="mobile-modal-title" class="text-base font-bold text-slate-900">弹窗标题</h4>
+                <button onclick="closeMobileModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200">
+                  <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+              </div>
+              <div id="mobile-modal-body" class="py-3 text-xs text-slate-600 space-y-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== 右侧：B端管理后台效果图 ==================== -->
+      <div id="backend-panel" class="flex-1 w-full min-w-0">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+          <!-- 后台顶部面包屑与子导航 -->
+          <div class="bg-slate-900 text-white px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-lg bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-bold">
+                <i class="fa-solid fa-layer-group mr-1"></i>K创社运营中台
+              </span>
+              <div class="text-xs text-slate-400 flex items-center gap-1.5">
+                <span>内容社区管理</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                <span>活动广场管理</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                <span class="text-white font-semibold">赛季聚合活动配置</span>
+              </div>
+            </div>
+
+            <!-- 后台子视图切换 -->
+            <div class="flex items-center gap-1.5 bg-slate-800 p-1 rounded-lg">
+              <button onclick="switchAdminSubView('config')" id="adm-tab-config" class="px-3 py-1 rounded-md text-xs font-semibold bg-orange-500 text-white transition">
+                <i class="fa-solid fa-pen-to-square mr-1"></i>创建/编辑赛季活动
+              </button>
+              <button onclick="switchAdminSubView('list')" id="adm-tab-list" class="px-3 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-list-ul mr-1"></i>赛季活动列表 (4)
+              </button>
+              <button onclick="switchAdminSubView('records')" id="adm-tab-records" class="px-3 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-award mr-1"></i>达标获奖名单 (128)
+              </button>
+            </div>
+          </div>
+
+          <!-- ==================== 后台子视图 1：创建/编辑赛季聚合活动表单 ==================== -->
+          <div id="admin-view-config" class="p-6 space-y-6">
+            <!-- 顶部操作提示与保存按钮 -->
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg font-bold text-slate-900">编辑赛季聚合活动：S4星耀赛季</h2>
+                  <span class="px-2 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full">进行中 · 已上线</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">支持将活动广场现有的多个独立子活动聚合为一个赛季专题，统一统计「赛季发帖数」与「作品被评优次数」并发放赠品。</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <button onclick="resetDemoConfig()" class="px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+                  <i class="fa-solid fa-rotate-left mr-1"></i>重置默认配置
+                </button>
+                <button onclick="saveAndSyncToast()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-bold shadow-sm hover:opacity-95 transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-floppy-disk"></i>保存并发布至小程序
+                </button>
+              </div>
+            </div>
+
+            <!-- 区块 1：基础信息与活动时间 -->
+            <section class="bg-slate-50/70 rounded-2xl p-5 border border-slate-200/80">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-slate-900 text-white text-xs font-bold flex items-center justify-center">1</span>
+                  <h3 class="text-sm font-bold text-slate-900">基础信息与活动时间</h3>
+                </div>
+                <span class="text-xs text-slate-400">对应小程序聚合页顶部 Header 及活动广场入口卡片</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">赛季活动名称 <span class="text-red-500">*</span></label>
+                  <input type="text" id="inp-season-title" value="2026年度 · S4星耀赛季" oninput="syncConfigToPreview()"
+                    class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-orange-500 font-medium">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">赛季有效时间 <span class="text-red-500">*</span></label>
+                  <div class="flex items-center gap-2">
+                    <input type="text" id="inp-season-start" value="2026.10.01" oninput="syncConfigToPreview()"
+                      class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-orange-500">
+                    <span class="text-slate-400 text-xs">至</span>
+                    <input type="text" id="inp-season-end" value="2026.12.31" oninput="syncConfigToPreview()"
+                      class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-orange-500">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">副标题 / 导语说明</label>
+                  <input type="text" id="inp-season-sub" value="参与本季关联活动发帖 & 冲刺评优，解锁双维限定赠品" oninput="syncConfigToPreview()"
+                    class="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-orange-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">活动广场展示方式</label>
+                  <div class="flex items-center gap-4 pt-1.5 text-xs text-slate-700">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" checked class="accent-orange-500 rounded">
+                      <span>在「全部」列表置顶聚合入口卡</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" checked class="accent-orange-500 rounded">
+                      <span>生成独立「S4赛季」分类Tab</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 区块 2：活动规则配置（头部直出摘要 + 弹窗完整细则） -->
+            <section class="bg-slate-50/70 rounded-2xl p-5 border border-slate-200/80">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-slate-900 text-white text-xs font-bold flex items-center justify-center">2</span>
+                  <h3 class="text-sm font-bold text-slate-900">活动规则配置（聚合页头部展示）</h3>
+                </div>
+                <span class="text-xs text-orange-600 bg-orange-50 px-2.5 py-0.5 rounded-full border border-orange-200">每行一条核心规则，直出在聚合页最上方</span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">头部核心规则摘要（建议 2~3 条精炼规则）<span class="text-red-500">*</span></label>
+                  <textarea id="inp-season-rules" rows="3" oninput="syncConfigToPreview()"
+                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed focus:outline-none focus:border-orange-500">1. 赛季期间，在下方任一【关联活动】中发布有效作品帖，均自动计入本赛季发帖进度；
+2. 赛季奖励分为「发帖达标奖」与「作品评优奖」两个维度，两项赠品可同时叠加获得；
+3. 达到目标后可直接在本页面点击领取赠品并填写收货地址，实物奖品将于7个工作日内寄出。</textarea>
+                </div>
+                <div class="bg-white rounded-xl p-3.5 border border-slate-200 flex flex-col justify-between">
+                  <div>
+                    <div class="text-xs font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-info text-blue-500"></i>统计口径自动校验规则
+                    </div>
+                    <ul class="text-xs text-slate-500 space-y-1.5 mt-2">
+                      <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-500"></i>仅统计审核通过的公开帖</li>
+                      <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-500"></i>同一篇帖子关联多个子活动不重复计次</li>
+                      <li class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-500"></i>删帖或转为私密自动扣减对应进度</li>
+                    </ul>
+                  </div>
+                  <div class="text-xs text-slate-400 pt-2 border-t border-slate-100 mt-2">
+                    支持点击左侧手机「完整细则」预览弹窗
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 区块 3：双维度奖励规则配置（核心需求：发帖XX篇获赠品A + 被评优N次获赠品B） -->
+            <section class="bg-gradient-to-br from-amber-50/60 via-orange-50/30 to-white rounded-2xl p-5 border border-amber-200">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+                  <h3 class="text-sm font-bold text-slate-900">双维度奖励规则配置</h3>
+                  <span class="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 rounded-md">两个维度相互独立 · 可叠加领取</span>
+                </div>
+                <div class="text-xs text-slate-500">
+                  修改下方篇数 <code class="px-1 py-0.5 bg-white rounded border text-orange-600 font-bold">XX</code> 或评优次数 <code class="px-1 py-0.5 bg-white rounded border text-orange-600 font-bold">N</code>，左侧进度条实时重算
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 维度一：赛季发帖达标 -->
+                <div class="bg-white rounded-xl p-4 border border-orange-200 shadow-2xs relative">
+                  <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-0.5 rounded bg-orange-100 text-orange-700 text-xs font-extrabold">维度一 · 活跃发帖奖</span>
+                      <span class="text-xs font-bold text-slate-700">发帖满 XX 篇获赠品 A</span>
+                    </div>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked class="sr-only peer">
+                      <div class="w-8 h-4 bg-emerald-500 rounded-full relative after:content-[''] after:absolute after:top-0.5 after:right-0.5 after:bg-white after:rounded-full after:h-3 after:w-3"></div>
+                    </label>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 bg-orange-50/60 p-2.5 rounded-xl border border-orange-100">
+                      <span class="text-xs font-semibold text-slate-700">达标条件：本赛季关联活动下累计有效发帖满</span>
+                      <input type="number" id="inp-target-posts" value="5" min="1" max="50" oninput="syncConfigToPreview()"
+                        class="w-16 px-2 py-1 bg-white border border-orange-300 rounded-lg text-center text-sm font-black text-orange-600 focus:outline-none">
+                      <span class="text-xs font-semibold text-slate-700">篇</span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                      <img id="adm-gift-a-img" src="" alt="赠品A" class="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0 bg-slate-100">
+                      <div class="flex-1 min-w-0 space-y-2">
+                        <div>
+                          <label class="block text-xs text-slate-500 mb-0.5">赠品 A 名称（展示在C端奖励卡）</label>
+                          <input type="text" id="inp-gift-a-name" value="奇妙积木「假面骑士」限定版盲盒" oninput="syncConfigToPreview()"
+                            class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:border-orange-500">
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <div class="flex-1">
+                            <label class="block text-xs text-slate-400">赠品价值/标签</label>
+                            <input type="text" id="inp-gift-a-tag" value="价值 ¥89 · 达标必得" oninput="syncConfigToPreview()"
+                              class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                          </div>
+                          <div class="w-24">
+                            <label class="block text-xs text-slate-400">发放库存</label>
+                            <input type="text" value="500 份" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 维度二：赛季作品被评优 -->
+                <div class="bg-white rounded-xl p-4 border border-amber-300 shadow-2xs relative">
+                  <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-xs font-extrabold">维度二 · 荣耀评优奖</span>
+                      <span class="text-xs font-bold text-slate-700">被评优 N 次获赠品 B</span>
+                    </div>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked class="sr-only peer">
+                      <div class="w-8 h-4 bg-emerald-500 rounded-full relative after:content-[''] after:absolute after:top-0.5 after:right-0.5 after:bg-white after:rounded-full after:h-3 after:w-3"></div>
+                    </label>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div class="flex items-center gap-2 bg-amber-50/70 p-2.5 rounded-xl border border-amber-200/70">
+                      <span class="text-xs font-semibold text-slate-700">达标条件：本赛季关联活动作品被评为「优秀」满</span>
+                      <input type="number" id="inp-target-exc" value="2" min="1" max="20" oninput="syncConfigToPreview()"
+                        class="w-16 px-2 py-1 bg-white border border-amber-400 rounded-lg text-center text-sm font-black text-amber-700 focus:outline-none">
+                      <span class="text-xs font-semibold text-slate-700">次</span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                      <img id="adm-gift-b-img" src="" alt="赠品B" class="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0 bg-slate-100">
+                      <div class="flex-1 min-w-0 space-y-2">
+                        <div>
+                          <label class="block text-xs text-slate-500 mb-0.5">赠品 B 名称（展示在C端奖励卡）</label>
+                          <input type="text" id="inp-gift-b-name" value="S4星耀黄金奥特曼限定典藏套装" oninput="syncConfigToPreview()"
+                            class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:bg-white focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <div class="flex-1">
+                            <label class="block text-xs text-slate-400">赠品价值/标签</label>
+                            <input type="text" id="inp-gift-b-tag" value="价值 ¥299 · 含荣誉证书" oninput="syncConfigToPreview()"
+                              class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                          </div>
+                          <div class="w-24">
+                            <label class="block text-xs text-slate-400">发放库存</label>
+                            <input type="text" value="150 份" class="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 区块 4：关联现有的活动配置 -->
+            <section class="bg-slate-50/70 rounded-2xl p-5 border border-slate-200/80">
+              <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-slate-900 text-white text-xs font-bold flex items-center justify-center">4</span>
+                  <h3 class="text-sm font-bold text-slate-900">关联现有的子活动</h3>
+                  <span class="text-xs text-slate-500">已关联 <b id="admin-assoc-count" class="text-orange-600">3</b> 个现有活动（可勾选/取消勾选实时同步左侧手机端）</span>
+                </div>
+                <button onclick="openActivitySelectorModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-plus"></i>从现有活动库中添加/管理关联
+                </button>
+              </div>
+
+              <!-- 已关联活动表格 -->
+              <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 font-semibold">
+                      <th class="py-2.5 px-3 w-12 text-center">排序</th>
+                      <th class="py-2.5 px-3">关联的子活动信息</th>
+                      <th class="py-2.5 px-3">原活动分类</th>
+                      <th class="py-2.5 px-3">活动时间</th>
+                      <th class="py-2.5 px-3">状态</th>
+                      <th class="py-2.5 px-3">本季贡献数据</th>
+                      <th class="py-2.5 px-3 text-right">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-associated-tbody" class="divide-y divide-slate-100 text-xs">
+                    <!-- JS 渲染 -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+          <!-- ==================== 后台子视图 2：赛季活动管理列表 ==================== -->
+          <div id="admin-view-list" class="p-6 hidden space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">赛季聚合活动列表</h2>
+                <p class="text-xs text-slate-500">管理历届赛季聚合专题及其关联的子活动、双维度赠品发放情况</p>
+              </div>
+              <button onclick="switchAdminSubView('config')" class="px-4 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition">
+                <i class="fa-solid fa-plus mr-1"></i>新建赛季聚合活动
+              </button>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                    <th class="py-3 px-4">赛季ID / 名称</th>
+                    <th class="py-3 px-4">赛季时间</th>
+                    <th class="py-3 px-4">关联子活动数</th>
+                    <th class="py-3 px-4">维度一（发帖赠品A）</th>
+                    <th class="py-3 px-4">维度二（评优赠品B）</th>
+                    <th class="py-3 px-4">状态</th>
+                    <th class="py-3 px-4 text-right">操作</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr class="hover:bg-orange-50/30">
+                    <td class="py-3.5 px-4">
+                      <div class="font-bold text-slate-900">2026年度 · S4星耀赛季</div>
+                      <div class="text-slate-400">ID: SEASON_2026_S4</div>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">2026.10.01 - 2026.12.31</td>
+                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-bold">3 个活动</span></td>
+                    <td class="py-3.5 px-4">
+                      <div class="font-semibold text-slate-800">发帖满 5 篇</div>
+                      <div class="text-slate-400">已达标 86 人 · 假面骑士盲盒</div>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <div class="font-semibold text-slate-800">被评优满 2 次</div>
+                      <div class="text-slate-400">已达标 42 人 · 黄金奥特曼套装</div>
+                    </td>
+                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold">进行中</span></td>
+                    <td class="py-3.5 px-4 text-right space-x-2">
+                      <button onclick="switchAdminSubView('config')" class="text-orange-600 font-semibold hover:underline">编辑配置</button>
+                      <button onclick="switchAdminSubView('records')" class="text-blue-600 font-semibold hover:underline">获奖名单</button>
+                    </td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="py-3.5 px-4">
+                      <div class="font-bold text-slate-700">2026年度 · S3炽焰赛季</div>
+                      <div class="text-slate-400">ID: SEASON_2026_S3</div>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-500">2026.07.01 - 2026.09.30</td>
+                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">5 个活动</span></td>
+                    <td class="py-3.5 px-4">
+                      <div class="font-medium text-slate-700">发帖满 6 篇</div>
+                      <div class="text-slate-400">已发放 312 份</div>
+                    </td>
+                    <td class="py-3.5 px-4">
+                      <div class="font-medium text-slate-700">被评优满 3 次</div>
+                      <div class="text-slate-400">已发放 95 份</div>
+                    </td>
+                    <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">已结束</span></td>
+                    <td class="py-3.5 px-4 text-right space-x-2">
+                      <button onclick="switchAdminSubView('config')" class="text-slate-500 hover:underline">查看</button>
+                      <button onclick="switchAdminSubView('records')" class="text-blue-600 hover:underline">发奖记录</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ==================== 后台子视图 3：达标获奖与赠品发放核销名单 ==================== -->
+          <div id="admin-view-records" class="p-6 hidden space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">S4赛季 · 创作者达标与赠品申领明细</h2>
+                <p class="text-xs text-slate-500">系统自动实时汇总关联子活动下的「有效发帖数」与「作品被评优次数」，达标用户填写地址后可导出发货</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="saveAndSyncToast('已导出 128 条达标收货地址 Excel')" class="px-3.5 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  <i class="fa-solid fa-file-export mr-1"></i>导出待发货名单
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold">
+                    <th class="py-3 px-4">创作者信息</th>
+                    <th class="py-3 px-4">本季关联活动发帖</th>
+                    <th class="py-3 px-4">赠品A（发帖达标）</th>
+                    <th class="py-3 px-4">本季作品被评优</th>
+                    <th class="py-3 px-4">赠品B（评优达标）</th>
+                    <th class="py-3 px-4">收货信息 / 发货状态</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr>
+                    <td class="py-3 px-4 font-bold text-slate-800">积木狂人阿凯 <span class="text-slate-400 font-normal">(UID: 882910)</span></td>
+                    <td class="py-3 px-4"><span class="font-bold text-emerald-600">6 / 5 篇</span> (已达标)</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold">已申领 · 假面骑士盲盒</span></td>
+                    <td class="py-3 px-4"><span class="font-bold text-amber-600">2 / 2 次</span> (已达标)</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-semibold">已申领 · 黄金奥特曼套装</span></td>
+                    <td class="py-3 px-4 text-slate-600">上海市浦东新区... <span class="text-blue-600 font-semibold ml-1">顺丰已发</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-3 px-4 font-bold text-slate-800">星际拼搭师Leo <span class="text-slate-400 font-normal">(UID: 774102)</span></td>
+                    <td class="py-3 px-4"><span class="font-bold text-emerald-600">5 / 5 篇</span> (已达标)</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-orange-50 text-orange-700 font-semibold">待发货 · 假面骑士盲盒</span></td>
+                    <td class="py-3 px-4"><span class="text-slate-500">1 / 2 次</span> (差1次)</td>
+                    <td class="py-3 px-4"><span class="text-slate-400">未达成</span></td>
+                    <td class="py-3 px-4 text-slate-600">广州市天河区... <button onclick="saveAndSyncToast('已录入物流单号')" class="text-orange-600 font-semibold ml-1 hover:underline">去发货</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==================== 后台弹窗：从现有活动库中选择并关联活动 ==================== -->
+  <div id="admin-selector-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold">选择要关联至「S4赛季」的现有活动</h3>
+          <p class="text-xs text-slate-400 mt-0.5">勾选后，用户在对应活动下发布的帖子与获得的评优将自动汇总至本赛季进度</p>
+        </div>
+        <button onclick="closeActivitySelectorModal()" class="w-7 h-7 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+      <div id="selector-modal-list" class="p-5 space-y-2.5 max-h-[420px] overflow-y-auto">
+        <!-- JS 渲染可选活动列表 -->
+      </div>
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <span class="text-xs text-slate-500">提示：勾选状态变更会实时同步至左侧小程序「本赛季关联活动」列表</span>
+        <button onclick="closeActivitySelectorModal()" class="px-4 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold hover:bg-orange-600">
+          完成选择
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部轻提示 Toast -->
+  <div id="demo-toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold hidden items-center gap-2">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="demo-toast-text">配置已实时同步至小程序预览</span>
+  </div>
+
+  <!-- 引入内嵌图片资源与交互脚本 -->
+  <script>
+window.DEMO_ASSETS = {
+  b1: "data:image/jpeg;base64,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",
+  b2: "data:image/jpeg;base64,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",
+  ga: "data:image/jpeg;base64,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",
+  gb: "data:image/jpeg;base64,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"
+};
+
+</script>
+  <script>
+    // 状态管理
+    const state = {
+      userProgressMode: 'progress', // 'init' | 'progress' | 'claim'
+      userPosts: 3,
+      userExc: 1,
+      claimedA: false,
+      claimedB: false,
+      rewardLayout: 'cards', // 'cards' (双卡极简并列/上下版) | 'steps' (阶梯节点版)
+      activities: [
+        {
+          id: 'ACT_101',
+          title: 'S4「奥特曼」口袋派对金秋创作特辑',
+          category: '口袋派对',
+          time: '2026.10.01 - 2026.11.15',
+          status: '进行中',
+          participants: 123,
+          views: '17482',
+          postsCount: 428,
+          excCount: 36,
+          bannerKey: 'b2',
+          associated: true
+        },
+        {
+          id: 'ACT_102',
+          title: '2026年度-K创社无界版机甲拼搭大赛',
+          category: '无界版',
+          time: '2026.10.01 - 2026.12.31',
+          status: '进行中',
+          participants: 89,
+          views: '9620',
+          postsCount: 315,
+          excCount: 28,
+          bannerKey: 'b1',
+          associated: true
+        },
+        {
+          id: 'ACT_103',
+          title: '假面骑士「极狐&龙骑」名场面还原挑战',
+          category: '日常活动',
+          time: '2026.10.15 - 2026.12.20',
+          status: '进行中',
+          participants: 64,
+          views: '6840',
+          postsCount: 192,
+          excCount: 19,
+          bannerKey: 'b1',
+          associated: true
+        },
+        {
+          id: 'ACT_104',
+          title: '周末桌面微缩积木摄影打卡日常',
+          category: '热爱',
+          time: '2026.10.01 - 2026.10.31',
+          status: '进行中',
+          participants: 45,
+          views: '3210',
+          postsCount: 98,
+          excCount: 8,
+          bannerKey: 'b2',
+          associated: false
+        }
+      ]
+    };
+
+    function getAsset(key) {
+      if (window.DEMO_ASSETS && window.DEMO_ASSETS[key]) {
+        return window.DEMO_ASSETS[key];
+      }
+      return '';
+    }
+
+    // 切换用户进度模拟状态
+    function setUserState(mode) {
+      state.userProgressMode = mode;
+      const targetPosts = parseInt(document.getElementById('inp-target-posts').value || '5', 10);
+      const targetExc = parseInt(document.getElementById('inp-target-exc').value || '2', 10);
+
+      if (mode === 'init') {
+        state.userPosts = 0;
+        state.userExc = 0;
+        state.claimedA = false;
+        state.claimedB = false;
+      } else if (mode === 'progress') {
+        state.userPosts = Math.max(1, Math.min(3, targetPosts - 1));
+        state.userExc = Math.max(0, Math.min(1, targetExc - 1));
+        state.claimedA = false;
+        state.claimedB = false;
+      } else if (mode === 'claim') {
+        state.userPosts = targetPosts;
+        state.userExc = targetExc;
+      }
+
+      ['init', 'progress', 'claim'].forEach(k => {
+        const btn = document.getElementById('state-btn-' + k);
+        if (!btn) return;
+        if (k === mode) {
+          btn.className = 'px-2 py-1 rounded text-xs font-semibold bg-orange-500 text-white transition';
+        } else {
+          btn.className = 'px-2 py-1 rounded text-xs font-medium text-slate-600 hover:bg-slate-100 transition';
+        }
+      });
+
+      syncConfigToPreview();
+    }
+
+    // 切换奖励卡片展示版式（极简双卡版 vs 阶梯版）
+    function toggleRewardLayout() {
+      state.rewardLayout = state.rewardLayout === 'cards' ? 'steps' : 'cards';
+      document.getElementById('reward-layout-label').innerText =
+        state.rewardLayout === 'cards' ? '双卡极简版' : '阶梯进度版';
+      syncConfigToPreview();
+    }
+
+    // 渲染双维度奖励进度区（核心亮点：比图2更简洁、直观）
+    function renderRewardProgress() {
+      const container = document.getElementById('reward-progress-container');
+      const targetPosts = Math.max(1, parseInt(document.getElementById('inp-target-posts').value || '5', 10));
+      const targetExc = Math.max(1, parseInt(document.getElementById('inp-target-exc').value || '2', 10));
+      const giftAName = document.getElementById('inp-gift-a-name').value || '赠品A';
+      const giftATag = document.getElementById('inp-gift-a-tag').value || '达标必得';
+      const giftBName = document.getElementById('inp-gift-b-name').value || '赠品B';
+      const giftBTag = document.getElementById('inp-gift-b-tag').value || '荣耀大奖';
+
+      // 如果处于达标演示模式，跟随目标值达标
+      if (state.userProgressMode === 'claim') {
+        state.userPosts = targetPosts;
+        state.userExc = targetExc;
+      }
+
+      document.getElementById('user-post-stat').innerText = state.userPosts;
+      document.getElementById('user-exc-stat').innerText = state.userExc;
+
+      const postPct = Math.min(100, Math.round((state.userPosts / targetPosts) * 100));
+      const excPct = Math.min(100, Math.round((state.userExc / targetExc) * 100));
+      const isPostDone = state.userPosts >= targetPosts;
+      const isExcDone = state.userExc >= targetExc;
+
+      if (state.rewardLayout === 'cards') {
+        // 方案 A：极简双维度横向/并列卡片（彻底告别图2的繁琐灰底卡片堆叠）
+        container.innerHTML = `
+          <div class="space-y-2.5">
+            <!-- 维度 1：赛季发帖达标奖（赠品A） -->
+            <div class="rounded-xl p-2.5 border transition ${isPostDone ? 'reward-subcard-active' : 'bg-slate-50/90 border-slate-200/80'}">
+              <div class="flex items-center gap-2.5">
+                <div class="relative w-14 h-14 rounded-xl overflow-hidden border border-amber-200 bg-slate-900 shrink-0">
+                  <img src="${getAsset('ga')}" alt="赠品A" class="w-full h-full object-cover">
+                  <span class="absolute top-0 left-0 px-1.5 py-0.2 bg-orange-500 text-white text-xs font-bold rounded-br-lg">赠品A</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="text-xs font-extrabold text-slate-900 truncate">${giftAName}</span>
+                  </div>
+                  <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                    <span>赛季累计发帖满 <b class="text-orange-600 font-bold">${targetPosts}篇</b></span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-amber-700 font-medium">${giftATag}</span>
+                  </div>
+                  <!-- 进度条与数值 -->
+                  <div class="mt-2 flex items-center gap-2">
+                    <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div class="h-full rounded-full transition-all duration-300 ${isPostDone ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-orange-400 to-red-500'}" style="width: ${postPct}%"></div>
+                    </div>
+                    <span class="text-xs font-bold ${isPostDone ? 'text-emerald-600' : 'text-orange-600'} shrink-0">
+                      ${state.userPosts}/${targetPosts}篇
+                    </span>
+                  </div>
+                </div>
+                <div class="shrink-0">
+                  ${
+                    state.claimedA
+                      ? `<button class="px-2.5 py-1.5 rounded-full bg-slate-200 text-slate-500 text-xs font-bold cursor-default">已申领</button>`
+                      : isPostDone
+                      ? `<button onclick="openClaimModal('A')" class="px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-bold shadow-xs btn-claim-pulse">领取赠品</button>`
+                      : `<button onclick="scrollToAssocList()" class="px-2.5 py-1.5 rounded-full bg-orange-100 text-orange-700 hover:bg-orange-200 text-xs font-bold transition">去发帖</button>`
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- 维度 2：赛季作品被评优奖（赠品B） -->
+            <div class="rounded-xl p-2.5 border transition ${isExcDone ? 'reward-subcard-active' : 'bg-slate-50/90 border-slate-200/80'}">
+              <div class="flex items-center gap-2.5">
+                <div class="relative w-14 h-14 rounded-xl overflow-hidden border border-amber-300 bg-slate-900 shrink-0">
+                  <img src="${getAsset('gb')}" alt="赠品B" class="w-full h-full object-cover">
+                  <span class="absolute top-0 left-0 px-1.5 py-0.2 bg-amber-500 text-slate-950 text-xs font-extrabold rounded-br-lg">赠品B</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="text-xs font-extrabold text-slate-900 truncate">${giftBName}</span>
+                  </div>
+                  <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                    <span>作品被评为优秀满 <b class="text-amber-700 font-bold">${targetExc}次</b></span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-amber-700 font-medium">${giftBTag}</span>
+                  </div>
+                  <!-- 进度条与数值 -->
+                  <div class="mt-2 flex items-center gap-2">
+                    <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div class="h-full rounded-full transition-all duration-300 ${isExcDone ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-amber-400 to-orange-500'}" style="width: ${excPct}%"></div>
+                    </div>
+                    <span class="text-xs font-bold ${isExcDone ? 'text-emerald-600' : 'text-amber-700'} shrink-0">
+                      ${state.userExc}/${targetExc}次
+                    </span>
+                  </div>
+                </div>
+                <div class="shrink-0">
+                  ${
+                    state.claimedB
+                      ? `<button class="px-2.5 py-1.5 rounded-full bg-slate-200 text-slate-500 text-xs font-bold cursor-default">已申领</button>`
+                      : isExcDone
+                      ? `<button onclick="openClaimModal('B')" class="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold shadow-xs btn-claim-pulse">领取赠品</button>`
+                      : `<span class="px-2.5 py-1 rounded-full bg-slate-200/80 text-slate-500 text-xs font-semibold">差${Math.max(0, targetExc - state.userExc)}次</span>`
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // 方案 B：左右双轨大卡对照版（同样比图2更清晰，适合强调奖品大图）
+        container.innerHTML = `
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="rounded-xl p-2.5 border ${isPostDone ? 'reward-subcard-active' : 'bg-slate-50 border-slate-200'} flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-orange-500 text-white text-xs font-bold">维度1 · 发帖奖</span>
+                  <span class="text-xs font-bold text-orange-600">${state.userPosts}/${targetPosts}篇</span>
+                </div>
+                <div class="h-24 rounded-lg overflow-hidden bg-slate-900 mb-2 relative">
+                  <img src="${getAsset('ga')}" class="w-full h-full object-cover">
+                  <div class="absolute bottom-0 inset-x-0 bg-black/65 text-white text-xs px-2 py-0.5 truncate">${giftATag}</div>
+                </div>
+                <div class="text-xs font-bold text-slate-900 line-clamp-1">${giftAName}</div>
+                <div class="text-xs text-slate-500 mt-0.5">累计发帖满 ${targetPosts} 篇可得</div>
+              </div>
+              <div class="mt-2.5">
+                ${
+                  isPostDone
+                    ? `<button onclick="openClaimModal('A')" class="w-full py-1.5 rounded-lg bg-orange-500 text-white text-xs font-bold">立即领取赠品A</button>`
+                    : `<button onclick="scrollToAssocList()" class="w-full py-1.5 rounded-lg bg-orange-100 text-orange-700 text-xs font-bold">还差 ${targetPosts - state.userPosts} 篇 · 去发帖</button>`
+                }
+              </div>
+            </div>
+
+            <div class="rounded-xl p-2.5 border ${isExcDone ? 'reward-subcard-active' : 'bg-slate-50 border-slate-200'} flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-xs font-bold">维度2 · 评优奖</span>
+                  <span class="text-xs font-bold text-amber-700">${state.userExc}/${targetExc}次</span>
+                </div>
+                <div class="h-24 rounded-lg overflow-hidden bg-slate-900 mb-2 relative">
+                  <img src="${getAsset('gb')}" class="w-full h-full object-cover">
+                  <div class="absolute bottom-0 inset-x-0 bg-black/65 text-amber-300 text-xs px-2 py-0.5 truncate">${giftBTag}</div>
+                </div>
+                <div class="text-xs font-bold text-slate-900 line-clamp-1">${giftBName}</div>
+                <div class="text-xs text-slate-500 mt-0.5">作品被评优满 ${targetExc} 次可得</div>
+              </div>
+              <div class="mt-2.5">
+                ${
+                  isExcDone
+                    ? `<button onclick="openClaimModal('B')" class="w-full py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold">立即领取赠品B</button>`
+                    : `<div class="w-full py-1.5 rounded-lg bg-slate-200/80 text-slate-500 text-xs font-bold text-center">还差 ${targetExc - state.userExc} 次评优</div>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 渲染小程序端「关联活动列表」与后台「已关联活动表格」
+    function renderAssociatedActivities() {
+      const assocList = state.activities.filter(a => a.associated);
+      document.getElementById('assoc-count-badge').innerText = `(${assocList.length})`;
+      document.getElementById('admin-assoc-count').innerText = assocList.length;
+
+      // 1. 渲染小程序聚合页下方的关联活动卡片（完全延续图1的K创社卡片风格）
+      const mobileContainer = document.getElementById('mobile-associated-list');
+      mobileContainer.innerHTML = assocList.map(act => `
+        <div class="bg-white rounded-2xl p-3.5 shadow-2xs border border-slate-100">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="badge-ongoing px-2 py-0.5 rounded-full text-xs font-bold shrink-0">${act.status}</span>
+              <h4 class="text-sm font-bold text-slate-900 truncate">${act.title}</h4>
+            </div>
+            <button onclick="simulatePostInActivity('${act.title}')" class="px-3 py-1 rounded-full border border-slate-200 text-slate-700 hover:border-orange-400 hover:text-orange-600 text-xs font-medium shrink-0 transition">
+              查看活动
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-2.5">
+            <span>活动时间：${act.time}</span>
+            <span class="text-orange-600 bg-orange-50 px-1.5 py-0.2 rounded font-medium">计入S4赛季</span>
+          </div>
+          <div onclick="simulatePostInActivity('${act.title}')" class="relative rounded-xl overflow-hidden h-40 bg-slate-900 cursor-pointer group">
+            <img src="${getAsset(act.bannerKey)}" alt="${act.title}" class="w-full h-full object-cover group-hover:scale-102 transition duration-300">
+          </div>
+          <div class="flex items-center justify-between mt-2.5 text-xs text-slate-400">
+            <div class="flex items-center">
+              <div class="flex -space-x-1.5">
+                <span class="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">A</span>
+                <span class="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">B</span>
+                <span class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold ring-2 ring-white">C</span>
+              </div>
+              <span class="ml-1.5 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs font-semibold">+${act.participants}</span>
+            </div>
+            <span><i class="fa-regular fa-eye mr-1"></i>${act.views} 次浏览</span>
+          </div>
+        </div>
+      `).join('');
+
+      // 2. 渲染活动广场首页普通活动列表
+      const plazaSubContainer = document.getElementById('plaza-sub-list');
+      if (plazaSubContainer) {
+        plazaSubContainer.innerHTML = assocList.map(act => `
+          <div class="bg-white rounded-2xl p-3.5 shadow-2xs border border-slate-100">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="badge-ongoing px-2 py-0.5 rounded-full text-xs font-bold shrink-0">${act.status}</span>
+                <h4 class="text-sm font-bold text-slate-900 truncate">${act.title}</h4>
+              </div>
+              <button onclick="switchMobileScreen('season')" class="px-3 py-1 rounded-full border border-slate-200 text-slate-700 text-xs font-medium shrink-0">
+                查看活动
+              </button>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <span>活动时间：${act.time}</span>
+              <span onclick="switchMobileScreen('season')" class="text-orange-600 bg-orange-50 px-1.5 py-0.2 rounded font-medium cursor-pointer">所属：S4星耀赛季 &gt;</span>
+            </div>
+            <div class="rounded-xl overflow-hidden h-36 bg-slate-900">
+              <img src="${getAsset(act.bannerKey)}" class="w-full h-full object-cover">
+            </div>
+            <div class="flex items-center justify-between mt-2.5 text-xs text-slate-400">
+              <span>+${act.participants} 人参与</span>
+              <span><i class="fa-regular fa-eye mr-1"></i>${act.views} 次浏览</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // 3. 渲染后台已关联活动表格
+      const tbody = document.getElementById('admin-associated-tbody');
+      tbody.innerHTML = assocList.map((act, idx) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="py-2.5 px-3 text-center font-bold text-slate-400">${idx + 1}</td>
+          <td class="py-2.5 px-3">
+            <div class="flex items-center gap-2.5">
+              <img src="${getAsset(act.bannerKey)}" class="w-12 h-8 rounded object-cover border border-slate-200 shrink-0">
+              <div>
+                <div class="font-bold text-slate-800">${act.title}</div>
+                <div class="text-slate-400">ID: ${act.id}</div>
+              </div>
+            </div>
+          </td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">${act.category}</span></td>
+          <td class="py-2.5 px-3 text-slate-500">${act.time}</td>
+          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-semibold">${act.status}</span></td>
+          <td class="py-2.5 px-3">
+            <span class="text-slate-700 font-semibold">${act.postsCount} 篇发帖</span>
+            <span class="text-slate-300 mx-1">|</span>
+            <span class="text-amber-700 font-semibold">${act.excCount} 次评优</span>
+          </td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="toggleAssociateActivity('${act.id}')" class="text-red-500 hover:text-red-700 font-semibold">移除关联</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 同步后台表单配置到左侧小程序预览
+    function syncConfigToPreview() {
+      const title = document.getElementById('inp-season-title').value || '2026年度 · S4星耀赛季';
+      const start = document.getElementById('inp-season-start').value || '2026.10.01';
+      const end = document.getElementById('inp-season-end').value || '2026.12.31';
+      const sub = document.getElementById('inp-season-sub').value || '';
+      const rulesRaw = document.getElementById('inp-season-rules').value || '';
+
+      document.getElementById('preview-season-title').innerText = title;
+      document.getElementById('preview-season-time').innerText = `${start} - ${end}`;
+      document.getElementById('preview-season-subtitle').innerText = sub;
+
+      const plazaTitle = document.getElementById('plaza-season-card-title');
+      const plazaTime = document.getElementById('plaza-season-card-time');
+      if (plazaTitle) plazaTitle.innerText = title;
+      if (plazaTime) {
+        const assocCount = state.activities.filter(a => a.associated).length;
+        plazaTime.innerText = `活动时间：${start} - ${end} · 含 ${assocCount} 个关联活动`;
+      }
+
+      // 渲染头部核心规则条目
+      const rulesLines = rulesRaw.split('\n').map(s => s.trim()).filter(Boolean);
+      const ruleListEl = document.getElementById('preview-rule-list');
+      ruleListEl.innerHTML = rulesLines.map(line => `
+        <div class="flex items-start gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0"></span>
+          <span>${line}</span>
+        </div>
+      `).join('');
+
+      renderRewardProgress();
+      renderAssociatedActivities();
+    }
+
+    // 切换小程序内部屏幕（S4赛季聚合页 vs 活动广场首页）
+    function switchMobileScreen(screen) {
+      const seasonEl = document.getElementById('screen-season-detail');
+      const plazaEl = document.getElementById('screen-plaza-home');
+      const tabSeason = document.getElementById('mob-tab-season');
+      const tabPlaza = document.getElementById('mob-tab-plaza');
+      const topbar = document.getElementById('mobile-topbar');
+      const navTitle = document.getElementById('mobile-nav-title');
+
+      if (screen === 'season') {
+        seasonEl.classList.remove('hidden');
+        plazaEl.classList.add('hidden');
+        tabSeason.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white transition';
+        tabPlaza.className = 'px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition';
+        topbar.className = 'bg-[#1f1726] text-white pt-3 pb-2.5 px-4 flex items-center justify-between shrink-0 transition-colors duration-200';
+        navTitle.innerText = 'S4星耀赛季';
+      } else {
+        seasonEl.classList.add('hidden');
+        plazaEl.classList.remove('hidden');
+        tabPlaza.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white transition';
+        tabSeason.className = 'px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition';
+        topbar.className = 'bg-white text-slate-900 border-b border-slate-100 pt-3 pb-2.5 px-4 flex items-center justify-between shrink-0 transition-colors duration-200';
+        navTitle.innerText = '活动广场';
+      }
+    }
+
+    // 切换顶部主视图（同屏对比 / 仅前端 / 仅后台）
+    function switchMainView(view) {
+      const fp = document.getElementById('frontend-panel');
+      const bp = document.getElementById('backend-panel');
+      ['split', 'frontend', 'backend'].forEach(v => {
+        const btn = document.getElementById('tab-' + v);
+        if (v === view) {
+          btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition';
+        } else {
+          btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        }
+      });
+
+      if (view === 'split') {
+        fp.classList.remove('hidden');
+        bp.classList.remove('hidden');
+      } else if (view === 'frontend') {
+        fp.classList.remove('hidden');
+        bp.classList.add('hidden');
+      } else {
+        fp.classList.add('hidden');
+        bp.classList.remove('hidden');
+      }
+    }
+
+    // 切换后台子视图
+    function switchAdminSubView(sub) {
+      ['config', 'list', 'records'].forEach(k => {
+        const panel = document.getElementById('admin-view-' + k);
+        const tab = document.getElementById('adm-tab-' + k);
+        if (k === sub) {
+          panel.classList.remove('hidden');
+          tab.className = 'px-3 py-1 rounded-md text-xs font-semibold bg-orange-500 text-white transition';
+        } else {
+          panel.classList.add('hidden');
+          tab.className = 'px-3 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-white transition';
+        }
+      });
+    }
+
+    // 手机端：打开活动规则说明弹窗（点击头部「活动规则」按钮触发）
+    function openRuleModal() {
+      const backdrop = document.getElementById('mobile-modal-backdrop');
+      const titleEl = document.getElementById('mobile-modal-title');
+      const bodyEl = document.getElementById('mobile-modal-body');
+      const targetPosts = document.getElementById('inp-target-posts').value || '5';
+      const targetExc = document.getElementById('inp-target-exc').value || '2';
+      const giftA = document.getElementById('inp-gift-a-name').value;
+      const giftB = document.getElementById('inp-gift-b-name').value;
+      const rulesRaw = document.getElementById('inp-season-rules').value || '';
+      const rulesLines = rulesRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+      titleEl.innerText = '赛季活动规则';
+      bodyEl.innerHTML = `
+        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1">
+          <div class="font-bold">一、赛季时间</div>
+          <p>${document.getElementById('inp-season-start').value} 00:00 至 ${document.getElementById('inp-season-end').value} 23:59</p>
+        </div>
+        <div class="space-y-1.5">
+          <div class="font-bold text-slate-900">二、核心规则说明</div>
+          ${rulesLines.map(line => `<p>${line}</p>`).join('')}
+        </div>
+        <div class="space-y-1.5">
+          <div class="font-bold text-slate-900">三、奖励达标条件</div>
+          <p>1. <b>有效作品达标奖（赠品A）</b>：有效作品满 <b>${targetPosts} 篇</b>，可领取【${giftA}】；</p>
+          <p>2. <b>作品评优奖（赠品B）</b>：作品被评优满 <b>${targetExc} 次</b>，可领取【${giftB}】。</p>
+        </div>
+      `;
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+    }
+
+    // 手机端：打开「我的奖品」弹窗（点击头部「我的奖品」按钮触发）
+    function openMyPrizesModal() {
+      const backdrop = document.getElementById('mobile-modal-backdrop');
+      const titleEl = document.getElementById('mobile-modal-title');
+      const bodyEl = document.getElementById('mobile-modal-body');
+      const targetPosts = Math.max(1, parseInt(document.getElementById('inp-target-posts').value || '5', 10));
+      const targetExc = Math.max(1, parseInt(document.getElementById('inp-target-exc').value || '2', 10));
+      const isPostDone = state.userPosts >= targetPosts;
+      const isExcDone = state.userExc >= targetExc;
+      const giftA = document.getElementById('inp-gift-a-name').value;
+      const giftB = document.getElementById('inp-gift-b-name').value;
+
+      titleEl.innerText = '我的赛季奖品';
+      bodyEl.innerHTML = `
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between p-3 rounded-xl border ${isPostDone ? 'border-orange-200 bg-orange-50/50' : 'border-slate-200 bg-slate-50'}">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${getAsset('ga')}" class="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0">
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 truncate">${giftA}</div>
+                <div class="text-xs text-slate-500 mt-0.5">条件：有效作品 ${targetPosts} 篇（当前 ${state.userPosts}/${targetPosts}）</div>
+              </div>
+            </div>
+            <div class="shrink-0 ml-2">
+              ${
+                state.claimedA
+                  ? `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">已申领待发货</span>`
+                  : isPostDone
+                  ? `<button onclick="openClaimModal('A')" class="px-3 py-1 rounded-full bg-orange-500 text-white text-xs font-bold">去领取</button>`
+                  : `<span class="text-xs text-slate-400 font-semibold">未达标</span>`
+              }
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 rounded-xl border ${isExcDone ? 'border-amber-200 bg-amber-50/50' : 'border-slate-200 bg-slate-50'}">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${getAsset('gb')}" class="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0">
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 truncate">${giftB}</div>
+                <div class="text-xs text-slate-500 mt-0.5">条件：作品被评优 ${targetExc} 次（当前 ${state.userExc}/${targetExc}）</div>
+              </div>
+            </div>
+            <div class="shrink-0 ml-2">
+              ${
+                state.claimedB
+                  ? `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">已申领待发货</span>`
+                  : isExcDone
+                  ? `<button onclick="openClaimModal('B')" class="px-3 py-1 rounded-full bg-amber-500 text-slate-950 text-xs font-bold">去领取</button>`
+                  : `<span class="text-xs text-slate-400 font-semibold">未达标</span>`
+              }
+            </div>
+          </div>
+        </div>
+      `;
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+    }
+
+    // 手机端：打开领取赠品弹窗
+    function openClaimModal(type) {
+      const backdrop = document.getElementById('mobile-modal-backdrop');
+      const titleEl = document.getElementById('mobile-modal-title');
+      const bodyEl = document.getElementById('mobile-modal-body');
+      const giftName = type === 'A'
+        ? document.getElementById('inp-gift-a-name').value
+        : document.getElementById('inp-gift-b-name').value;
+      const giftImg = type === 'A' ? getAsset('ga') : getAsset('gb');
+
+      titleEl.innerText = `恭喜达标 · 申领赛季赠品${type}`;
+      bodyEl.innerHTML = `
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-orange-50 border border-orange-200">
+          <img src="${giftImg}" class="w-12 h-12 rounded-lg object-cover border border-orange-300">
+          <div>
+            <div class="text-xs text-orange-600 font-bold">${type === 'A' ? '维度一：赛季发帖达标奖' : '维度二：赛季作品评优奖'}</div>
+            <div class="text-sm font-extrabold text-slate-900">${giftName}</div>
+          </div>
+        </div>
+        <div class="space-y-2 pt-1">
+          <input type="text" value="积木玩家阿凯 / 138****8820" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium" placeholder="收件人姓名与手机号">
+          <input type="text" value="上海市浦东新区张江高科园区科苑路88号" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium" placeholder="详细收货地址">
+        </div>
+        <button onclick="confirmClaim('${type}')" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-bold shadow-sm mt-2">
+          确认提交收货地址并领取
+        </button>
+      `;
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+    }
+
+    function confirmClaim(type) {
+      if (type === 'A') state.claimedA = true;
+      if (type === 'B') state.claimedB = true;
+      closeMobileModal();
+      syncConfigToPreview();
+      saveAndSyncToast(`赠品${type}申领成功！已同步至后台获奖名单`);
+    }
+
+    function closeMobileModal() {
+      const backdrop = document.getElementById('mobile-modal-backdrop');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('flex');
+    }
+
+    function scrollToAssocList() {
+      const listEl = document.getElementById('mobile-associated-list');
+      if (listEl) listEl.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function simulatePostInActivity(actTitle) {
+      state.userPosts += 1;
+      syncConfigToPreview();
+      saveAndSyncToast(`模拟在「${actTitle}」发帖 +1，赛季进度已实时更新！`);
+    }
+
+    // 后台：打开关联现有活动选择器弹窗
+    function openActivitySelectorModal() {
+      const modal = document.getElementById('admin-selector-modal');
+      const listContainer = document.getElementById('selector-modal-list');
+      listContainer.innerHTML = state.activities.map(act => `
+        <label class="flex items-center justify-between p-3 rounded-xl border ${act.associated ? 'border-orange-300 bg-orange-50/40' : 'border-slate-200 bg-white'} cursor-pointer hover:border-orange-400 transition">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" ${act.associated ? 'checked' : ''} onchange="toggleAssociateActivity('${act.id}')" class="w-4 h-4 accent-orange-500 rounded">
+            <img src="${getAsset(act.bannerKey)}" class="w-14 h-9 rounded object-cover border border-slate-200">
+            <div>
+              <div class="text-xs font-bold text-slate-900">${act.title}</div>
+              <div class="text-xs text-slate-400">分类：${act.category} · 时间：${act.time}</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${act.associated ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-500'}">
+            ${act.associated ? '已关联至S4' : '未关联'}
+          </span>
+        </label>
+      `).join('');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeActivitySelectorModal() {
+      const modal = document.getElementById('admin-selector-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function toggleAssociateActivity(id) {
+      const item = state.activities.find(a => a.id === id);
+      if (item) {
+        item.associated = !item.associated;
+        syncConfigToPreview();
+        const modal = document.getElementById('admin-selector-modal');
+        if (!modal.classList.contains('hidden')) {
+          openActivitySelectorModal();
+        }
+        saveAndSyncToast(item.associated ? `已关联「${item.title}」` : `已取消关联「${item.title}」`);
+      }
+    }
+
+    function resetDemoConfig() {
+      document.getElementById('inp-season-title').value = '2026年度 · S4星耀赛季';
+      document.getElementById('inp-season-start').value = '2026.10.01';
+      document.getElementById('inp-season-end').value = '2026.12.31';
+      document.getElementById('inp-target-posts').value = '5';
+      document.getElementById('inp-target-exc').value = '2';
+      state.activities.forEach((a, i) => { a.associated = i < 3; });
+      setUserState('progress');
+      saveAndSyncToast('已恢复默认演示配置');
+    }
+
+    function saveAndSyncToast(msg) {
+      syncConfigToPreview();
+      const toast = document.getElementById('demo-toast');
+      const text = document.getElementById('demo-toast-text');
+      text.innerText = msg || '保存成功！配置已实时同步至左侧小程序聚合页';
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 2600);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('adm-gift-a-img').src = getAsset('ga');
+      document.getElementById('adm-gift-b-img').src = getAsset('gb');
+      const plazaHero = document.getElementById('plaza-hero-img');
+      if (plazaHero) plazaHero.src = getAsset('b1');
+      syncConfigToPreview();
+    });
+  </script>
+</body>
+</html>

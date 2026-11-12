@@ -1,0 +1,430 @@
+/* MoveProdTaobaoAuth.css */
+
+.move-prod-demo-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 32px;
+}
+
+/* 顶部演示导航切换条 */
+.demo-flow-switcher {
+  background: linear-gradient(90deg, #eff6ff 0%, #f8fafc 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.demo-flow-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.demo-flow-badge {
+  background: #1890ff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.demo-flow-title {
+  font-size: 13px;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.demo-flow-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 页面通用容器 (还原 admin-ops dt-page 风格) */
+.dt-page-card {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.dt-page-header-bar {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dt-page-header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dt-page-route-tag {
+  font-size: 12px;
+  font-weight: 400;
+  color: #8c8c8c;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.dt-search-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dt-search-inputs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dt-search-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dt-search-label {
+  font-size: 14px;
+  color: #262626;
+  white-space: nowrap;
+}
+
+.dt-table-section {
+  padding: 20px 24px;
+}
+
+/* 创建搬家任务弹窗 — 平台选择卡片 (1:1 还原 addMoveTask.vue) */
+.channel-card-group {
+  display: flex;
+  gap: 14px;
+}
+
+.channel-select-card {
+  position: relative;
+  display: flex;
+  width: 132px;
+  height: 64px;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  cursor: pointer;
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  background: #fff;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.channel-select-card:hover {
+  border-color: #2474ff;
+}
+
+.channel-select-card.active {
+  border: 1px solid #2474ff;
+  background: #f8fbff;
+}
+
+.channel-select-card .channel-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.channel-icon.douyin {
+  background: #161823;
+}
+
+.channel-icon.taobao {
+  background: linear-gradient(135deg, #ff9000 0%, #ff5000 100%);
+}
+
+.channel-select-card .channel-name {
+  margin-left: 8px;
+  color: #262626;
+}
+
+.channel-check-corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 24px 24px;
+  border-color: transparent transparent #2474ff transparent;
+}
+
+.channel-check-icon {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-size: 11px;
+  color: #fff;
+  line-height: 1;
+}
+
+/* 商品ID多行输入框容器 */
+.prod-textarea-box {
+  position: relative;
+  width: 478px;
+  max-width: 100%;
+}
+
+.prod-textarea-counter {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  color: #999999;
+  font-size: 12px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0 4px;
+}
+
+/* 辅助操作链接带竖线分隔 */
+.form-helper-links {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.form-helper-divider {
+  color: #bfbfbf;
+}
+
+/* =====================================================
+ * 新增授权弹窗 —— 两步走卡片样式
+ * ===================================================== */
+.two-step-auth-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.two-step-auth-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 18px 20px;
+  background: #fafafa;
+  transition: all 0.2s;
+}
+
+.two-step-auth-card:hover {
+  border-color: #91d5ff;
+  background: #fcfeff;
+}
+
+.two-step-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.two-step-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.two-step-num-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1890ff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.two-step-card-desc {
+  padding-left: 34px;
+  font-size: 13px;
+  color: #595959;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.two-step-card-actions {
+  padding-left: 34px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 授权成功跳回弹窗样式 */
+.auth-success-modal-content {
+  text-align: center;
+  padding: 8px 12px 4px;
+}
+
+.auth-success-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f6ffed;
+  border: 2px solid #b7eb8f;
+  color: #52c41a;
+  font-size: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.auth-success-info-box {
+  margin-top: 18px;
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 14px 20px;
+  text-align: left;
+}
+
+.auth-success-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed #ebebeb;
+}
+
+.auth-success-kv-row:last-child {
+  border-bottom: none;
+}
+
+/* =====================================================
+ * 模拟页面：淘宝服务市场订购页 & 淘宝开放平台授权页
+ * ===================================================== */
+.tb-market-container {
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tb-market-top-nav {
+  background: #fff;
+  border-bottom: 2px solid #ff5000;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tb-market-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tb-market-brand-logo {
+  background: linear-gradient(135deg, #ff9000 0%, #ff5000 100%);
+  color: #fff;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+
+.tb-market-url-bar {
+  background: #f0f2f5;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #595959;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tb-market-body {
+  padding: 28px 32px;
+  background: #fff;
+  margin: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.tb-app-detail-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.tb-app-cover {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff7a00 0%, #ff4400 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(255, 80, 0, 0.22);
+}
+
+.tb-app-info {
+  flex: 1;
+  min-width: 280px;
+}
+
+.tb-buy-btn {
+  background: linear-gradient(90deg, #ff9000 0%, #ff5000 100%) !important;
+  border: none !important;
+  height: 42px !important;
+  padding: 0 28px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 12px rgba(255, 80, 0, 0.3) !important;
+}
+
+.tb-buy-btn:hover {
+  opacity: 0.92;
+}
