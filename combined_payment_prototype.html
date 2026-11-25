@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小程序组合支付交互原型 - 交互稿演示</title>
+  <style>
+    :root {
+      --primary-color: #ff5000;
+      --primary-light: #fff3ed;
+      --wechat-color: #07c160;
+      --text-main: #1f2329;
+      --text-sub: #646a73;
+      --text-muted: #8f959e;
+      --border-color: #ebedf0;
+      --bg-color: #f7f8fa;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background: #eef1f6;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 24px 16px;
+      color: var(--text-main);
+    }
+
+    .demo-container {
+      display: flex;
+      gap: 32px;
+      max-width: 960px;
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* 手机外框 */
+    .phone-wrapper {
+      width: 375px;
+      height: 740px;
+      background: #fff;
+      border-radius: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 10px #222;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* 顶部胶囊与状态栏 */
+    .status-bar {
+      height: 44px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .nav-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 17px;
+      font-weight: 600;
+      position: relative;
+    }
+
+    .nav-back {
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .wechat-capsule {
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 16px;
+      padding: 3px 10px;
+      gap: 8px;
+    }
+
+    .capsule-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #000;
+      box-shadow: 6px 0 0 #000, -6px 0 0 #000;
+    }
+
+    .capsule-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1.5px solid #000;
+    }
+
+    /* 主体滚动区 */
+    .scroll-body {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--bg-color);
+      padding: 12px;
+      padding-bottom: 90px;
+    }
+
+    /* 卡片通用 */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .goods-card {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .goods-img {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #7928ca, #ff0080);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .goods-info {
+      flex: 1;
+    }
+
+    .goods-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .goods-price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .price-num {
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    /* 单元格信息列表 */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      font-size: 13px;
+      border-bottom: 1px solid #f2f3f5;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-sub);
+    }
+
+    .info-val {
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 支付方式区域 - 核心交互模块 */
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-tag {
+      font-size: 11px;
+      background: #e8f7ee;
+      color: var(--wechat-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: normal;
+    }
+
+    .pay-item {
+      padding: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .pay-item:not(:last-child) {
+      border-bottom: 1px solid #f2f3f5;
+    }
+
+    .pay-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pay-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .icon-wallet {
+      background: #ff9800;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .icon-wechat {
+      background: var(--wechat-color);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .pay-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .pay-name {
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pay-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .pay-desc.active {
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    /* Switch 开关样式 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e5e6eb;
+      transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary-color);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    input:disabled + .slider {
+      background-color: #f2f3f5;
+      cursor: not-allowed;
+    }
+
+    input:disabled + .slider:before {
+      background-color: #c9cdd4;
+    }
+
+    /* 微信支付右侧状态提示 */
+    .wechat-pay-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .amount-tag {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .status-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--wechat-color);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    .status-check.disabled {
+      background: #e5e6eb;
+      color: #8f959e;
+    }
+
+    /* 折叠扣减明细小条 */
+    .deduct-banner {
+      background: var(--primary-light);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      margin-top: 8px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 底部结算吸底栏 */
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: #fff;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      z-index: 10;
+    }
+
+    .total-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .total-title {
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .total-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #ff6034, #ee0a24);
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 22px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(238, 10, 36, 0.3);
+      transition: transform 0.1s ease;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* 右侧交互控制面板 */
+    .control-panel {
+      flex: 1;
+      min-width: 320px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--bg-color);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .scenario-btns {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .scenario-btn {
+      padding: 10px 14px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .scenario-btn:hover {
+      background: #e9ecef;
+    }
+
+    .scenario-btn.active {
+      background: var(--primary-light);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .spec-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-sub);
+    }
+
+    .spec-card strong {
+      color: var(--text-main);
+    }
+
+    .tag-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      margin-right: 4px;
+      font-weight: 600;
+    }
+    .tag-green { background: #e8f7ee; color: #07c160; }
+    .tag-orange { background: #fff3ed; color: #ff5000; }
+  </style>
+</head>
+<body>
+
+<div class="demo-container">
+  <!-- 手机端模拟原型 -->
+  <div class="phone-wrapper">
+    <div class="status-bar">
+      <span>16:35</span>
+      <span>📶 5G 🔋 98%</span>
+    </div>
+
+    <div class="nav-bar">
+      <span class="nav-back">‹</span>
+      <span>提交订单</span>
+      <div class="wechat-capsule">
+        <div class="capsule-dot"></div>
+        <div class="capsule-circle"></div>
+      </div>
+    </div>
+
+    <div class="scroll-body">
+      <!-- 商品卡片 -->
+      <div class="card goods-card">
+        <div class="goods-img">宇宙接力赛</div>
+        <div class="goods-info">
+          <div class="goods-title" id="displayGoodsTitle">weij测试05</div>
+          <div class="goods-price-row">
+            <span class="price-num" id="displayGoodsPrice">¥0.01</span>
+            <span style="font-size: 12px; color: var(--text-muted);">x1</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 配送信息 -->
+      <div class="card" style="padding: 4px 14px;">
+        <div class="info-row">
+          <span class="info-label">配送方式</span>
+          <span class="info-val">快递发货</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">订单备注</span>
+          <span class="info-val" style="color: var(--text-muted);">备注前请与商家沟通确认</span>
+        </div>
+      </div>
+
+      <!-- 价格明细 -->
+      <div class="card" style="padding: 4px 14px;">
+        <div class="info-row">
+          <span class="info-label">商品总价</span>
+          <span class="info-val" id="detailGoodsTotal">¥0.01</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">运费</span>
+          <span class="info-val">¥0.00</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">优惠券</span>
+          <span class="info-val" style="color: var(--text-muted);">暂无可用 ›</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">星币抵现</span>
+          <span class="info-val" style="color: var(--text-muted);">不使用 ›</span>
+        </div>
+      </div>
+
+      <!-- 重构后的支付方式区域 -->
+      <div class="card" style="padding: 14px;">
+        <div class="section-title">
+          <span>支付方式</span>
+          <span class="badge-tag" id="modeTag">组合支付已就绪</span>
+        </div>
+
+        <!-- 1. 余额支付 (前置资产抵扣 - Switch开关，单行内敛展示) -->
+        <div class="pay-item" id="balanceRow">
+          <div class="pay-item-left">
+            <div class="pay-icon icon-wallet">💰</div>
+            <div class="pay-info">
+              <div class="pay-name">
+                <span>余额支付</span>
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: normal;" id="balanceAmountText">可用 ¥15.00</span>
+              </div>
+              <div class="pay-desc active" id="balanceSubText">本单抵扣 ¥0.01</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="inlineDeductTag" style="font-size: 13px; font-weight: 600; color: var(--primary-color); display: none;">-¥0.01</span>
+            <label class="switch">
+              <input type="checkbox" id="balanceSwitch" checked onchange="handleBalanceToggle()">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. 微信支付 (兜底外部通道) -->
+        <div class="pay-item" id="wechatRow" style="margin-top: 6px;">
+          <div class="pay-item-left">
+            <div class="pay-icon icon-wechat">💬</div>
+            <div class="pay-info">
+              <div class="pay-name">微信支付</div>
+              <div class="pay-desc" id="wechatDesc">极速安全微信在线支付</div>
+            </div>
+          </div>
+          <div class="wechat-pay-status">
+            <span class="amount-tag" id="wechatAmountTag">需付 ¥0.00</span>
+            <div class="status-check" id="wechatCheck">✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部吸底结算栏 -->
+    <div class="bottom-bar">
+      <div class="total-wrap">
+        <span class="total-title" id="bottomDetailText">余额已抵扣 ¥0.01</span>
+        <div>
+          <span style="font-size: 12px; color: var(--primary-color);">实付 </span>
+          <span class="total-price" id="bottomPayAmount">¥0.00</span>
+        </div>
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">立即支付</button>
+    </div>
+  </div>
+
+  <!-- 右侧说明与场景模拟器 -->
+  <div class="control-panel">
+    <div class="panel-title">💡 交互测试与场景验证</div>
+
+    <div class="control-group">
+      <span class="control-label">⚡ 快速切换业务测试场景：</span>
+      <div class="scenario-btns">
+        <button class="scenario-btn active" id="btn-scene1" onclick="switchScenario(1)">
+          <strong>场景 1：余额充足（当前截图场景）</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+            订单 ¥0.01，余额 ¥15.00 → 余额全额抵扣，微信付 ¥0.00
+          </div>
+        </button>
+
+        <button class="scenario-btn" id="btn-scene2" onclick="switchScenario(2)">
+          <strong>场景 2：组合支付（余额不足全额）</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+            订单 ¥50.00，余额 ¥15.00 → 余额扣 ¥15.00，微信付 ¥35.00
+          </div>
+        </button>
+
+        <button class="scenario-btn" id="btn-scene3" onclick="switchScenario(3)">
+          <strong>场景 3：无可用余额</strong>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+            订单 ¥20.00，余额 ¥0.00 → 开关禁用，全额微信支付
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <span class="control-label">📝 交互核心改进点核对：</span>
+      <div class="spec-card">
+        <p><span class="tag-badge tag-green">层级重构</span> <strong>位置上移：</strong> 余额属于前置资产（内部资金抵扣），微信属于兜底外部结算通道。遵循“先扣减资产，再补齐现金”的认知视线流。</p>
+        <br>
+        <p><span class="tag-badge tag-orange">交互解耦</span> <strong>Switch开关替代单选：</strong> 单选（Radio）在心智上互斥，无法表达“组合”概念；Switch 开关明确控制“是否参与抵扣”，微信作为兜底渠道常驻。</p>
+        <br>
+        <p><span class="tag-badge tag-green">状态联动</span> <strong>微信状态动态感知：</strong> 当余额全额抵扣时，微信支付金额显示 ¥0 并弱化提示；当需要补差价时，微信支付金额动态显示待补金额。</p>
+      </div>
+    </div>
+
+    <div class="spec-card" style="background: #eef2ff; border-left: 3px solid #4f46e5;">
+      <strong>当前状态快照：</strong>
+      <div id="debugInfo" style="font-family: monospace; font-size: 11px; margin-top: 6px; color: #333;">
+        Order: ¥0.01 | Balance: ¥15.00 | Switch: ON | WeChat: ¥0.00
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 状态数据
+  const state = {
+    orderAmount: 0.01,
+    balance: 15.00,
+    isBalanceOn: true,
+  };
+
+  function updateView() {
+    const { orderAmount, balance, isBalanceOn } = state;
+    
+    // 计算抵扣和实付
+    let deduct = 0;
+    if (isBalanceOn && balance > 0) {
+      deduct = Math.min(orderAmount, balance);
+    }
+    const wechatPay = Math.max(0, orderAmount - deduct);
+
+    // 更新界面元素
+    document.getElementById('displayGoodsPrice').innerText = `¥${orderAmount.toFixed(2)}`;
+    document.getElementById('detailGoodsTotal').innerText = `¥${orderAmount.toFixed(2)}`;
+    document.getElementById('balanceAmountText').innerText = `(可用 ¥${balance.toFixed(2)})`;
+    
+    const balanceSwitch = document.getElementById('balanceSwitch');
+    const balanceSubText = document.getElementById('balanceSubText');
+    const inlineDeductTag = document.getElementById('inlineDeductTag');
+    const wechatAmountTag = document.getElementById('wechatAmountTag');
+    const wechatCheck = document.getElementById('wechatCheck');
+    const wechatDesc = document.getElementById('wechatDesc');
+    const bottomPayAmount = document.getElementById('bottomPayAmount');
+    const bottomDetailText = document.getElementById('bottomDetailText');
+    const submitBtn = document.getElementById('submitBtn');
+    const modeTag = document.getElementById('modeTag');
+
+    // 余额为 0 的场景处理
+    if (balance <= 0) {
+      balanceSwitch.checked = false;
+      balanceSwitch.disabled = true;
+      inlineDeductTag.style.display = 'none';
+      balanceSubText.innerText = '当前暂无可用余额';
+      balanceSubText.className = 'pay-desc';
+    } else {
+      balanceSwitch.disabled = false;
+      balanceSwitch.checked = isBalanceOn;
+      
+      if (isBalanceOn && deduct > 0) {
+        balanceSubText.innerText = `已自动抵扣 ¥${deduct.toFixed(2)}`;
+        balanceSubText.className = 'pay-desc active';
+        inlineDeductTag.innerText = `-¥${deduct.toFixed(2)}`;
+        inlineDeductTag.style.display = 'inline-block';
+      } else {
+        balanceSubText.innerText = isBalanceOn ? '余额为0无法抵扣' : '未开启余额抵扣';
+        balanceSubText.className = 'pay-desc';
+        inlineDeductTag.style.display = 'none';
+      }
+    }
+
+    // 微信支付行展示
+    if (wechatPay <= 0) {
+      // 全额由余额抵扣
+      wechatAmountTag.innerText = '需付 ¥0.00';
+      wechatAmountTag.style.color = '#8f959e';
+      wechatCheck.innerText = '-';
+      wechatCheck.className = 'status-check disabled';
+      wechatDesc.innerText = '余额已全额抵扣，无需唤起微信支付';
+      submitBtn.innerText = '提交订单 (免唤起支付)';
+      modeTag.innerText = '余额全额抵扣';
+      modeTag.style.background = '#fff3ed';
+      modeTag.style.color = '#ff5000';
+    } else {
+      wechatAmountTag.innerText = `需付 ¥${wechatPay.toFixed(2)}`;
+      wechatAmountTag.style.color = '#1f2329';
+      wechatCheck.innerText = '✓';
+      wechatCheck.className = 'status-check';
+      wechatDesc.innerText = isBalanceOn && deduct > 0 ? `组合支付：微信补足 ¥${wechatPay.toFixed(2)}` : '极速安全微信在线支付';
+      submitBtn.innerText = `微信支付 ¥${wechatPay.toFixed(2)}`;
+      modeTag.innerText = isBalanceOn && deduct > 0 ? '组合支付进行中' : '全额外部支付';
+      modeTag.style.background = '#e8f7ee';
+      modeTag.style.color = '#07c160';
+    }
+
+    // 底栏金额
+    bottomPayAmount.innerText = `¥${wechatPay.toFixed(2)}`;
+    if (isBalanceOn && deduct > 0) {
+      bottomDetailText.innerText = `已用余额抵扣 ¥${deduct.toFixed(2)}`;
+    } else {
+      bottomDetailText.innerText = `总额 ¥${orderAmount.toFixed(2)}`;
+    }
+
+    // 更新调试状态信息
+    document.getElementById('debugInfo').innerText = 
+      `总额: ¥${orderAmount.toFixed(2)} | 余额: ¥${balance.toFixed(2)} | 余额抵扣: ¥${deduct.toFixed(2)} | 微信需付: ¥${wechatPay.toFixed(2)} | 开关: ${isBalanceOn ? 'ON' : 'OFF'}`;
+  }
+
+  function handleBalanceToggle() {
+    const sw = document.getElementById('balanceSwitch');
+    state.isBalanceOn = sw.checked;
+    updateView();
+  }
+
+  function switchScenario(sceneId) {
+    document.querySelectorAll('.scenario-btn').forEach((btn, index) => {
+      btn.classList.toggle('active', index + 1 === sceneId);
+    });
+
+    if (sceneId === 1) {
+      state.orderAmount = 0.01;
+      state.balance = 15.00;
+      state.isBalanceOn = true;
+    } else if (sceneId === 2) {
+      state.orderAmount = 50.00;
+      state.balance = 15.00;
+      state.isBalanceOn = true;
+    } else if (sceneId === 3) {
+      state.orderAmount = 20.00;
+      state.balance = 0.00;
+      state.isBalanceOn = false;
+    }
+    updateView();
+  }
+
+  function handleSubmit() {
+    const deduct = (state.isBalanceOn && state.balance > 0) ? Math.min(state.orderAmount, state.balance) : 0;
+    const wechat = Math.max(0, state.orderAmount - deduct);
+    
+    if (wechat === 0) {
+      alert(`【支付成功】\n本单金额 ¥${state.orderAmount.toFixed(2)}，已全额通过余额扣除，无需唤起微信收银台。`);
+    } else if (deduct > 0) {
+      alert(`【唤起组合支付】\n1. 预扣/抵扣余额：¥${deduct.toFixed(2)}\n2. 唤起微信收银台支付剩余金额：¥${wechat.toFixed(2)}`);
+    } else {
+      alert(`【唤起微信支付】\n全额支付 ¥${wechat.toFixed(2)}`);
+    }
+  }
+
+  // 初始化渲染
+  updateView();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+/* ManChouPrizeConfig.css - 订单满抽活动奖品配置与弹窗交互原型 */
+
+.manchou-config-container {
+  padding: 24px;
+  background-color: #f0f2f5;
+  min-height: calc(100vh - 64px);
+}
+
+.manchou-page-header {
+  background: #ffffff;
+  padding: 16px 24px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.manchou-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 390px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .manchou-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 抽奖活动选择弹窗左右分栏样式 */
+.lottery-modal-container {
+  display: flex;
+  height: 560px;
+  margin: -12px -16px;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.lottery-modal-left {
+  flex: 5;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: #fafafa;
+}
+
+.lottery-modal-right {
+  flex: 6;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.lottery-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+  margin-top: 12px;
+}
+
+.lottery-item-card {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+
+.lottery-item-card:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.12);
+}
+
+.tier-item-card {
+  background: #f9fbfd;
+  border: 1px solid #d9e7f5;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.tier-item-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.tier-item-card.has-error {
+  border-color: #ff4d4f;
+  background-color: #fff2f0;
+}
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1890ff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 1px 8px;
+  border-radius: 12px;
+  margin-right: 8px;
+}
+
+/* 手机端预览 */
+.mobile-preview-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 24px;
+}
+
+.phone-shell {
+  width: 330px;
+  height: 640px;
+  margin: 0 auto;
+  background: #111;
+  border-radius: 40px;
+  padding: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: #f7f8fa;
+  border-radius: 32px;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-notch {
+  width: 120px;
+  height: 18px;
+  background: #111;
+  margin: 0 auto;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+/* 自定义滚动条 */
+.custom-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

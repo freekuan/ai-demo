@@ -85,6 +85,9 @@ import OrderConversion from './pages/OrderConversion'
 import BossAdminTaobaoSync from './pages/BossAdminTaobaoSync'
 import CategoryManager from './pages/CategoryManager'
 import ProductGroupManager from './pages/ProductGroupManager'
+import MoveProdTaobaoAuth from './pages/MoveProdTaobaoAuth'
+import ManChouPrizeConfig from './pages/ManChouPrizeConfig'
+import TimedLotteryCooldown from './pages/TimedLotteryCooldown'
 import './App.css'
 
 const { Sider, Content } = Layout
@@ -123,12 +126,16 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-order-list', label: '订单列表' },
       { key: 'shop-order-verify', label: '订单核销' },
       { key: 'shop-order-conversion', label: '订单转积分' },
+      { key: 'shop-manchou-prize-config', label: '订单满抽活动 (奖品弹窗交互)' },
+      { key: 'shop-manchou-prototype-link', label: <a href="/manchou_prize_modal_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>满抽奖品弹窗原型(独立页)</a> },
     ],
   },
   {
     key: 'shop-product-group',
     label: '商品管理',
     children: [
+      { key: 'shop-product-move', label: '商品搬家' },
+      { key: 'shop-taobao-auth', label: '淘宝店铺ISV授权' },
       { key: 'shop-product-list', label: '商品列表' },
       { key: 'shop-product-grouping-mgr', label: '商品分组 (新版设计稿)' },
       { key: 'shop-product-category', label: '商品分类' },
@@ -149,6 +156,8 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-coupon-list', label: '卡券列表' },
       { key: 'shop-distributor', label: '分销商' },
       { key: 'shop-invite-reward', label: '邀请有礼' },
+      { key: 'shop-timed-lottery', label: '定时开奖 (中奖冷却规则)' },
+      { key: 'shop-timed-lottery-prototype-link', label: <a href="/timed_lottery_cooldown_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>定时开奖冷却原型(独立页)</a> },
     ],
   },
   {
@@ -245,7 +254,7 @@ const defaultSecondaryKey: Record<PrimaryKey, string> = {
   customer: 'dash-customer-assets',
   message: 'dash-msg-inbox',
   marketing: 'dash-mkt-plan',
-  shop: 'shop-mkt-tools-home', // Default secondary key to orange page
+  shop: 'shop-product-move', // Default secondary key to 商品搬家 (/dtmall/prod/moveProd)
   content: 'dash-content-lib',
   ai: 'dash-ai-chat',
   tools: 'dash-tools-list',
@@ -3716,6 +3725,10 @@ function KocInteractiveEditor({ aiInteractiveEnabled, openAiAuditModal }: KocInt
 
 // 页面路由快捷别名映射
 const PAGE_ALIAS_MAP: Record<string, { rail: PrimaryKey; menu: string }> = {
+  // 商品搬家 & 淘宝ISV授权
+  'move-prod': { rail: 'shop', menu: 'shop-product-move' },
+  moveProd: { rail: 'shop', menu: 'shop-product-move' },
+  'taobao-auth': { rail: 'shop', menu: 'shop-taobao-auth' },
   // 分类管理 / 分类装修 (当前核心)
   category: { rail: 'shop', menu: 'shop-product-category' },
   'category-manager': { rail: 'shop', menu: 'shop-product-category' },
@@ -3734,6 +3747,10 @@ const PAGE_ALIAS_MAP: Record<string, { rail: PrimaryKey; menu: string }> = {
   invite: { rail: 'shop', menu: 'shop-invite-reward' },
   'group-buy': { rail: 'shop', menu: 'shop-group-buy' },
   'order-conversion': { rail: 'shop', menu: 'shop-order-conversion' },
+  'manchou-prize': { rail: 'shop', menu: 'shop-manchou-prize-config' },
+  'manchou': { rail: 'shop', menu: 'shop-manchou-prize-config' },
+  'timed-lottery': { rail: 'shop', menu: 'shop-timed-lottery' },
+  'timed-lottery-cooldown': { rail: 'shop', menu: 'shop-timed-lottery' },
   // 积分与应用
   'points-prod': { rail: 'shop', menu: 'shop-points-prod' },
   'points-mkt': { rail: 'shop', menu: 'shop-points-mkt' },
@@ -3745,6 +3762,9 @@ const PAGE_ALIAS_MAP: Record<string, { rail: PrimaryKey; menu: string }> = {
 function getInitialRoute(): { rail: PrimaryKey; menu: string } {
   if (typeof window === 'undefined') {
     return { rail: 'shop', menu: defaultSecondaryKey.shop }
+  }
+  if (window.location.pathname.includes('/prod/moveProd')) {
+    return { rail: 'shop', menu: 'shop-product-move' }
   }
   const params = new URLSearchParams(window.location.search)
   const page = params.get('page')
@@ -3840,17 +3860,22 @@ export default function App() {
   const isAppsMarketPage = railKey === 'apps' && secondaryKey === 'dash-apps-market'
   const isGroupBuyPage = railKey === 'shop' && secondaryKey === 'shop-group-buy'
   const isOrderConversionPage = railKey === 'shop' && secondaryKey === 'shop-order-conversion'
+  const isManChouPrizePage = railKey === 'shop' && secondaryKey === 'shop-manchou-prize-config'
+  const isTimedLotteryPage = railKey === 'shop' && secondaryKey === 'shop-timed-lottery'
   const isCategoryManagerPage = railKey === 'shop' && (secondaryKey === 'shop-product-category' || secondaryKey === 'shop-category-decoration')
   const isProductGroupPage = railKey === 'shop' && (secondaryKey === 'shop-product-grouping-mgr' || secondaryKey === 'shop-product-list')
+  const isMoveProdPage = railKey === 'shop' && (secondaryKey === 'shop-product-move' || secondaryKey === 'shop-taobao-auth')
 
   const handleToolClick = useCallback((key: string) => {
     if (key === 'group') {
       updateRoute('shop', 'shop-group-buy')
+    } else if (key === 'timing-lottery') {
+      updateRoute('shop', 'shop-timed-lottery')
     }
   }, [updateRoute])
   
   // 基础主题色
-  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage || isCategoryManagerPage || isProductGroupPage) ? 'blue' : 'orange'
+  const activeTheme = (isPointsMarketingPage || isPointsTaskPage || isNavigationPage || isPointsProdPage || isPointsLotteryRulesPage || isHomeDecorationPage || isTemplateManagerPage || isCategoryManagerPage || isProductGroupPage || isMoveProdPage || isTimedLotteryPage) ? 'blue' : 'orange'
   const brandColor = activeTheme === 'blue' ? '#1890FF' : '#FF5E29'
   const brandSelectedBg = activeTheme === 'blue' ? '#E6F7FF' : '#FFF2EC'
 
@@ -3981,10 +4006,19 @@ export default function App() {
                 <GroupBuyPage />
               ) : isOrderConversionPage ? (
                 <OrderConversion />
+              ) : isManChouPrizePage ? (
+                <ManChouPrizeConfig />
+              ) : isTimedLotteryPage ? (
+                <TimedLotteryCooldown />
               ) : isProductGroupPage ? (
                 <ProductGroupManager />
               ) : isCategoryManagerPage ? (
                 <CategoryManager />
+              ) : isMoveProdPage ? (
+                <MoveProdTaobaoAuth
+                  key={secondaryKey}
+                  defaultView={secondaryKey === 'shop-taobao-auth' ? 'taobaoAuth' : 'moveProd'}
+                />
               ) : (
                 <div style={{ marginTop: 60 }}>
                   <Empty

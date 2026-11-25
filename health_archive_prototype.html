@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>大健康档案字段与健康测评/会员资料复用联动原型</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    .switch-checkbox:checked + .switch-label {
+      background-color: #2563eb;
+    }
+    .switch-checkbox:checked + .switch-label .switch-circle {
+      transform: translateX(18px);
+    }
+    .phone-shadow {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 12px #1f2937, 0 0 0 14px #374151;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Top System Header -->
+  <header class="bg-slate-900 text-white px-6 py-3 shadow flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+        <i class="fa-solid fa-notes-medical text-sm"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-semibold flex items-center gap-2">
+          大健康档案 · 测评题库 · 会员资料全链路交互原型
+          <span class="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded font-mono">v2.1 修复交互完整版</span>
+        </h1>
+        <p class="text-xs text-slate-400">实现：题库挑选 ➔ 测评编排 ➔ 字段映射对齐 ➔ 小程序答题 ➔ 自动沉淀更新健康档案</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2.5 text-xs">
+      <button onclick="toggleMiniProgramDrawer('assessment')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded flex items-center gap-1.5 shadow-sm transition font-medium cursor-pointer">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <span>模拟前台答题 & 档案自动沉淀</span>
+      </button>
+      <button onclick="openAddModal('vitals')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center gap-1.5 shadow-sm transition font-medium cursor-pointer">
+        <i class="fa-solid fa-plus"></i>
+        <span>添加档案字段</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Body Wrapper -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-5">
+    
+    <!-- Core Management Board -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      
+      <!-- Top Level Tabs (IA Architecture) -->
+      <div class="border-b border-gray-200 px-6 pt-3 flex items-center justify-between bg-slate-50/40">
+        <div class="flex items-center gap-8 text-sm">
+          <button onclick="switchTab('member-list')" id="tab-btn-member-list" class="text-gray-500 hover:text-gray-700 py-3 font-medium transition cursor-pointer">
+            会员列表
+          </button>
+          <button onclick="switchTab('member-profile')" id="tab-btn-member-profile" class="text-gray-500 hover:text-gray-700 py-3 font-medium transition cursor-pointer flex items-center gap-1.5">
+            基础会员资料
+            <span class="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">1:1 账户级</span>
+          </button>
+          <button onclick="switchTab('health-archive')" id="tab-btn-health-archive" class="text-blue-600 font-semibold py-3 border-b-2 border-blue-600 cursor-pointer flex items-center gap-2 relative">
+            <i class="fa-solid fa-id-card-clip text-rose-500"></i>
+            健康档案设置
+            <span class="text-[10px] bg-rose-50 text-rose-600 border border-rose-200 px-1.5 py-0.5 rounded font-bold">目标数据池</span>
+          </button>
+          <button onclick="switchTab('assessment-center')" id="tab-btn-assessment-center" class="text-gray-500 hover:text-gray-700 py-3 font-medium transition cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-question text-blue-600"></i>
+            健康测评与题库编排
+            <span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-1">
+              <i class="fa-solid fa-link text-[9px]"></i> 数据录入通道
+            </span>
+          </button>
+        </div>
+
+        <div class="text-xs text-gray-500 hidden sm:flex items-center gap-2">
+          <span class="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 font-mono">
+            <i class="fa-solid fa-arrow-right-arrow-left text-[10px]"></i> 支持添加/编辑健康字段 & 测评联动
+          </span>
+        </div>
+      </div>
+
+      <!-- ================= TAB 1: 健康档案设置 (Restored & Enhanced) ================= -->
+      <div id="view-health-archive" class="p-6 space-y-5">
+        
+        <!-- Prompt / Tip Bar -->
+        <div class="bg-blue-50/80 border border-blue-200 rounded-lg p-3.5 flex items-start gap-3 text-xs text-blue-900 leading-relaxed">
+          <i class="fa-solid fa-circle-exclamation text-blue-600 text-sm mt-0.5"></i>
+          <div class="flex-1">
+            <span class="font-medium">配置说明：</span>
+            健康档案是客户的生理底表（支持1:N家庭就诊人）。基础身份已默认复用会员资料池；生理指标、慢病过敏已与<strong>「健康测评中心」</strong>打通。点击下方各字段的<strong>【编辑】</strong>或右上角<strong>【添加档案字段】</strong>即可呼出大健康特化配置弹窗。
+          </div>
+          <button onclick="switchTab('assessment-center')" class="text-blue-600 hover:underline font-bold whitespace-nowrap">查看测评题库联动 &rarr;</button>
+        </div>
+
+        <!-- Action Bar: Group Filter & Add Button -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <!-- Left: Group Tabs -->
+          <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg text-xs">
+            <button onclick="filterGroup('all')" class="group-tab-btn px-3 py-1.5 rounded-md font-medium bg-white text-blue-600 shadow-sm cursor-pointer" data-group="all">
+              全部模块 (11)
+            </button>
+            <button onclick="filterGroup('basic')" class="group-tab-btn px-3 py-1.5 rounded-md font-medium text-gray-600 hover:text-gray-900 cursor-pointer" data-group="basic">
+              <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>基础身份信息 (3)
+            </button>
+            <button onclick="filterGroup('vitals')" class="group-tab-btn px-3 py-1.5 rounded-md font-medium text-gray-600 hover:text-gray-900 cursor-pointer" data-group="vitals">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>体征生理指标 (4)
+            </button>
+            <button onclick="filterGroup('history')" class="group-tab-btn px-3 py-1.5 rounded-md font-medium text-gray-600 hover:text-gray-900 cursor-pointer" data-group="history">
+              <span class="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1.5"></span>既往病史与过敏 (2)
+            </button>
+            <button onclick="filterGroup('lifestyle')" class="group-tab-btn px-3 py-1.5 rounded-md font-medium text-gray-600 hover:text-gray-900 cursor-pointer" data-group="lifestyle">
+              <span class="inline-block w-2 h-2 rounded-full bg-purple-500 mr-1.5"></span>生活方式习惯 (2)
+            </button>
+          </div>
+
+          <!-- Right: Buttons -->
+          <div class="flex items-center gap-2">
+            <button onclick="openAddModal('basic', 'import')" class="px-3.5 py-1.5 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-xs transition flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-file-import text-blue-600"></i>
+              从会员资料引入
+            </button>
+            <button onclick="openAddModal('vitals', 'new')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition shadow-sm flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-plus"></i>
+              添加档案字段
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 1: 基础身份信息 (Basic Info) -->
+        <div class="health-group-block border border-gray-200 rounded-lg overflow-hidden" data-group="basic">
+          <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <i class="fa-solid fa-grip-vertical text-gray-400 cursor-move"></i>
+              <h3 class="text-xs font-bold text-gray-800 flex items-center gap-2">
+                基础身份信息
+                <span class="text-[11px] font-normal text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <i class="fa-solid fa-arrows-rotate text-[10px]"></i> 复用会员资料池 (本人自动预填)
+                </span>
+              </h3>
+            </div>
+            <button onclick="openAddModal('basic', 'import')" class="text-blue-600 hover:underline text-xs flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-file-import text-[11px]"></i> 引入会员字段
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-gray-700">
+              <thead class="bg-gray-50/50 text-gray-500 border-b border-gray-200 font-medium">
+                <tr>
+                  <th class="py-2.5 px-4 min-w-[120px]">字段名称</th>
+                  <th class="py-2.5 px-3 min-w-[90px]">字段类型</th>
+                  <th class="py-2.5 px-3 min-w-[120px]">数据源 / 映射</th>
+                  <th class="py-2.5 px-4 min-w-[150px]">提示文案</th>
+                  <th class="py-2.5 px-3 text-center min-w-[60px]">必填</th>
+                  <th class="py-2.5 px-3 text-center min-w-[70px]">可修改</th>
+                  <th class="py-2.5 px-3 text-center min-w-[70px]">启用</th>
+                  <th class="py-2.5 px-4 text-center min-w-[110px]">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">真实姓名 <span class="text-[10px] bg-red-100 text-red-600 px-1 rounded">核心</span></td>
+                  <td class="py-2.5 px-3 text-gray-600">文本</td>
+                  <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-mono border border-blue-100">映射: 会员姓名</span></td>
+                  <td class="py-2.5 px-4 text-gray-400">请输入就诊人真实姓名</td>
+                  <td class="py-2.5 px-3 text-center text-blue-600 font-semibold">是</td>
+                  <td class="py-2.5 px-3 text-center">是</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked disabled class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('真实姓名', 'basic', 'text', '', '请输入就诊人真实姓名', '1', '1', '通用', 'normal')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button class="text-gray-300 cursor-not-allowed" title="核心字段不可删除">删除</button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">生理性别</td>
+                  <td class="py-2.5 px-3 text-gray-600">单选 (男/女)</td>
+                  <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-mono border border-blue-100">映射: 会员性别</span></td>
+                  <td class="py-2.5 px-4 text-gray-400">请选择生理性别</td>
+                  <td class="py-2.5 px-3 text-center text-blue-600 font-semibold">是</td>
+                  <td class="py-2.5 px-3 text-center">是</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('生理性别', 'basic', 'radio', '', '请选择生理性别', '1', '1', '通用', 'normal')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('已解除与会员资料的引用关系')" class="text-red-500 hover:underline cursor-pointer">解除引用</button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">出生日期</td>
+                  <td class="py-2.5 px-3 text-gray-600">日期</td>
+                  <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-mono border border-blue-100">映射: 会员生日</span></td>
+                  <td class="py-2.5 px-4 text-gray-400">出生年月日 (自动换算年龄)</td>
+                  <td class="py-2.5 px-3 text-center text-blue-600 font-semibold">是</td>
+                  <td class="py-2.5 px-3 text-center">是</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('出生日期', 'basic', 'date', '', '出生年月日 (自动换算年龄)', '1', '1', '通用', 'normal')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('已解除与会员资料的引用关系')" class="text-red-500 hover:underline cursor-pointer">解除引用</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 2: 体征与生理指标 (Vitals) -->
+        <div class="health-group-block border border-gray-200 rounded-lg overflow-hidden" data-group="vitals">
+          <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-800 flex items-center gap-2">
+              体征与生理指标
+              <span class="text-[11px] font-normal text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                支持单位、参考区间，已打通测评采集 Q1 & Q2
+              </span>
+            </h3>
+            <button onclick="openAddModal('vitals', 'new')" class="text-blue-600 hover:underline text-xs flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-plus text-[11px]"></i> 添加指标字段
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-gray-700">
+              <thead class="bg-gray-50/50 text-gray-500 border-b border-gray-200 font-medium">
+                <tr>
+                  <th class="py-2.5 px-4 min-w-[120px]">字段名称</th>
+                  <th class="py-2.5 px-3 min-w-[110px]">字段类型 / 单位</th>
+                  <th class="py-2.5 px-4 min-w-[150px]">参考范围 / 测评来源</th>
+                  <th class="py-2.5 px-4 min-w-[140px]">提示文案</th>
+                  <th class="py-2.5 px-3 text-center min-w-[60px]">必填</th>
+                  <th class="py-2.5 px-3 text-center min-w-[70px]">启用</th>
+                  <th class="py-2.5 px-4 text-center min-w-[110px]">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">身高</td>
+                  <td class="py-2.5 px-3"><span class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px]">数值 · cm</span></td>
+                  <td class="py-2.5 px-4">
+                    <span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] block">有效区间: 50~250 cm</span>
+                    <span class="text-[10px] text-gray-400 mt-0.5 block">来自测评 Q1</span>
+                  </td>
+                  <td class="py-2.5 px-4 text-gray-400">请输入净身高 (厘米)</td>
+                  <td class="py-2.5 px-3 text-center text-blue-600 font-semibold">是</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('身高', 'vitals', 'number', 'cm', '请输入净身高 (厘米)', '1', '1', '通用', 'normal', '50', '250')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('字段删除成功')" class="text-red-500 hover:underline cursor-pointer">删除</button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">体重</td>
+                  <td class="py-2.5 px-3"><span class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px]">数值(1位小数) · kg</span></td>
+                  <td class="py-2.5 px-4">
+                    <span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] block">有效区间: 2.0~200.0 kg</span>
+                    <span class="text-[10px] text-gray-400 mt-0.5 block">来自测评 Q2</span>
+                  </td>
+                  <td class="py-2.5 px-4 text-gray-400">请输入空腹体重</td>
+                  <td class="py-2.5 px-3 text-center text-blue-600 font-semibold">是</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('体重', 'vitals', 'number', 'kg', '请输入空腹体重', '1', '1', '通用', 'normal', '2.0', '200.0')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('字段删除成功')" class="text-red-500 hover:underline cursor-pointer">删除</button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-blue-50/20 bg-slate-50/30">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">BMI 指数 <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1 rounded">公式换算</span></td>
+                  <td class="py-2.5 px-3"><span class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px]">计算字段</span></td>
+                  <td class="py-2.5 px-4 text-gray-500">
+                    <span class="font-mono text-[11px]">体重(kg) / 身高(m)²</span>
+                    <span class="text-[10px] text-gray-400 block">正常参考: 18.5 ~ 23.9</span>
+                  </td>
+                  <td class="py-2.5 px-4 text-gray-400">系统自动测算</td>
+                  <td class="py-2.5 px-3 text-center text-gray-400">否</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="alert('BMI 为系统预置核心公式，根据身高与体重自动换算')" class="text-blue-600 hover:underline cursor-pointer">公式设置</button>
+                    <span class="text-gray-300">|</span>
+                    <button class="text-gray-300 cursor-not-allowed">删除</button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">空腹血糖</td>
+                  <td class="py-2.5 px-3"><span class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px]">数值 · mmol/L</span></td>
+                  <td class="py-2.5 px-4"><span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px]">正常参考: 3.9 ~ 6.1</span></td>
+                  <td class="py-2.5 px-4 text-gray-400">清晨空腹静脉血糖值</td>
+                  <td class="py-2.5 px-3 text-center text-gray-400">否</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('空腹血糖', 'vitals', 'number', 'mmol/L', '清晨空腹静脉血糖值', '0', '1', '通用', 'sensitive', '3.9', '6.1')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('字段删除成功')" class="text-red-500 hover:underline cursor-pointer">删除</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 3: 既往病史与过敏 (History) -->
+        <div class="health-group-block border border-gray-200 rounded-lg overflow-hidden" data-group="history">
+          <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-800 flex items-center gap-2">
+              既往病史与过敏禁忌
+              <span class="text-[11px] font-normal text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                多选互斥 & 二级输入补充
+              </span>
+            </h3>
+            <button onclick="openAddModal('history', 'new')" class="text-blue-600 hover:underline text-xs flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-plus text-[11px]"></i> 添加病史字段
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-gray-700">
+              <thead class="bg-gray-50/50 text-gray-500 border-b border-gray-200 font-medium">
+                <tr>
+                  <th class="py-2.5 px-4 min-w-[120px]">字段名称</th>
+                  <th class="py-2.5 px-3 min-w-[110px]">字段类型</th>
+                  <th class="py-2.5 px-4 min-w-[200px]">预置枚举项</th>
+                  <th class="py-2.5 px-3 text-center min-w-[60px]">必填</th>
+                  <th class="py-2.5 px-3 text-center min-w-[70px]">启用</th>
+                  <th class="py-2.5 px-4 text-center min-w-[110px]">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">既往慢性病史</td>
+                  <td class="py-2.5 px-3 text-gray-600">多选 (含互斥)</td>
+                  <td class="py-2.5 px-4 text-gray-600">[无] (互斥) / 高血压 / 糖尿病 / 高血脂 / 冠心病</td>
+                  <td class="py-2.5 px-3 text-center text-blue-600 font-semibold">是</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('既往慢性病史', 'history', 'checkbox', '', '请勾选确诊慢病', '1', '1', '通用', 'sensitive')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('字段删除成功')" class="text-red-500 hover:underline cursor-pointer">删除</button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">药物过敏史 <span class="text-[10px] bg-rose-100 text-rose-700 px-1 rounded font-bold">高危</span></td>
+                  <td class="py-2.5 px-3 text-gray-600">多选 (互斥+其他备注)</td>
+                  <td class="py-2.5 px-4 text-gray-600">[无] / 青霉素 / 头孢 / 磺胺 / 其他(展开输入框)</td>
+                  <td class="py-2.5 px-3 text-center text-blue-600 font-semibold">是</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('药物过敏史', 'history', 'checkbox', '', '请勾选过敏药物', '1', '1', '通用', 'sensitive')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('字段删除成功')" class="text-red-500 hover:underline cursor-pointer">删除</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 4: 生活方式习惯 (Lifestyle) -->
+        <div class="health-group-block border border-gray-200 rounded-lg overflow-hidden" data-group="lifestyle">
+          <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-800 flex items-center gap-2">
+              生活方式与习惯
+              <span class="text-[11px] font-normal text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full">
+                已打通测评 Q4 吸烟习惯映射
+              </span>
+            </h3>
+            <button onclick="openAddModal('lifestyle', 'new')" class="text-blue-600 hover:underline text-xs flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-plus text-[11px]"></i> 添加习惯字段
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-gray-700">
+              <thead class="bg-gray-50/50 text-gray-500 border-b border-gray-200 font-medium">
+                <tr>
+                  <th class="py-2.5 px-4 min-w-[120px]">字段名称</th>
+                  <th class="py-2.5 px-3 min-w-[110px]">字段类型</th>
+                  <th class="py-2.5 px-4 min-w-[200px]">标准枚举项 / 测评映射</th>
+                  <th class="py-2.5 px-3 text-center min-w-[60px]">必填</th>
+                  <th class="py-2.5 px-3 text-center min-w-[70px]">启用</th>
+                  <th class="py-2.5 px-4 text-center min-w-[110px]">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">吸烟情况</td>
+                  <td class="py-2.5 px-3 text-gray-600">单选</td>
+                  <td class="py-2.5 px-4 text-gray-600">从不 / 已戒烟 / 偶尔吸 / 经常吸 (已关联测评Q4 5对3值转换)</td>
+                  <td class="py-2.5 px-3 text-center text-gray-400">否</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('吸烟情况', 'lifestyle', 'radio', '', '请选择吸烟情况', '0', '1', '通用', 'normal')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('字段删除成功')" class="text-red-500 hover:underline cursor-pointer">删除</button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-blue-50/20">
+                  <td class="py-2.5 px-4 font-medium text-gray-900">饮酒频次</td>
+                  <td class="py-2.5 px-3 text-gray-600">单选</td>
+                  <td class="py-2.5 px-4 text-gray-600">从不 / 偶尔社交饮酒 / 经常或每天饮酒</td>
+                  <td class="py-2.5 px-3 text-center text-gray-400">否</td>
+                  <td class="py-2.5 px-3 text-center"><input type="checkbox" checked class="accent-blue-600"></td>
+                  <td class="py-2.5 px-4 text-center space-x-2">
+                    <button onclick="openEditModal('饮酒频次', 'lifestyle', 'radio', '', '请选择饮酒频次', '0', '1', '通用', 'normal')" class="text-blue-600 hover:underline cursor-pointer">编辑</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="alert('字段删除成功')" class="text-red-500 hover:underline cursor-pointer">删除</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= TAB 2: 健康测评与题库编排 ================= -->
+      <div id="view-assessment-center" class="p-6 space-y-5 hidden">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="text-xs font-bold text-blue-950 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">i</span>
+              测评题目与健康档案关联逻辑说明
+            </div>
+            <p class="text-xs text-blue-800 leading-relaxed">
+              健康档案是<strong>静态结果数据结构</strong>，健康测评是<strong>前端交互采集工具</strong>。编排测评时，可从标准题库挑选题目，并为每道题指定对应的<strong>「健康档案字段」</strong>。用户完成测评后，系统将按规则自动回填档案，下次测评时自动预填。
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="openQuestionBankModal()" class="px-3.5 py-2 bg-white hover:bg-gray-50 text-blue-700 border border-blue-300 rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer">
+              <i class="fa-solid fa-box-archive"></i> 从题库挑选题目
+            </button>
+            <button onclick="toggleMiniProgramDrawer('assessment')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1.5 transition cursor-pointer">
+              <i class="fa-solid fa-play"></i> 预览移动端答题
+            </button>
+          </div>
+        </div>
+
+        <!-- Assessment Meta Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">测</div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-sm font-bold text-gray-900">《成人综合健康风险初筛与档案建档测评》</h2>
+                <span class="text-[11px] bg-green-100 text-green-800 px-2 py-0.2 rounded-full font-medium">发布中</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-0.5">适用对象: 18岁以上全人群 · 预计耗时: 3分钟 · 答题后自动生成综合健康评估报告</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 text-xs">
+            <div class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 flex items-center gap-2">
+              <span class="text-gray-500">档案字段关联率:</span>
+              <span class="font-bold text-emerald-700 font-mono">4 / 5 (80%)</span>
+            </div>
+            <button onclick="openQuestionBankModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium flex items-center gap-1.5 shadow-xs cursor-pointer">
+              <i class="fa-solid fa-plus"></i> 从题库添加题目
+            </button>
+          </div>
+        </div>
+
+        <!-- Question List with Explicit Archive Mapping Badges -->
+        <div class="space-y-3">
+          <!-- Q1 -->
+          <div class="p-4 bg-white border border-gray-200 hover:border-blue-400 rounded-xl shadow-xs transition space-y-3">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-xs text-gray-900">您的净身高是多少？</span>
+                    <span class="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.2 rounded">数值填空题</span>
+                    <span class="text-[10px] bg-red-50 text-red-600 px-1 rounded">必答</span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1">前台控件：数字键盘输入，限定 50 ~ 250 cm</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs">
+                  <i class="fa-solid fa-link text-emerald-600 text-xs"></i>
+                  <div>
+                    <div class="font-bold text-[11px]">已关联档案字段：<span class="underline decoration-emerald-400">身高 (cm)</span></div>
+                    <div class="text-[10px] text-emerald-700/80">双向同步 (自动预填 + 答题后更新)</div>
+                  </div>
+                </div>
+                <button onclick="openMappingDrawer(1, 'height')" class="px-2.5 py-1 text-blue-600 hover:bg-blue-50 border border-blue-200 rounded text-xs transition cursor-pointer">
+                  配置映射
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="p-4 bg-white border border-gray-200 hover:border-blue-400 rounded-xl shadow-xs transition space-y-3">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-xs text-gray-900">您目前的空腹体重是多少？</span>
+                    <span class="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.2 rounded">数值填空题</span>
+                    <span class="text-[10px] bg-red-50 text-red-600 px-1 rounded">必答</span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1">前台控件：支持输入1位小数，单位 kg。答完身高体重将自动换算 BMI</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs">
+                  <i class="fa-solid fa-link text-emerald-600 text-xs"></i>
+                  <div>
+                    <div class="font-bold text-[11px]">已关联档案字段：<span class="underline decoration-emerald-400">体重 (kg)</span></div>
+                    <div class="text-[10px] text-emerald-700/80">双向同步 (换算BMI写入档案)</div>
+                  </div>
+                </div>
+                <button onclick="openMappingDrawer(2, 'weight')" class="px-2.5 py-1 text-blue-600 hover:bg-blue-50 border border-blue-200 rounded text-xs transition cursor-pointer">
+                  配置映射
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q3 -->
+          <div class="p-4 bg-white border border-gray-200 hover:border-blue-400 rounded-xl shadow-xs transition space-y-3">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-xs text-gray-900">您过往是否被确诊过以下慢性疾病？</span>
+                    <span class="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-1.5 py-0.2 rounded">多选题 (含互斥)</span>
+                    <span class="text-[10px] bg-red-50 text-red-600 px-1 rounded">必答</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5 mt-2 text-[11px] text-gray-600">
+                    <span class="bg-gray-100 px-2 py-0.5 rounded">A. 从未确诊过慢性病 (互斥项)</span>
+                    <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">B. 高血压</span>
+                    <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">C. 2型糖尿病</span>
+                    <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded">D. 高脂血症</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1.5 rounded-lg text-xs">
+                  <i class="fa-solid fa-link text-emerald-600 text-xs"></i>
+                  <div>
+                    <div class="font-bold text-[11px]">已关联档案字段：<span class="underline decoration-emerald-400">既往慢性病史</span></div>
+                    <div class="text-[10px] text-emerald-700/80">选项已100%对齐 · 勾选值自动同步更新</div>
+                  </div>
+                </div>
+                <button onclick="openMappingDrawer(3, 'history')" class="px-2.5 py-1 text-blue-600 hover:bg-blue-50 border border-blue-200 rounded text-xs transition cursor-pointer">
+                  配置映射
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="p-4 bg-white border border-gray-200 hover:border-blue-400 rounded-xl shadow-xs transition space-y-3">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-xs text-gray-900">您目前的吸烟习惯是？</span>
+                    <span class="text-[10px] bg-purple-50 text-purple-700 border border-purple-200 px-1.5 py-0.2 rounded">单选题</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5 mt-2 text-[11px] text-gray-600">
+                    <span class="bg-gray-100 px-2 py-0.5 rounded">A. 从不吸烟</span>
+                    <span class="bg-gray-100 px-2 py-0.5 rounded">B. 已戒烟 3 年以上</span>
+                    <span class="bg-gray-100 px-2 py-0.5 rounded">C. 已戒烟不足 3 年</span>
+                    <span class="bg-gray-100 px-2 py-0.5 rounded">D. 偶尔吸</span>
+                    <span class="bg-gray-100 px-2 py-0.5 rounded">E. 每天吸烟</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-lg text-xs">
+                  <i class="fa-solid fa-code-compare text-amber-600 text-xs"></i>
+                  <div>
+                    <div class="font-bold text-[11px]">已关联档案字段：<span class="underline decoration-amber-400">吸烟情况</span></div>
+                    <div class="text-[10px] text-amber-700/80">含5对3选项值映射 (B/C映射为戒烟)</div>
+                  </div>
+                </div>
+                <button onclick="openMappingDrawer(4, 'smoke')" class="px-2.5 py-1 text-blue-600 hover:bg-blue-50 border border-blue-200 rounded text-xs transition cursor-pointer">
+                  配置映射
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="p-4 bg-slate-50/70 border border-slate-200 rounded-xl shadow-xs transition space-y-3">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">5</span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-xs text-gray-700">在过去的一个月里，您感到精神紧绷、焦虑不安的频次是？</span>
+                    <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded">打分量表题</span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1">从不 (0分) / 偶尔 (1分) / 经常 (2分) / 几乎每天 (3分)</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-1.5 bg-gray-100 border border-gray-300 text-gray-500 px-3 py-1.5 rounded-lg text-xs">
+                  <i class="fa-regular fa-circle-dot text-gray-400"></i>
+                  <div>
+                    <div class="font-medium text-[11px]">仅用于测评报告算分</div>
+                    <div class="text-[10px] text-gray-400">不写入长期健康档案</div>
+                  </div>
+                </div>
+                <button onclick="openMappingDrawer(5, 'none')" class="px-2.5 py-1 text-gray-600 hover:bg-gray-200 border border-gray-300 rounded text-xs transition cursor-pointer">
+                  关联字段
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tab: 基础会员资料 & 会员列表 (Placeholder) -->
+      <div id="view-member-profile" class="p-6 space-y-4 hidden">
+        <div class="bg-blue-50/80 border border-blue-200 rounded-lg p-3 text-xs text-blue-900 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-blue-600"></i>
+            <span>这是原有的基础会员资料配置。其中「真实姓名、手机号、性别、生日」已自动复用至健康档案。</span>
+          </div>
+          <button onclick="switchTab('health-archive')" class="text-blue-600 hover:underline font-medium cursor-pointer">前往健康档案设置 &rarr;</button>
+        </div>
+      </div>
+      <div id="view-member-list" class="p-12 text-center text-gray-400 text-xs hidden">
+        会员列表数据维护界面
+      </div>
+
+    </div>
+
+    <!-- Strategy Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
+        <div class="flex items-center gap-2 font-bold text-gray-900 text-sm">
+          <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">1</span>
+          题库级预置 vs 问卷级复写
+        </div>
+        <p class="text-gray-600 leading-relaxed">
+          题库管理中每道标准题预设默认的【档案字段绑定】。在组建不同测评问卷时，默认继承题库映射，同时允许组卷人随时调整或解绑（如某测评仅用于打分）。
+        </p>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
+        <div class="flex items-center gap-2 font-bold text-gray-900 text-sm">
+          <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">2</span>
+          选项值对齐转换器 (Value Mapping)
+        </div>
+        <p class="text-gray-600 leading-relaxed">
+          当测评题目更细（5个梯度）而档案字段粗（3个状态）时，交互提供直观的【连线/下拉映射器】，实现“多选一归并”，避免数据清洗的后台黑盒。
+        </p>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2">
+        <div class="flex items-center gap-2 font-bold text-gray-900 text-sm">
+          <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">3</span>
+          小程序端双向闭环机制
+        </div>
+        <p class="text-gray-600 leading-relaxed">
+          <strong>答题前</strong>：自动读取档案已存数据预填（如身高体重免重复填）；<strong>答题后</strong>：一键确认，差异数据自动平滑写回健康档案，形成完整闭环。
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= MODAL: 添加/编辑健康档案字段 (The Missing Modal Fully Restored!) ================= -->
+  <div id="add-field-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 animate-in fade-in zoom-in duration-150">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+        <div>
+          <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <span id="modal-title-text">添加健康档案字段</span>
+            <span class="text-[11px] font-normal bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-mono">大健康特化配置</span>
+          </h3>
+          <p class="text-xs text-gray-500 mt-0.5">支持从会员资料复用或新建健康专属字段，可配置单位、正常区间与分组</p>
+        </div>
+        <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600 w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable Form) -->
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs">
+
+        <!-- 1. 字段创建模式 (Mode Switch: New vs Reuse) -->
+        <div id="field-source-mode-block" class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+          <label class="block font-semibold text-gray-800">
+            <span class="text-red-500 mr-1">*</span>字段来源方式：
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-2.5 p-2.5 bg-white border border-blue-500 rounded-lg cursor-pointer text-blue-900 font-medium shadow-sm transition ring-1 ring-blue-400">
+              <input type="radio" name="field-source-mode" value="new" checked onchange="switchSourceMode('new')" class="accent-blue-600">
+              <div>
+                <div class="font-bold">新建健康专有字段</div>
+                <div class="text-[11px] text-gray-400 font-normal">如生理体征、既往病史、生活习惯等</div>
+              </div>
+            </label>
+
+            <label class="flex items-center gap-2.5 p-2.5 bg-white border border-gray-200 hover:border-gray-300 rounded-lg cursor-pointer text-gray-700 font-medium transition">
+              <input type="radio" name="field-source-mode" value="import" onchange="switchSourceMode('import')" class="accent-blue-600">
+              <div>
+                <div class="font-bold flex items-center gap-1.5">
+                  从会员资料库引入
+                  <span class="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded font-normal">免重录</span>
+                </div>
+                <div class="text-[11px] text-gray-400 font-normal">复用已有字段元数据及用户历史录入</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Mode = Import: Select Existing Field -->
+        <div id="import-field-selector" class="hidden p-3 bg-blue-50/60 border border-blue-200 rounded-lg space-y-2">
+          <label class="block font-semibold text-blue-950">
+            <span class="text-red-500 mr-1">*</span>选择要引入的会员资料字段：
+          </label>
+          <div class="flex items-center gap-2">
+            <select class="w-full px-3 py-2 bg-white border border-blue-300 rounded text-xs focus:ring-2 focus:ring-blue-400 focus:outline-none">
+              <option value="city">常住城市 (文本 - 当前未引入)</option>
+              <option value="job">职业行业 (单选项 - 当前未引入)</option>
+              <option value="emergency_contact">紧急联系人 (文本 - 当前未引入)</option>
+              <option value="emergency_phone">紧急联系电话 (文本 - 当前未引入)</option>
+            </select>
+            <span class="text-[11px] text-blue-700 whitespace-nowrap">自动带入属性</span>
+          </div>
+          <div class="text-[11px] text-gray-500">
+            <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
+            引入后，在小程序建档时将自动读取用户在会员中心已填写的历史值。
+          </div>
+        </div>
+
+        <!-- 2. 所属健康业务分组 (Grouping) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-gray-800 mb-1.5">
+              <span class="text-red-500 mr-1">*</span>所属档案分组：
+            </label>
+            <select id="modal-group-select" class="w-full px-3 py-2 bg-white border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-400 focus:outline-none">
+              <option value="basic">基础身份信息 (Identity)</option>
+              <option value="vitals" selected>体征与生理指标 (Vitals)</option>
+              <option value="history">既往病史与过敏 (History & Allergy)</option>
+              <option value="lifestyle">生活方式与习惯 (Lifestyle)</option>
+              <option value="custom_new">+ 自定义新建分组...</option>
+            </select>
+            <p class="text-[11px] text-gray-400 mt-1">健康档案按模块分区聚合，前台填写体验更流畅</p>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-gray-800 mb-1.5">
+              <span class="text-red-500 mr-1">*</span>字段名称：
+            </label>
+            <div class="relative">
+              <input type="text" id="input-field-name" placeholder="例如：空腹血糖 / 收缩压" value="空腹血糖" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-400 focus:outline-none pr-12">
+              <span class="absolute right-2.5 top-2 text-gray-400 text-[11px]">4/10</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 字段类型及特殊处理 (Field Type & Specific Controls) -->
+        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="block font-semibold text-gray-800">
+              <span class="text-red-500 mr-1">*</span>字段类型：
+            </label>
+            <span class="text-[11px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+              <i class="fa-solid fa-triangle-exclamation mr-1"></i>保存后，字段类型不可更改
+            </span>
+          </div>
+
+          <select id="modal-field-type" onchange="onFieldTypeChanged(this.value)" class="w-full px-3 py-2 bg-white border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-400 focus:outline-none font-medium">
+            <option value="number" selected>数值 (体征指标特化：支持单位、小数点精度与参考范围)</option>
+            <option value="text">单行文本 (如身份证号、就诊卡号)</option>
+            <option value="radio">单选项 (如吸烟情况、血型、饮酒频次)</option>
+            <option value="checkbox">多选项 (病史过敏特化：支持互斥项及“其他”输入框)</option>
+            <option value="date">日期时间 (如发病日期、末次体检时间)</option>
+            <option value="image">图片/附件 (如体检报告单原件拍照、病历上传)</option>
+          </select>
+
+          <!-- ====== 特殊处理 A: 数值类型特化 (单位 + 参考范围) ====== -->
+          <div id="type-detail-number" class="p-3.5 bg-white border border-blue-200 rounded-lg space-y-3 shadow-xs">
+            <div class="flex items-center justify-between text-blue-950 font-semibold border-b border-blue-100 pb-2">
+              <span class="flex items-center gap-1.5">
+                <i class="fa-solid fa-calculator text-blue-600"></i> 数值指标特殊增强
+              </span>
+              <span class="text-[11px] text-gray-400 font-normal">支持单位换算与小程序录入异常提醒</span>
+            </div>
+
+            <!-- 单位设置 -->
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">数值单位 (Unit)：</label>
+              <div class="flex flex-wrap items-center gap-1.5 mb-2">
+                <button type="button" onclick="setUnit('mmol/L')" class="unit-preset-btn px-2.5 py-1 bg-blue-50 border border-blue-300 text-blue-700 rounded text-[11px] font-mono hover:bg-blue-100 cursor-pointer">mmol/L</button>
+                <button type="button" onclick="setUnit('cm')" class="unit-preset-btn px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-mono hover:bg-gray-200 cursor-pointer">cm</button>
+                <button type="button" onclick="setUnit('kg')" class="unit-preset-btn px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-mono hover:bg-gray-200 cursor-pointer">kg</button>
+                <button type="button" onclick="setUnit('mmHg')" class="unit-preset-btn px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-mono hover:bg-gray-200 cursor-pointer">mmHg</button>
+                <button type="button" onclick="setUnit('bpm')" class="unit-preset-btn px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-mono hover:bg-gray-200 cursor-pointer">次/分 (bpm)</button>
+                <button type="button" onclick="setUnit('℃')" class="unit-preset-btn px-2.5 py-1 bg-gray-100 border border-gray-200 text-gray-700 rounded text-[11px] font-mono hover:bg-gray-200 cursor-pointer">℃</button>
+              </div>
+              <input type="text" id="input-unit" value="mmol/L" placeholder="输入自定义单位" class="w-full px-3 py-1.5 border border-gray-300 rounded text-xs">
+            </div>
+
+            <!-- 参考区间 & 校验 -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div>
+                <label class="block text-gray-700 font-medium mb-1">健康正常参考值区间：</label>
+                <div class="flex items-center gap-1.5">
+                  <input type="text" id="input-val-min" value="3.9" placeholder="低值" class="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs font-mono">
+                  <span class="text-gray-400">~</span>
+                  <input type="text" id="input-val-max" value="6.1" placeholder="高值" class="w-full px-2.5 py-1.5 border border-gray-300 rounded text-xs font-mono">
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">前台输入超出范围时显示橙黄色异常标识</p>
+              </div>
+              <div>
+                <label class="block text-gray-700 font-medium mb-1">数值精度限制：</label>
+                <select class="w-full px-2.5 py-1.5 bg-white border border-gray-300 rounded text-xs">
+                  <option>整数 (如心率 75)</option>
+                  <option selected>1位小数 (如血糖 5.6、体重 68.2)</option>
+                  <option>2位小数</option>
+                </select>
+                <p class="text-[10px] text-gray-400 mt-1">控制小程序端键盘精度</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ====== 特殊处理 B: 单选/多选特化 (互斥选项 + 附带输入框) ====== -->
+          <div id="type-detail-options" class="p-3.5 bg-white border border-purple-200 rounded-lg space-y-3 shadow-xs hidden">
+            <div class="flex items-center justify-between text-purple-950 font-semibold border-b border-purple-100 pb-2">
+              <span class="flex items-center gap-1.5">
+                <i class="fa-solid fa-list-check text-purple-600"></i> 病史/选项逻辑特殊增强
+              </span>
+              <span class="text-[11px] text-gray-400 font-normal">支持“无”互斥选项与“其他(输入备注)”</span>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <input type="text" value="无" class="w-28 px-2 py-1 border border-gray-300 rounded text-xs" readonly>
+                <label class="flex items-center gap-1 text-[11px] text-gray-700">
+                  <input type="checkbox" checked class="accent-purple-600">
+                  <span class="font-medium text-purple-800 bg-purple-50 px-1 rounded">设为互斥项 (选中时清空其他)</span>
+                </label>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="text" value="青霉素" class="w-28 px-2 py-1 border border-gray-300 rounded text-xs">
+                <span class="text-[11px] text-gray-400">常规选项</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="text" value="其他" class="w-28 px-2 py-1 border border-gray-300 rounded text-xs">
+                <label class="flex items-center gap-1 text-[11px] text-gray-700">
+                  <input type="checkbox" checked class="accent-purple-600">
+                  <span class="font-medium text-blue-800 bg-blue-50 px-1 rounded">选中时展开文本输入框 (补充说明)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 4. 提示文案与基础属性 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-semibold text-gray-800 mb-1.5">
+              <span class="text-red-500 mr-1">*</span>提示文案 (Placeholder)：
+            </label>
+            <div class="relative">
+              <input type="text" id="input-field-placeholder" placeholder="例如：请输入清晨空腹血糖值" value="请输入清晨空腹血糖值" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-400 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-gray-800 mb-1.5">
+              <span class="text-red-500 mr-1">*</span>字段填写控制：
+            </label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="border border-gray-300 rounded p-2 flex items-center justify-between bg-white">
+                <span class="text-gray-700">是否必填：</span>
+                <div class="flex items-center gap-2">
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="modal-required" value="1" id="req-yes" class="accent-blue-600"> 是</label>
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="modal-required" value="0" id="req-no" checked class="accent-blue-600"> 否</label>
+                </div>
+              </div>
+              <div class="border border-gray-300 rounded p-2 flex items-center justify-between bg-white">
+                <span class="text-gray-700">允许修改：</span>
+                <div class="flex items-center gap-2">
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="modal-editable" value="1" id="edit-yes" checked class="accent-blue-600"> 是</label>
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="modal-editable" value="0" id="edit-no" class="accent-blue-600"> 否</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. 特殊处理 C: 适用对象 & 隐私安全控制 -->
+        <div class="border border-gray-200 rounded-lg p-3.5 bg-slate-50 space-y-3">
+          <div class="text-gray-800 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-cat text-blue-600"></i>
+            健康档案业务范围与隐私安全策略
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">适用档案对象：</label>
+              <select id="modal-target-scope" class="w-full px-2.5 py-1.5 bg-white border border-gray-300 rounded text-xs">
+                <option value="通用" selected>通用 (本人及所有家庭就诊人)</option>
+                <option value="仅限本人">仅限会员本人 (不适用于家庭成员)</option>
+                <option value="仅限儿童">仅限儿童档案 (0~14岁)</option>
+                <option value="仅限女性">仅限女性健康档案</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-medium mb-1">合规与敏感度等级：</label>
+              <select id="modal-privacy-level" class="w-full px-2.5 py-1.5 bg-white border border-gray-300 rounded text-xs">
+                <option value="normal">普通生理数据 (公开展示)</option>
+                <option value="sensitive" selected>敏感健康信息 (前台需单独授权，后台非医生角色脱敏)</option>
+                <option value="strict">核心隐私病历 (严密加密，仅持证医护人员授权查阅)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div class="text-[11px] text-gray-500">
+          <i class="fa-solid fa-circle-check text-emerald-500 mr-1"></i>
+          保存后即刻生效，将在小程序前台“健康档案”中对应分组展现
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button onclick="closeAddModal()" class="px-4 py-2 border border-gray-300 hover:bg-white text-gray-700 rounded text-xs transition cursor-pointer">
+            取消
+          </button>
+          <button onclick="saveFieldMock()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow-sm transition cursor-pointer">
+            保存字段
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MODAL: 题库挑选弹窗 ================= -->
+  <div id="bank-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+        <div>
+          <h3 class="text-sm font-bold text-gray-900">从健康题库中挑选题目入卷</h3>
+          <p class="text-xs text-gray-500 mt-0.5">支持按疾病谱系与生活方式筛选，已预置档案字段映射的题目将自动同步规则</p>
+        </div>
+        <button onclick="closeQuestionBankModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-white text-xs">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+          <input type="text" placeholder="搜索题目名称、标签或档案字段" class="w-full pl-8 pr-3 py-1.5 border border-gray-300 rounded focus:ring-1 focus:ring-blue-400 outline-none">
+        </div>
+        <select class="border border-gray-300 rounded px-2.5 py-1.5 outline-none">
+          <option>全部题型</option>
+          <option>数值填空</option>
+          <option>单选题</option>
+          <option>多选题</option>
+        </select>
+        <select class="border border-gray-300 rounded px-2.5 py-1.5 outline-none">
+          <option>全部映射状态</option>
+          <option>已关联健康档案</option>
+          <option>仅测评打分</option>
+        </select>
+      </div>
+
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-2.5 flex-1 text-xs">
+        <label class="flex items-center justify-between p-3 border border-gray-200 hover:border-blue-300 hover:bg-blue-50/20 rounded-lg cursor-pointer transition">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" checked class="accent-blue-600 rounded">
+            <div>
+              <div class="font-medium text-gray-900">您的清晨静息心率通常是多少？</div>
+              <div class="text-[11px] text-gray-400 mt-0.5">题型：数值输入 · 建议单位：次/分 (bpm)</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <i class="fa-solid fa-link text-[9px]"></i> 预设关联档案: [心率]
+            </span>
+          </div>
+        </label>
+        <label class="flex items-center justify-between p-3 border border-gray-200 hover:border-blue-300 hover:bg-blue-50/20 rounded-lg cursor-pointer transition">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" class="accent-blue-600 rounded">
+            <div>
+              <div class="font-medium text-gray-900">您是否有直系亲属患有高血压或糖尿病？</div>
+              <div class="text-[11px] text-gray-400 mt-0.5">题型：多选题 · 分类：家族遗传病史</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <i class="fa-solid fa-link text-[9px]"></i> 预设关联档案: [家族病史]
+            </span>
+          </div>
+        </label>
+      </div>
+
+      <div class="px-6 py-3.5 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+        <span class="text-xs text-gray-500">已选择 1 道新题目</span>
+        <div class="flex gap-2 text-xs">
+          <button onclick="closeQuestionBankModal()" class="px-4 py-1.5 border border-gray-300 rounded bg-white text-gray-700 cursor-pointer">取消</button>
+          <button onclick="addQuestionMock()" class="px-4 py-1.5 bg-blue-600 text-white rounded font-medium cursor-pointer">确认加入问卷</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DRAWER: 题目与档案字段关联配置抽屉 ================= -->
+  <div id="mapping-drawer" class="fixed inset-0 z-50 flex items-center justify-end bg-black/50 backdrop-blur-xs hidden">
+    <div class="h-full w-full max-w-lg bg-white shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+      
+      <!-- Drawer Header -->
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <span>测评题目 ⇄ 健康档案字段关联配置</span>
+          </h3>
+          <p class="text-xs text-gray-500 mt-0.5" id="drawer-q-name">配置第 4 题：您目前的吸烟习惯是？</p>
+        </div>
+        <button onclick="closeMappingDrawer()" class="text-gray-400 hover:text-gray-600 w-8 h-8 rounded flex items-center justify-center cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Body -->
+      <div class="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-5 text-xs">
+
+        <!-- Step 1: 关联开关 -->
+        <div class="flex items-center justify-between p-3.5 bg-blue-50/60 border border-blue-200 rounded-lg">
+          <div>
+            <div class="font-bold text-gray-900">将本题答案同步至健康档案</div>
+            <div class="text-gray-500 text-[11px] mt-0.5">开启后，用户做完测评会自动沉淀到长期健康档案卡片中</div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="drawer-sync-switch" checked class="sr-only switch-checkbox" onchange="toggleSyncBody(this.checked)">
+            <div class="switch-label w-9 h-5 bg-gray-300 rounded-full transition-colors flex items-center p-0.5">
+              <div class="switch-circle w-4 h-4 bg-white rounded-full shadow transition-transform"></div>
+            </div>
+          </label>
+        </div>
+
+        <div id="drawer-sync-body" class="space-y-4">
+          <div class="space-y-1.5">
+            <label class="block font-semibold text-gray-800">
+              <span class="text-red-500 mr-1">*</span>目标健康档案字段：
+            </label>
+            <div class="flex items-center gap-2">
+              <select id="drawer-target-field" class="w-full px-3 py-2 border border-gray-300 rounded text-xs bg-white focus:ring-1 focus:ring-blue-400 outline-none font-medium">
+                <optgroup label="生活方式与习惯">
+                  <option value="smoke" selected>吸烟情况 (单选: 从不/已戒烟/偶尔/经常)</option>
+                  <option value="drink">饮酒频次 (单选)</option>
+                </optgroup>
+                <optgroup label="体征与生理指标">
+                  <option value="height">身高 (数值 cm)</option>
+                  <option value="weight">体重 (数值 kg)</option>
+                  <option value="glucose">空腹血糖 (数值 mmol/L)</option>
+                </optgroup>
+              </select>
+              <button onclick="openAddModal('lifestyle', 'new')" class="px-2.5 py-2 border border-dashed border-blue-400 text-blue-600 rounded hover:bg-blue-50 whitespace-nowrap cursor-pointer">
+                + 新建档案字段
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block font-semibold text-gray-800">数据读写联动规则：</label>
+            <div class="space-y-2">
+              <label class="flex items-start gap-2 p-2.5 border border-blue-300 bg-blue-50/30 rounded-lg cursor-pointer">
+                <input type="radio" name="sync_direction" checked class="accent-blue-600 mt-0.5">
+                <div>
+                  <div class="font-bold text-gray-900">双向互通 (推荐)</div>
+                  <div class="text-gray-500 text-[11px]">做测评时自动拉取档案历史值预填（免答）；答题修改后自动更新健康档案</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-2 p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                <input type="radio" name="sync_direction" class="accent-blue-600 mt-0.5">
+                <div>
+                  <div class="font-bold text-gray-900">仅单向回写 (不预填)</div>
+                  <div class="text-gray-500 text-[11px]">每次测评强制用户重新答题，答完后覆盖更新健康档案</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 选项值映射转换器 -->
+          <div class="border border-gray-200 rounded-lg p-3.5 bg-slate-50 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-gray-900 flex items-center gap-1.5">
+                <i class="fa-solid fa-code-compare text-blue-600"></i>
+                选项值映射转换器 (5 对 3 对齐)
+              </span>
+              <span class="text-[10px] text-gray-400">测评选项 ➔ 档案字段枚举</span>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <div class="w-40 bg-white border border-gray-200 px-2 py-1 rounded text-[11px] truncate">A. 从不吸烟</div>
+                <i class="fa-solid fa-arrow-right text-gray-400 text-[10px]"></i>
+                <select class="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-[11px]">
+                  <option selected>从不</option>
+                  <option>已戒烟</option>
+                  <option>偶尔吸</option>
+                  <option>经常吸</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="w-40 bg-white border border-gray-200 px-2 py-1 rounded text-[11px] truncate">B. 已戒烟 3 年以上</div>
+                <i class="fa-solid fa-arrow-right text-gray-400 text-[10px]"></i>
+                <select class="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-[11px]">
+                  <option>从不</option>
+                  <option selected>已戒烟</option>
+                  <option>偶尔吸</option>
+                  <option>经常吸</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="w-40 bg-white border border-gray-200 px-2 py-1 rounded text-[11px] truncate">C. 已戒烟不足 3 年</div>
+                <i class="fa-solid fa-arrow-right text-gray-400 text-[10px]"></i>
+                <select class="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-[11px]">
+                  <option>从不</option>
+                  <option selected>已戒烟</option>
+                  <option>偶尔吸</option>
+                  <option>经常吸</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="w-40 bg-white border border-gray-200 px-2 py-1 rounded text-[11px] truncate">D. 偶尔吸 (每周<3次)</div>
+                <i class="fa-solid fa-arrow-right text-gray-400 text-[10px]"></i>
+                <select class="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-[11px]">
+                  <option>从不</option>
+                  <option>已戒烟</option>
+                  <option selected>偶尔吸</option>
+                  <option>经常吸</option>
+                </select>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="w-40 bg-white border border-gray-200 px-2 py-1 rounded text-[11px] truncate">E. 每天吸烟 (≥1包)</div>
+                <i class="fa-solid fa-arrow-right text-gray-400 text-[10px]"></i>
+                <select class="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-[11px]">
+                  <option>从不</option>
+                  <option>已戒烟</option>
+                  <option>偶尔吸</option>
+                  <option selected>经常吸</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="px-6 py-3 border-t border-gray-200 bg-gray-50 flex justify-end gap-2 text-xs">
+        <button onclick="closeMappingDrawer()" class="px-4 py-2 border border-gray-300 rounded bg-white text-gray-700 cursor-pointer">取消</button>
+        <button onclick="saveMappingMock()" class="px-5 py-2 bg-blue-600 text-white rounded font-semibold cursor-pointer">保存映射规则</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= DRAWER: 小程序端答题与档案自动沉淀体验模拟 ================= -->
+  <div id="miniprogram-drawer" class="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs hidden">
+    <div class="h-full w-full max-w-md bg-slate-900 p-4 sm:p-6 flex flex-col items-center justify-center relative animate-in slide-in-from-right duration-200">
+      
+      <button onclick="toggleMiniProgramDrawer()" class="absolute top-4 left-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition cursor-pointer">
+        <i class="fa-solid fa-chevron-left"></i> 返回后台管理
+      </button>
+
+      <!-- Smartphone -->
+      <div class="w-[340px] h-[680px] bg-white rounded-[40px] phone-shadow flex flex-col overflow-hidden relative border-4 border-slate-700">
+        
+        <!-- Status Bar -->
+        <div class="bg-blue-600 text-white pt-2.5 px-6 pb-2 flex justify-between items-center text-[11px] font-semibold">
+          <span>09:41</span>
+          <div class="flex items-center gap-1.5">
+            <i class="fa-solid fa-signal text-[10px]"></i>
+            <i class="fa-solid fa-wifi text-[10px]"></i>
+            <i class="fa-solid fa-battery-full text-xs"></i>
+          </div>
+        </div>
+
+        <!-- Mini Program Header -->
+        <div class="bg-blue-600 text-white px-4 py-3 flex items-center justify-between shadow">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-chevron-left text-sm"></i>
+            <span class="font-bold text-sm" id="mobile-header-title">健康风险初筛测评</span>
+          </div>
+          <div class="bg-blue-700/60 rounded-full px-2.5 py-1 flex items-center gap-2 text-xs border border-white/20">
+            <i class="fa-solid fa-ellipsis"></i>
+            <span class="w-[1px] h-3 bg-white/40"></span>
+            <i class="fa-regular fa-circle-dot text-[10px]"></i>
+          </div>
+        </div>
+
+        <!-- Phone Content -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 text-gray-800 text-xs p-3.5 space-y-3.5">
+          
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-start gap-2 text-[11px] text-emerald-900">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-xs mt-0.5"></i>
+            <div>
+              <span class="font-bold">已为您预填健康档案数据</span>
+              <p class="text-emerald-700 text-[10px] mt-0.5">检测到您已录入过身高体重，已为您自动填入，如有变动可直接修改。</p>
+            </div>
+          </div>
+
+          <!-- Question 1 in Mobile -->
+          <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2">
+            <div class="font-bold text-gray-900 flex items-center justify-between">
+              <span>1. 您的净身高是多少？</span>
+              <span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">已从档案预填</span>
+            </div>
+            <div class="flex items-center justify-between border border-gray-200 rounded-lg p-2">
+              <input type="text" value="175" class="w-24 text-sm font-bold text-gray-800 outline-none">
+              <span class="text-gray-400 font-medium">cm</span>
+            </div>
+          </div>
+
+          <!-- Question 2 in Mobile -->
+          <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2">
+            <div class="font-bold text-gray-900 flex items-center justify-between">
+              <span>2. 您目前的空腹体重是多少？</span>
+              <span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">已从档案预填</span>
+            </div>
+            <div class="flex items-center justify-between border border-gray-200 rounded-lg p-2">
+              <input type="text" value="70.5" class="w-24 text-sm font-bold text-gray-800 outline-none">
+              <span class="text-gray-400 font-medium">kg</span>
+            </div>
+            <div class="text-[10px] text-gray-400 flex items-center gap-1">
+              <i class="fa-solid fa-calculator text-blue-500"></i> BMI 体质指数自动换算：<span class="font-bold text-emerald-600">23.0 (正常)</span>
+            </div>
+          </div>
+
+          <!-- Question 3 in Mobile -->
+          <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-xs space-y-2">
+            <div class="font-bold text-gray-900">3. 您目前的吸烟习惯是？</div>
+            <div class="space-y-1.5 text-[11px]">
+              <div class="p-2 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-between">
+                <span>A. 从不吸烟</span>
+                <i class="fa-regular fa-circle text-gray-300"></i>
+              </div>
+              <div class="p-2 rounded-lg border border-blue-500 bg-blue-50 text-blue-900 font-medium flex items-center justify-between">
+                <span>B. 已戒烟 3 年以上</span>
+                <i class="fa-solid fa-circle-check text-blue-600"></i>
+              </div>
+              <div class="p-2 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-between">
+                <span>C. 偶尔吸烟</span>
+                <i class="fa-regular fa-circle text-gray-300"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button onclick="submitAssessmentMobile()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md text-xs transition cursor-pointer">
+            提交测评并同步更新健康档案
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.getElementById('view-assessment-center').classList.add('hidden');
+      document.getElementById('view-health-archive').classList.add('hidden');
+      document.getElementById('view-member-profile').classList.add('hidden');
+      document.getElementById('view-member-list').classList.add('hidden');
+
+      const tabs = ['member-list', 'member-profile', 'health-archive', 'assessment-center'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        if(btn) {
+          btn.classList.remove('text-blue-600', 'font-semibold', 'border-b-2', 'border-blue-600');
+          btn.classList.add('text-gray-500');
+        }
+      });
+
+      const activeBtn = document.getElementById('tab-btn-' + tabId);
+      if(activeBtn) {
+        activeBtn.classList.remove('text-gray-500');
+        activeBtn.classList.add('text-blue-600', 'font-semibold', 'border-b-2', 'border-blue-600');
+      }
+
+      document.getElementById('view-' + tabId).classList.remove('hidden');
+    }
+
+    // Filter Group in health archive
+    function filterGroup(group) {
+      const buttons = document.querySelectorAll('.group-tab-btn');
+      buttons.forEach(btn => {
+        if(btn.getAttribute('data-group') === group) {
+          btn.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+          btn.classList.remove('text-gray-600');
+        } else {
+          btn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+          btn.classList.add('text-gray-600');
+        }
+      });
+
+      const blocks = document.querySelectorAll('.health-group-block');
+      blocks.forEach(block => {
+        if(group === 'all' || block.getAttribute('data-group') === group) {
+          block.classList.remove('hidden');
+        } else {
+          block.classList.add('hidden');
+        }
+      });
+    }
+
+    // ================= MODAL LOGIC (ADD & EDIT) =================
+    function openAddModal(group = 'vitals', mode = 'new') {
+      document.getElementById('add-field-modal').classList.remove('hidden');
+      document.getElementById('modal-title-text').innerText = '添加健康档案字段';
+      document.getElementById('field-source-mode-block').classList.remove('hidden');
+      
+      if(group) {
+        document.getElementById('modal-group-select').value = group;
+      }
+      
+      // Reset inputs
+      document.getElementById('input-field-name').value = mode === 'import' ? '常住城市' : '';
+      document.getElementById('input-field-placeholder').value = '';
+      document.getElementById('modal-field-type').value = 'number';
+      document.getElementById('input-unit').value = 'cm';
+      document.getElementById('input-val-min').value = '';
+      document.getElementById('input-val-max').value = '';
+      document.getElementById('req-no').checked = true;
+      document.getElementById('edit-yes').checked = true;
+      
+      switchSourceMode(mode);
+      onFieldTypeChanged('number');
+    }
+
+    function openEditModal(name, group, type, unit, placeholder, req, edit, scope, privacy, minVal, maxVal) {
+      document.getElementById('add-field-modal').classList.remove('hidden');
+      document.getElementById('modal-title-text').innerText = '编辑健康档案字段 - ' + name;
+      document.getElementById('field-source-mode-block').classList.add('hidden'); // Hide mode switch when editing
+      document.getElementById('import-field-selector').classList.add('hidden');
+
+      if(group) document.getElementById('modal-group-select').value = group;
+      if(name) document.getElementById('input-field-name').value = name;
+      if(type) document.getElementById('modal-field-type').value = type;
+      if(unit) document.getElementById('input-unit').value = unit;
+      if(placeholder) document.getElementById('input-field-placeholder').value = placeholder;
+      
+      if(minVal !== undefined) document.getElementById('input-val-min').value = minVal;
+      if(maxVal !== undefined) document.getElementById('input-val-max').value = maxVal;
+
+      if(req === '1') document.getElementById('req-yes').checked = true;
+      else document.getElementById('req-no').checked = true;
+
+      if(edit === '1') document.getElementById('edit-yes').checked = true;
+      else document.getElementById('edit-no').checked = true;
+
+      if(scope) document.getElementById('modal-target-scope').value = scope;
+      if(privacy) document.getElementById('modal-privacy-level').value = privacy;
+
+      onFieldTypeChanged(type || 'text');
+    }
+
+    function closeAddModal() {
+      document.getElementById('add-field-modal').classList.add('hidden');
+    }
+
+    function switchSourceMode(mode) {
+      const importBox = document.getElementById('import-field-selector');
+      const nameInput = document.getElementById('input-field-name');
+      const typeSelect = document.getElementById('modal-field-type');
+      
+      const radios = document.getElementsByName('field-source-mode');
+      radios.forEach(r => {
+        if(r.value === mode) r.checked = true;
+      });
+
+      if (mode === 'import') {
+        importBox.classList.remove('hidden');
+        nameInput.value = '常住城市 (继承自会员资料)';
+        typeSelect.value = 'text';
+        onFieldTypeChanged('text');
+      } else {
+        importBox.classList.add('hidden');
+        if(!nameInput.value || nameInput.value.includes('继承自会员资料')) {
+          nameInput.value = '空腹血糖';
+          typeSelect.value = 'number';
+          onFieldTypeChanged('number');
+        }
+      }
+    }
+
+    function onFieldTypeChanged(type) {
+      const numberBox = document.getElementById('type-detail-number');
+      const optionsBox = document.getElementById('type-detail-options');
+
+      numberBox.classList.add('hidden');
+      optionsBox.classList.add('hidden');
+
+      if (type === 'number') {
+        numberBox.classList.remove('hidden');
+      } else if (type === 'radio' || type === 'checkbox') {
+        optionsBox.classList.remove('hidden');
+      }
+    }
+
+    function setUnit(unit) {
+      document.getElementById('input-unit').value = unit;
+    }
+
+    function saveFieldMock() {
+      const name = document.getElementById('input-field-name').value || '新字段';
+      alert('【保存成功】字段「' + name + '」的配置已即时生效！在小程序健康档案中已同步展示。');
+      closeAddModal();
+    }
+
+    // Question Bank
+    function openQuestionBankModal() {
+      document.getElementById('bank-modal').classList.remove('hidden');
+    }
+
+    function closeQuestionBankModal() {
+      document.getElementById('bank-modal').classList.add('hidden');
+    }
+
+    function addQuestionMock() {
+      alert('已将选中的「静息心率」题目成功加入测评问卷！已自动建立与健康档案 [心率 (bpm)] 字段的预设关联。');
+      closeQuestionBankModal();
+    }
+
+    // Mapping Drawer
+    function openMappingDrawer(qNum, qType) {
+      document.getElementById('mapping-drawer').classList.remove('hidden');
+      const titleEl = document.getElementById('drawer-q-name');
+      if(qType === 'smoke') {
+        titleEl.innerText = '配置第 4 题：您目前的吸烟习惯是？';
+      } else if (qType === 'height') {
+        titleEl.innerText = '配置第 1 题：您的净身高是多少？';
+      } else if (qType === 'weight') {
+        titleEl.innerText = '配置第 2 题：您目前的空腹体重是多少？';
+      } else {
+        titleEl.innerText = '配置测评题目与健康档案关联';
+      }
+    }
+
+    function closeMappingDrawer() {
+      document.getElementById('mapping-drawer').classList.add('hidden');
+    }
+
+    function toggleSyncBody(checked) {
+      const body = document.getElementById('drawer-sync-body');
+      if(checked) body.classList.remove('hidden');
+      else body.classList.add('hidden');
+    }
+
+    function saveMappingMock() {
+      alert('映射规则已保存！测评答题结果将按照转换规则自动回填健康档案。');
+      closeMappingDrawer();
+    }
+
+    // Mini program
+    function toggleMiniProgramDrawer(mode) {
+      const drawer = document.getElementById('miniprogram-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    function submitAssessmentMobile() {
+      alert('【小程序端提示】测评已完成！生成《健康风险评估报告》；同时系统已为您同步更新健康档案中的最新生理指标！');
+      toggleMiniProgramDrawer();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订单转换满抽活动：奖品弹窗与同活动多梯度交互原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .fade-in {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .scale-in {
+      animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-6 flex flex-col items-center">
+
+  <!-- 顶部标题与用例快捷操作栏 -->
+  <header class="w-full max-w-7xl mb-5">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">高保真交互原型</span>
+          <h1 class="text-xl font-bold text-slate-900">订单转换满抽：关联抽奖活动与奖品设置</h1>
+          <span class="text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 font-medium">同一抽奖活动多次选为奖品 · 抽奖次数自定义</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+          解决痛点：传统弹窗只能对一个抽奖活动勾选一次。本交互原型支持<b>将同一个抽奖活动（如大转盘）多次选为奖品</b>，分别配置多个门槛档位（如满188送1次、满388送3次、满1888送5次）与赠送抽奖次数。
+        </p>
+      </div>
+
+      <!-- 操作按钮群 -->
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <button onclick="loadUserPreset()" class="px-3.5 py-2 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i> 一键填入需求用例 (满188/388/1888 同一活动)
+        </button>
+        <button onclick="openPrizeModal()" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-plus"></i> 打开关联抽奖活动弹窗
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体工作区：左侧B端活动配置表格，右侧C端小程序实时联动 -->
+  <main class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <!-- 左侧：B 端后台管理视图 -->
+    <div class="lg:col-span-8 flex flex-col gap-5">
+      
+      <!-- 规则选项卡片 -->
+      <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+          <span class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-blue-600"></i> 活动规则设置
+          </span>
+          <span class="text-xs text-slate-400">已生效配置</span>
+        </div>
+
+        <div class="flex items-center gap-6 text-xs text-slate-700 mb-4">
+          <span class="font-medium text-slate-600">奖品领取方式:</span>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="radio" name="ruleType" value="4" checked onchange="changeRuleType(4)" class="text-blue-600 focus:ring-blue-500">
+            <span class="font-bold text-slate-800">奖励叠加</span>
+            <span class="text-slate-400">(满足金额可多次兑换，每次扣减对应门槛额度)</span>
+          </label>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="radio" name="ruleType" value="1" onchange="changeRuleType(1)" class="text-blue-600 focus:ring-blue-500">
+            <span class="font-bold text-slate-800">奖品N选一</span>
+            <span class="text-slate-400">(多个门槛只能选1件兑换)</span>
+          </label>
+        </div>
+
+        <div class="bg-blue-50/70 border border-blue-200/80 rounded-lg p-3 text-xs text-blue-800 flex items-start gap-2">
+          <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+          <div>
+            <b>配置说明：</b>下表已配置不同门槛梯度的赠送抽奖。您可以点击<b>【+ 关联/添加抽奖活动】</b>打开弹窗体验多梯度配置，或直接在表格内修改门槛与次数。
+          </div>
+        </div>
+      </div>
+
+      <!-- 奖品表格卡片 -->
+      <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-slate-800">抽奖奖品列表</span>
+            <span id="tierCountBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">3/10 奖品</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="openPrizeModal()" class="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition border border-blue-200 flex items-center gap-1">
+              <i class="fa-solid fa-plus"></i> 关联/添加抽奖活动弹窗
+            </button>
+          </div>
+        </div>
+
+        <!-- 表格主体 -->
+        <div class="overflow-x-auto border border-slate-200 rounded-lg">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-3 w-12 text-center">序号</th>
+                <th class="py-3 px-3 w-16">图片</th>
+                <th class="py-3 px-4 min-w-[180px]">关联抽奖活动</th>
+                <th class="py-3 px-3 w-36">兑奖门槛 (元)</th>
+                <th class="py-3 px-3 w-36">赠送抽奖次数</th>
+                <th class="py-3 px-3">引导文案</th>
+                <th class="py-3 px-3 w-20 text-center">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tierTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- 动态渲染 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- C端文案实时生成预览 -->
+      <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+        <div class="text-xs font-bold text-slate-800 mb-2 flex items-center gap-1.5">
+          <i class="fa-solid fa-code-compare text-blue-600"></i> 后端动态下发给小程序端展示的文案预览：
+        </div>
+        <div id="ruleTextPreview" class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2 text-xs font-mono text-slate-700">
+          <!-- 动态更新 -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 右侧：C 端小程序高保真实时交互预览 -->
+    <div class="lg:col-span-4 sticky top-6">
+      <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+        
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <span class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-mobile-screen-button text-emerald-600"></i> C端小程序实时效果
+          </span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold animate-pulse">实时同步</span>
+        </div>
+
+        <!-- 模拟器额度控制条 -->
+        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4 text-xs">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-slate-600">模拟用户已完结金额:</span>
+            <span id="displayAmount" class="font-bold text-rose-600 text-sm">¥ 500.00</span>
+          </div>
+          <input id="sliderAmount" type="range" min="0" max="2500" step="50" value="500" oninput="onAmountSliderChange(this.value)" class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+          <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+            <span>剩余可用: <b id="displayBalance" class="text-emerald-600 font-bold">¥500.00</b></span>
+            <span>已获抽奖机会: <b id="displayDraws" class="text-blue-600 font-bold">0 次</b></span>
+          </div>
+        </div>
+
+        <!-- 手机外壳 -->
+        <div class="w-[310px] mx-auto bg-slate-900 rounded-[38px] p-2.5 shadow-2xl border-4 border-slate-800">
+          <div class="w-full bg-[#f6f7f9] rounded-[30px] overflow-hidden flex flex-col h-[560px] relative">
+            
+            <!-- 手机灵动岛 -->
+            <div class="w-24 h-4 bg-slate-900 mx-auto rounded-b-xl z-20"></div>
+
+            <!-- 小程序头部 Banner -->
+            <div class="bg-gradient-to-r from-orange-500 to-rose-500 p-4 text-white relative">
+              <div class="text-[10px] tracking-wide opacity-80 font-medium">订单转换满额抽大奖</div>
+              <div class="text-base font-black mt-0.5">618 年中狂欢专场</div>
+
+              <div class="mt-3 bg-white/20 backdrop-blur-md rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] opacity-80">完结金额 / 剩余额度</div>
+                  <div class="text-xs font-bold mt-0.5">
+                    <span id="cSimAmount">¥ 500</span> / <span id="cSimBalance" class="text-yellow-200 font-black">¥ 500</span>
+                  </div>
+                </div>
+                <div class="bg-white/25 px-2 py-1 rounded-lg text-[10px] font-bold">
+                  资格: <span id="cDrawCount">0</span> 次
+                </div>
+              </div>
+            </div>
+
+            <!-- 小程序活动奖品列表 -->
+            <div class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scroll">
+              <div class="text-xs font-bold text-slate-800 flex items-center justify-between">
+                <span>活动奖品</span>
+                <span class="text-[10px] text-slate-400 font-normal">完结后即可兑换</span>
+              </div>
+
+              <!-- 渲染小程序奖品卡片 -->
+              <div id="cPrizeContainer" class="space-y-2.5">
+                <!-- 动态填充 -->
+              </div>
+            </div>
+
+            <!-- 小程序底部提示 -->
+            <div class="bg-white py-2 text-center text-[10px] text-slate-400 border-t border-slate-100">
+              数据定时更新，解冻后自动充入额度
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════════════════════════ -->
+  <!-- 核心交互弹窗：关联抽奖活动与梯度设置 (左右分栏模式) -->
+  <!-- ════════════════════════════════════════════════════════════════════════════ -->
+  <div id="prizeModal" style="display: none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[640px] flex flex-col scale-in overflow-hidden border border-slate-100">
+      
+      <!-- 弹窗 Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-bold text-slate-900">关联抽奖活动与奖品配置</h3>
+            <span class="px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-100 text-blue-700">支持同一活动选择多次</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">左侧选择抽奖活动选为奖品（可多次添加同一活动），右侧灵活配置各奖品的门槛金额与赠送抽奖次数。</p>
+        </div>
+        <button onclick="closePrizeModal()" class="w-8 h-8 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- 弹窗 Body：左右分栏 -->
+      <div class="flex-1 flex overflow-hidden">
+        
+        <!-- 左侧：可选抽奖活动库 -->
+        <div class="w-[45%] border-r border-slate-200 bg-slate-50/50 flex flex-col p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-gift text-blue-600"></i> ① 选择抽奖活动
+            </span>
+            <span id="libCountText" class="text-[11px] text-slate-400">共 4 个可用活动</span>
+          </div>
+
+          <!-- 搜索框 -->
+          <div class="relative mb-3">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+            <input id="lotterySearchInput" type="text" oninput="filterLotteryLibrary(this.value)" placeholder="搜索抽奖活动名称..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 bg-white">
+          </div>
+
+          <!-- 活动列表 -->
+          <div id="lotteryLibContainer" class="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scroll">
+            <!-- 动态渲染抽奖活动项 -->
+          </div>
+        </div>
+
+        <!-- 右侧：已选抽奖奖品配置区 -->
+        <div class="w-[55%] flex flex-col p-4 bg-white">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-layer-group text-blue-600"></i> ② 已选奖品列表
+              </span>
+              <span id="modalTierCount" class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-bold">3 项</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="sortTiersAsc()" class="px-2 py-1 text-[11px] font-medium text-slate-600 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 rounded border border-slate-200 transition">
+                <i class="fa-solid fa-arrow-down-short-wide"></i> 按门槛升序
+              </button>
+              <button onclick="clearModalTiers()" class="px-2 py-1 text-[11px] font-medium text-rose-600 hover:bg-rose-50 rounded border border-rose-200 transition">
+                清空
+              </button>
+            </div>
+          </div>
+
+          <!-- 重复门槛告警栏 -->
+          <div id="duplicateAlert" class="hidden mb-2 p-2 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-rose-500"></i>
+            <span id="duplicateAlertText">门槛金额不能相同，请修改重复项！</span>
+          </div>
+
+          <!-- 奖品卡片列表 -->
+          <div id="modalTierContainer" class="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scroll">
+            <!-- 动态渲染每个奖品 -->
+          </div>
+
+          <!-- 底部配置摘要 -->
+          <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>支持同一活动多次选为奖品，请确保门槛互不重复</span>
+            <span id="summaryText" class="font-medium text-slate-700">共 3 个奖品</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 弹窗 Footer -->
+      <div class="px-6 py-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+        <span class="text-xs text-slate-500">
+          <i class="fa-regular fa-circle-question mr-1"></i> 提示：左侧可多次点击抽奖活动<b>「选为奖品」</b>，分别设置不同门槛
+        </span>
+        <div class="flex items-center gap-2.5">
+          <button onclick="closePrizeModal()" class="px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-200/70 rounded-lg transition border border-slate-300">
+            取消
+          </button>
+          <button onclick="applyModalChanges()" class="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow-sm">
+            确认并应用配置
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast 提示容器 -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-lg shadow-xl opacity-0 transition duration-300 pointer-events-none flex items-center gap-2">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMsg">操作成功</span>
+  </div>
+
+  <script>
+    // ─── 抽奖活动库 Mock ───────────────────────────────────────────────────────────
+    const lotteryLibrary = [
+      {
+        id: 101,
+        title: "【618周年庆】狂欢大转盘",
+        subTitle: "全场通用，高转化大转盘抽奖",
+        imgUrl: "https://b0.dtminds.com/1/2026/03/09/g8kVWn.png",
+        status: 1,
+        statusText: "进行中",
+        timeRange: "2026-06-01 至 2026-06-30",
+        prizesSummary: "iPhone 16 Pro、50元无门槛券、免单大红包"
+      },
+      {
+        id: 102,
+        title: "【天天有礼】幸运抽盲盒",
+        subTitle: "100%中奖惊喜盲盒抽奖",
+        imgUrl: "https://b0.dtminds.com/1/2026/03/03/48d7hQ.png!w1100.webp",
+        status: 1,
+        statusText: "进行中",
+        timeRange: "2026-05-20 至 2026-07-20",
+        prizesSummary: "戴森吹风机、美妆中样礼包、满减券"
+      },
+      {
+        id: 103,
+        title: "【会员尊享】金蛋大狂欢",
+        subTitle: "限高价值会员参与的砸金蛋活动",
+        imgUrl: "https://b0.dtminds.com/1/2026/03/03/w7f6aq.png",
+        status: 1,
+        statusText: "进行中",
+        timeRange: "2026-06-10 至 2026-06-25",
+        prizesSummary: "外星人主机、扫地机器人、888积分"
+      },
+      {
+        id: 104,
+        title: "【免单专场】夏日幸运大翻牌",
+        subTitle: "超高爆率免单活动",
+        imgUrl: "https://b0.dtminds.com/1/2026/03/09/nVWl0t.png",
+        status: 2,
+        statusText: "未开始",
+        timeRange: "2026-07-01 至 2026-07-31",
+        prizesSummary: "最高整单全额免单、海量全场券"
+      }
+    ];
+
+    // ─── 全局状态 ──────────────────────────────────────────────────────────────────
+    let ruleType = 4; // 4: 叠加, 1: N选1
+    let simulatedAmount = 500; // 用户已完结金额
+    let userDrawsCount = 0; // 已获得抽奖次数
+    let exchangedTiersMap = {}; // tierId => exchangedCount
+
+    // 初始奖品梯度数据（满188送1次 / 满388送3次 / 满1888送5次，同一个抽奖活动）
+    let currentTiers = [
+      {
+        id: "t_188",
+        lotteryId: 101,
+        lotteryTitle: "【618周年庆】狂欢大转盘",
+        lotteryPic: "https://b0.dtminds.com/1/2026/03/09/g8kVWn.png",
+        prizeCost: 188,
+        lotteryTimes: 1,
+        guideText: "抢iPhone大奖"
+      },
+      {
+        id: "t_388",
+        lotteryId: 101,
+        lotteryTitle: "【618周年庆】狂欢大转盘",
+        lotteryPic: "https://b0.dtminds.com/1/2026/03/09/g8kVWn.png",
+        prizeCost: 388,
+        lotteryTimes: 3,
+        guideText: "100%中奖"
+      },
+      {
+        id: "t_1888",
+        lotteryId: 101,
+        lotteryTitle: "【618周年庆】狂欢大转盘",
+        lotteryPic: "https://b0.dtminds.com/1/2026/03/09/g8kVWn.png",
+        prizeCost: 1888,
+        lotteryTimes: 5,
+        guideText: "超高中奖率"
+      }
+    ];
+
+    // 弹窗中正在编辑的临时数据
+    let modalTiers = [];
+
+    // ─── 提示 Toast ───────────────────────────────────────────────────────────────
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.innerText = msg;
+      if (isError) {
+        toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+      }
+
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2400);
+    }
+
+    // ─── 渲染主页面表格与文案 ──────────────────────────────────────────────────────
+    function renderMainTable() {
+      const tbody = document.getElementById('tierTableBody');
+      const badge = document.getElementById('tierCountBadge');
+      const preview = document.getElementById('ruleTextPreview');
+
+      badge.innerText = `${currentTiers.length}/10 奖品`;
+
+      // 渲染表格行
+      tbody.innerHTML = currentTiers.map((tier, idx) => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-3 px-3 text-center font-bold text-slate-400">#${idx + 1}</td>
+          <td class="py-3 px-3">
+            <img src="${tier.lotteryPic}" class="w-10 h-10 rounded-lg object-cover border border-slate-200">
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-800">${tier.lotteryTitle}</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">活动ID: ${tier.lotteryId} <span class="ml-1 px-1 rounded bg-blue-50 text-blue-600">大转盘</span></div>
+          </td>
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-1">
+              <span class="text-slate-400 text-xs">¥</span>
+              <input type="number" step="0.01" min="0.01" value="${tier.prizeCost}" onchange="updateTierInTable(${idx}, 'prizeCost', this.value)" class="w-24 px-2 py-1 text-xs font-bold text-slate-800 rounded border border-slate-200 focus:border-blue-500 focus:outline-none">
+            </div>
+          </td>
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-1">
+              <input type="number" min="1" max="999" value="${tier.lotteryTimes}" onchange="updateTierInTable(${idx}, 'lotteryTimes', this.value)" class="w-16 px-2 py-1 text-xs font-bold text-blue-600 rounded border border-slate-200 focus:border-blue-500 focus:outline-none text-center">
+              <span class="text-slate-500 text-xs">次</span>
+            </div>
+          </td>
+          <td class="py-3 px-3">
+            <input type="text" maxlength="20" value="${tier.guideText || ''}" onchange="updateTierInTable(${idx}, 'guideText', this.value)" placeholder="引导文案..." class="w-full px-2 py-1 text-xs rounded border border-slate-200 focus:border-blue-500 focus:outline-none">
+          </td>
+          <td class="py-3 px-3 text-center">
+            <button onclick="removeTierInTable(${idx})" class="text-rose-500 hover:text-rose-700 font-medium text-xs">删除</button>
+          </td>
+        </tr>
+      `).join('');
+
+      // 渲染动态规则预览
+      preview.innerHTML = currentTiers.map((tier, idx) => `
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+          <span class="font-bold text-slate-800">奖品 ${idx + 1}:</span>
+          <span class="text-rose-600 font-bold">满 ${tier.prizeCost} 元可兑 ${tier.lotteryTimes} 次抽奖机会</span>
+          <span class="text-slate-400">（抽奖活动: ${tier.lotteryTitle}）</span>
+        </div>
+      `).join('');
+
+      renderMiniapp();
+    }
+
+    function updateTierInTable(idx, field, val) {
+      if (field === 'prizeCost' || field === 'lotteryTimes') {
+        currentTiers[idx][field] = Number(val) || 0;
+      } else {
+        currentTiers[idx][field] = val;
+      }
+      renderMainTable();
+    }
+
+    function removeTierInTable(idx) {
+      currentTiers.splice(idx, 1);
+      renderMainTable();
+      showToast('已删除奖品');
+    }
+
+    // ─── 渲染 C 端小程序效果 ───────────────────────────────────────────────────────
+    function renderMiniapp() {
+      const container = document.getElementById('cPrizeContainer');
+      const cSimAmount = document.getElementById('cSimAmount');
+      const cSimBalance = document.getElementById('cSimBalance');
+      const cDrawCount = document.getElementById('cDrawCount');
+
+      // 计算已扣减的额度
+      const spent = currentTiers.reduce((sum, t) => sum + (exchangedTiersMap[t.id] || 0) * t.prizeCost, 0);
+      const remainingBalance = Math.max(0, simulatedAmount - spent);
+
+      cSimAmount.innerText = `¥ ${simulatedAmount}`;
+      cSimBalance.innerText = `¥ ${remainingBalance}`;
+      cDrawCount.innerText = `${userDrawsCount}`;
+
+      document.getElementById('displayBalance').innerText = `¥${remainingBalance}.00`;
+      document.getElementById('displayDraws').innerText = `${userDrawsCount} 次`;
+
+      container.innerHTML = currentTiers.map(tier => {
+        const hasExchanged = (exchangedTiersMap[tier.id] || 0) > 0;
+        const canExchange = remainingBalance >= tier.prizeCost;
+        const percent = Math.min(100, Math.round((remainingBalance / tier.prizeCost) * 100));
+
+        let btnText = "去兑换";
+        let btnClass = "bg-rose-500 hover:bg-rose-600 text-white shadow";
+        let disabled = false;
+
+        if (hasExchanged && ruleType === 4) {
+          btnText = "继续兑换";
+        } else if (hasExchanged && ruleType === 1) {
+          btnText = "已兑换";
+          btnClass = "bg-slate-200 text-slate-400";
+          disabled = true;
+        } else if (!canExchange) {
+          btnText = "差额";
+          btnClass = "bg-slate-200 text-slate-400";
+          disabled = true;
+        }
+
+        return `
+          <div class="bg-white rounded-xl p-2.5 shadow-sm border border-slate-100 flex items-center justify-between">
+            <img src="${tier.lotteryPic}" class="w-12 h-12 rounded-lg object-cover mr-2.5 flex-shrink-0 border border-slate-100">
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-bold text-slate-900 truncate">满${tier.prizeCost}元可兑${tier.lotteryTimes}次抽奖</div>
+              <div class="text-[10px] text-slate-400 mt-0.5 truncate">${tier.guideText || '幸运转盘抽奖'}</div>
+              <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                <div class="bg-rose-500 h-full rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+              </div>
+            </div>
+            <div class="ml-2 flex-shrink-0">
+              <button onclick="handleMiniappExchange('${tier.id}')" ${disabled ? 'disabled' : ''} class="text-[11px] font-bold px-3 py-1.5 rounded-full transition ${btnClass}">
+                ${btnText}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onAmountSliderChange(val) {
+      simulatedAmount = Number(val);
+      document.getElementById('displayAmount').innerText = `¥ ${simulatedAmount}.00`;
+      renderMiniapp();
+    }
+
+    function handleMiniappExchange(tierId) {
+      const tier = currentTiers.find(t => t.id === tierId);
+      if (!tier) return;
+
+      const spent = currentTiers.reduce((sum, t) => sum + (exchangedTiersMap[t.id] || 0) * t.prizeCost, 0);
+      const remainingBalance = Math.max(0, simulatedAmount - spent);
+
+      if (remainingBalance < tier.prizeCost) {
+        showToast('可用完结金额不足，无法兑换！', true);
+        return;
+      }
+
+      exchangedTiersMap[tier.id] = (exchangedTiersMap[tier.id] || 0) + 1;
+      userDrawsCount += tier.lotteryTimes;
+
+      showToast(`兑换成功！消耗 ¥${tier.prizeCost}，已发放 ${tier.lotteryTimes} 次抽奖资格！`);
+      renderMiniapp();
+    }
+
+    function changeRuleType(type) {
+      ruleType = type;
+      exchangedTiersMap = {};
+      renderMiniapp();
+      showToast(type === 4 ? '已切换为奖励叠加模式' : '已切换为N选1模式');
+    }
+
+    // ─── 弹窗交互逻辑 ──────────────────────────────────────────────────────────────
+    function openPrizeModal() {
+      modalTiers = JSON.parse(JSON.stringify(currentTiers));
+      const modal = document.getElementById('prizeModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+      }
+      const searchInput = document.getElementById('lotterySearchInput');
+      if (searchInput) searchInput.value = '';
+      renderLotteryLibrary(lotteryLibrary);
+      renderModalTiers();
+    }
+
+    function closePrizeModal() {
+      const modal = document.getElementById('prizeModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+    }
+
+    function filterLotteryLibrary(keyword) {
+      const kw = keyword.trim().toLowerCase();
+      const filtered = lotteryLibrary.filter(l => l.title.toLowerCase().includes(kw) || l.subTitle.toLowerCase().includes(kw));
+      renderLotteryLibrary(filtered);
+    }
+
+    function renderLotteryLibrary(list) {
+      const container = document.getElementById('lotteryLibContainer');
+      document.getElementById('libCountText').innerText = `共 ${list.length} 个可用活动`;
+
+      container.innerHTML = list.map(item => {
+        // 统计此活动已在右侧设置了几个梯度
+        const count = modalTiers.filter(t => t.lotteryId === item.id).length;
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-xl p-3 hover:border-blue-500 hover:shadow-sm transition flex items-center justify-between gap-2.5">
+            <img src="${item.imgUrl}" class="w-12 h-12 rounded-lg object-cover border border-slate-100 flex-shrink-0">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-800 truncate">${item.title}</span>
+                <span class="text-[10px] px-1 rounded ${item.status === 1 ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}">${item.statusText}</span>
+              </div>
+              <div class="text-[11px] text-slate-500 truncate mt-0.5">${item.prizesSummary}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">${item.timeRange}</div>
+            </div>
+            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+              ${count > 0 ? `<span class="text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-semibold">已选 ${count} 次</span>` : ''}
+              <button onclick="addLotteryToModalTiers(${item.id})" class="px-2.5 py-1 text-xs font-semibold text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 rounded-lg transition border border-blue-200">
+                + 选为奖品
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 从左侧抽奖活动库添加奖品（支持多次添加同一个活动）
+    function addLotteryToModalTiers(lotteryId) {
+      if (modalTiers.length >= 10) {
+        showToast('最多只能添加 10 个奖品', true);
+        return;
+      }
+      const lottery = lotteryLibrary.find(l => l.id === lotteryId);
+      if (!lottery) return;
+
+      // 智能推荐梯度：在现有最大门槛基础上增加，次数递增
+      let nextCost = 188;
+      let nextTimes = 1;
+      if (modalTiers.length > 0) {
+        const maxCost = Math.max(...modalTiers.map(t => t.prizeCost || 0));
+        nextCost = maxCost + 200;
+        const last = modalTiers[modalTiers.length - 1];
+        nextTimes = (last.lotteryTimes || 1) + 2;
+      }
+
+      modalTiers.push({
+        id: 'mt_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        lotteryId: lottery.id,
+        lotteryTitle: lottery.title,
+        lotteryPic: lottery.imgUrl,
+        prizeCost: nextCost,
+        lotteryTimes: nextTimes,
+        guideText: '幸运抽大奖'
+      });
+
+      renderModalTiers();
+      renderLotteryLibrary(lotteryLibrary);
+      showToast(`已将「${lottery.title}」选为奖品`);
+    }
+
+    function removeModalTier(idx) {
+      modalTiers.splice(idx, 1);
+      renderModalTiers();
+      renderLotteryLibrary(lotteryLibrary);
+    }
+
+    function moveModalTier(idx, dir) {
+      const target = dir === 'up' ? idx - 1 : idx + 1;
+      if (target < 0 || target >= modalTiers.length) return;
+      const [moved] = modalTiers.splice(idx, 1);
+      modalTiers.splice(target, 0, moved);
+      renderModalTiers();
+    }
+
+    function sortTiersAsc() {
+      modalTiers.sort((a, b) => (a.prizeCost || 0) - (b.prizeCost || 0));
+      renderModalTiers();
+      showToast('已按门槛升序重排');
+    }
+
+    function clearModalTiers() {
+      modalTiers = [];
+      renderModalTiers();
+      renderLotteryLibrary(lotteryLibrary);
+    }
+
+    // 校验门槛是否有重复
+    function checkDuplicateCosts() {
+      const map = {};
+      const dupes = [];
+      modalTiers.forEach(t => {
+        if (t.prizeCost !== undefined && t.prizeCost !== null) {
+          map[t.prizeCost] = (map[t.prizeCost] || 0) + 1;
+        }
+      });
+      Object.keys(map).forEach(k => {
+        if (map[k] > 1) dupes.push(Number(k));
+      });
+      return dupes;
+    }
+
+    // 渲染右侧奖品列表
+    function renderModalTiers() {
+      const container = document.getElementById('modalTierContainer');
+      const badge = document.getElementById('modalTierCount');
+      const summaryText = document.getElementById('summaryText');
+      const dupAlert = document.getElementById('duplicateAlert');
+      const dupAlertText = document.getElementById('duplicateAlertText');
+
+      badge.innerText = `${modalTiers.length}/10 奖品`;
+      summaryText.innerText = `共 ${modalTiers.length} 个奖品，覆盖 ${new Set(modalTiers.map(t => t.lotteryId)).size} 个抽奖活动`;
+
+      const duplicates = checkDuplicateCosts();
+      if (duplicates.length > 0) {
+        dupAlert.classList.remove('hidden');
+        dupAlertText.innerText = `存在重复门槛金额：¥${duplicates.join(', ¥')}，请修改避免冲突！`;
+      } else {
+        dupAlert.classList.add('hidden');
+      }
+
+      if (modalTiers.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-slate-400 py-16">
+            <i class="fa-solid fa-gift text-4xl mb-2 text-slate-300"></i>
+            <span class="text-xs">暂未选择奖品</span>
+            <span class="text-[11px] text-slate-400 mt-1">请从左侧将抽奖活动选为奖品，支持多次选择同一个活动设置不同门槛</span>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = modalTiers.map((tier, idx) => {
+        const isDup = duplicates.includes(tier.prizeCost);
+
+        return `
+          <div class="bg-slate-50 border ${isDup ? 'border-rose-400 bg-rose-50/50' : 'border-slate-200'} rounded-xl p-3 shadow-2xs transition">
+            
+            <!-- 卡片 Header -->
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/60">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-600 text-white">奖品 #${idx + 1}</span>
+                <span class="text-xs font-bold text-slate-800 truncate max-w-[200px]">${tier.lotteryTitle}</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-xs">
+                <button onclick="moveModalTier(${idx}, 'up')" ${idx === 0 ? 'disabled class="opacity-30"' : 'class="hover:text-blue-600"'} title="上移">
+                  <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button onclick="moveModalTier(${idx}, 'down')" ${idx === modalTiers.length - 1 ? 'disabled class="opacity-30"' : 'class="hover:text-blue-600"'} title="下移">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <button onclick="removeModalTier(${idx})" class="text-rose-500 hover:text-rose-700 ml-1" title="删除">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 卡片 Inputs 栅格 -->
+            <div class="grid grid-cols-12 gap-2.5 items-center">
+              
+              <!-- 门槛输入 -->
+              <div class="col-span-4">
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">
+                  <span class="text-rose-500 font-bold">*</span> 兑奖门槛:
+                </label>
+                <div class="relative">
+                  <span class="absolute left-2.5 top-1.5 text-xs text-slate-400">¥</span>
+                  <input type="number" step="0.01" min="0.01" value="${tier.prizeCost}" onchange="updateModalTierField(${idx}, 'prizeCost', this.value)" class="w-full pl-6 pr-2 py-1.5 text-xs font-bold rounded-lg border ${isDup ? 'border-rose-400 text-rose-600 bg-white' : 'border-slate-300 text-slate-800 bg-white'} focus:outline-none focus:border-blue-500">
+                </div>
+              </div>
+
+              <!-- 赠送次数输入 -->
+              <div class="col-span-4">
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">
+                  <span class="text-rose-500 font-bold">*</span> 赠送抽奖次数:
+                </label>
+                <div class="flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden">
+                  <button onclick="stepTimes(${idx}, -1)" class="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs">-</button>
+                  <input type="number" min="1" max="999" value="${tier.lotteryTimes}" onchange="updateModalTierField(${idx}, 'lotteryTimes', this.value)" class="w-full text-center text-xs font-bold text-blue-600 py-1.5 focus:outline-none">
+                  <span class="text-[10px] text-slate-400 pr-1.5">次</span>
+                  <button onclick="stepTimes(${idx}, 1)" class="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs">+</button>
+                </div>
+              </div>
+
+              <!-- 引导文案 -->
+              <div class="col-span-4">
+                <label class="block text-[11px] font-medium text-slate-600 mb-1">引导文案 (选填):</label>
+                <input type="text" maxlength="20" value="${tier.guideText || ''}" onchange="updateModalTierField(${idx}, 'guideText', this.value)" placeholder="如: 抢iPhone" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-blue-500 bg-white">
+              </div>
+
+            </div>
+
+            <!-- 卡片 Footer 说明 -->
+            <div class="mt-2 pt-1.5 border-t border-slate-200/50 flex justify-between items-center text-[11px] text-slate-500">
+              <span>生成规则：满 <b class="text-rose-600">¥${tier.prizeCost || 0}</b> 赠送 <b class="text-blue-600 font-bold">${tier.lotteryTimes || 1}</b> 次抽奖</span>
+              ${isDup ? `<span class="text-rose-600 font-bold text-[10px]">⚠️ 门槛金额与其他奖品重复</span>` : ''}
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateModalTierField(idx, field, val) {
+      if (field === 'prizeCost' || field === 'lotteryTimes') {
+        modalTiers[idx][field] = Number(val) || 0;
+      } else {
+        modalTiers[idx][field] = val;
+      }
+      renderModalTiers();
+    }
+
+    function stepTimes(idx, delta) {
+      const current = modalTiers[idx].lotteryTimes || 1;
+      const next = Math.max(1, current + delta);
+      modalTiers[idx].lotteryTimes = next;
+      renderModalTiers();
+    }
+
+    // 确认应用弹窗配置到主页面
+    function applyModalChanges() {
+      if (modalTiers.length === 0) {
+        showToast('请至少添加一个奖品！', true);
+        return;
+      }
+
+      for (let i = 0; i < modalTiers.length; i++) {
+        const t = modalTiers[i];
+        if (!t.prizeCost || t.prizeCost <= 0) {
+          showToast(`第 ${i + 1} 个奖品的门槛金额必须大于 0`, true);
+          return;
+        }
+        if (!t.lotteryTimes || t.lotteryTimes < 1) {
+          showToast(`第 ${i + 1} 个奖品的赠送抽奖次数至少为 1 次`, true);
+          return;
+        }
+      }
+
+      const dupes = checkDuplicateCosts();
+      if (dupes.length > 0) {
+        showToast(`存在重复的门槛金额 ¥${dupes.join(', ¥')}，请修改！`, true);
+        return;
+      }
+
+      currentTiers = JSON.parse(JSON.stringify(modalTiers));
+      closePrizeModal();
+      renderMainTable();
+      showToast('抽奖活动与奖品配置已成功应用！');
+    }
+
+    // 载入用户需求用例
+    function loadUserPreset() {
+      currentTiers = [
+        {
+          id: "t_188",
+          lotteryId: 101,
+          lotteryTitle: "【618周年庆】狂欢大转盘",
+          lotteryPic: "https://b0.dtminds.com/1/2026/03/09/g8kVWn.png",
+          prizeCost: 188,
+          lotteryTimes: 1,
+          guideText: "抢iPhone大奖"
+        },
+        {
+          id: "t_388",
+          lotteryId: 101,
+          lotteryTitle: "【618周年庆】狂欢大转盘",
+          lotteryPic: "https://b0.dtminds.com/1/2026/03/09/g8kVWn.png",
+          prizeCost: 388,
+          lotteryTimes: 3,
+          guideText: "100%中奖"
+        },
+        {
+          id: "t_1888",
+          lotteryId: 101,
+          lotteryTitle: "【618周年庆】狂欢大转盘",
+          lotteryPic: "https://b0.dtminds.com/1/2026/03/09/g8kVWn.png",
+          prizeCost: 1888,
+          lotteryTimes: 5,
+          guideText: "超高中奖率"
+        }
+      ];
+      exchangedTiersMap = {};
+      userDrawsCount = 0;
+      renderMainTable();
+      showToast('已载入用例：同一抽奖活动（满188送1次/满388送3次/满1888送5次）');
+    }
+
+    // 初始化
+    window.onload = function() {
+      renderMainTable();
+    };
+  </script>
+</body>
+</html>

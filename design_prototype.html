@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>售后单-退货物流已签收快捷筛选设计方案</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-custom {
+      animation: spin 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased min-h-screen p-4 md:p-6">
+
+  <!-- Main System UI Wrapper -->
+  <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    
+    <!-- Top System Nav (Replicating User Screenshot) -->
+    <div class="border-b border-gray-200 px-6 pt-3 flex items-center gap-8 text-sm">
+      <div class="text-gray-500 hover:text-gray-700 py-3 cursor-pointer">订单查询</div>
+      <div class="text-blue-600 font-semibold py-3 border-b-2 border-blue-600 cursor-pointer flex items-center gap-1.5">
+        售后订单
+        <span class="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full leading-none">2</span>
+      </div>
+      <div class="text-gray-500 hover:text-gray-700 py-3 cursor-pointer">上门取件</div>
+    </div>
+
+    <!-- Search Filter Area (Matching User Screenshot) -->
+    <div class="p-6 pb-4 border-b border-gray-100 bg-white">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3.5 items-center text-xs">
+        
+        <!-- Field 1 -->
+        <div class="flex items-center border border-gray-300 rounded focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-400 bg-white">
+          <div class="bg-gray-50 text-gray-600 px-2.5 py-2 border-r border-gray-300 whitespace-nowrap">订单编号</div>
+          <input type="text" placeholder="请输入" class="w-full px-2.5 py-1.5 outline-none text-xs text-gray-700">
+        </div>
+
+        <!-- Field 2 -->
+        <div class="flex items-center border border-gray-300 rounded focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-400 bg-white">
+          <div class="bg-gray-50 text-gray-600 px-2.5 py-2 border-r border-gray-300 whitespace-nowrap">商品名称</div>
+          <input type="text" placeholder="请输入" class="w-full px-2.5 py-1.5 outline-none text-xs text-gray-700">
+        </div>
+
+        <!-- Field 3 -->
+        <div class="flex items-center border border-gray-300 rounded focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-400 bg-white">
+          <div class="bg-gray-50 text-gray-600 px-2.5 py-2 border-r border-gray-300 whitespace-nowrap">售后方式</div>
+          <select class="w-full px-2 py-1.5 outline-none text-xs text-gray-700 bg-transparent">
+            <option>请选择</option>
+            <option>仅退款</option>
+            <option selected>退货退款</option>
+          </select>
+        </div>
+
+        <!-- Field 4: Date Range -->
+        <div class="flex items-center border border-gray-300 rounded focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-400 bg-white sm:col-span-2 lg:col-span-1">
+          <div class="bg-gray-50 text-gray-600 px-2.5 py-2 border-r border-gray-300 whitespace-nowrap">申请时间</div>
+          <input type="text" placeholder="开始日期 ~ 结束日期" class="w-full px-2 py-1.5 outline-none text-xs text-gray-700">
+          <i class="fa-regular fa-calendar text-gray-400 mr-2.5"></i>
+        </div>
+
+        <!-- Search / Reset Buttons -->
+        <div class="flex items-center gap-2">
+          <button class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition shadow-sm">
+            查询
+          </button>
+          <button class="px-3.5 py-1.5 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded text-xs transition">
+            重置
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Tabs Row (Primary Tabs) -->
+    <div class="px-6 pt-3 pb-0 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+      <div class="flex items-center gap-1 overflow-x-auto custom-scrollbar">
+        <button class="px-3.5 py-2 text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap">全部</button>
+        <button class="px-3.5 py-2 text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap">
+          买家申请退款 <span class="text-gray-400 text-[11px] ml-0.5">1</span>
+        </button>
+        <button class="px-3.5 py-2 text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap">
+          待卖家处理 <span class="text-gray-400 text-[11px] ml-0.5">0</span>
+        </button>
+        
+        <!-- Active Tab: 待卖家收货 -->
+        <button class="px-3.5 py-2 text-xs font-bold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap flex items-center gap-1 bg-white rounded-t">
+          <span>待卖家收货</span>
+          <span class="text-blue-600 font-semibold text-[11px] ml-0.5">1</span>
+        </button>
+
+        <button class="px-3.5 py-2 text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap">
+          退款中 <span class="text-gray-400 text-[11px] ml-0.5">0</span>
+        </button>
+        <button class="px-3.5 py-2 text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap">退款成功</button>
+        <button class="px-3.5 py-2 text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap">买家撤销退款</button>
+        <button class="px-3.5 py-2 text-xs text-gray-600 hover:text-gray-900 whitespace-nowrap">卖家拒绝退款</button>
+      </div>
+
+      <div class="text-xs text-gray-500 hover:text-blue-600 cursor-pointer flex items-center gap-1 py-2">
+        <i class="fa-solid fa-download"></i> 导出
+      </div>
+    </div>
+
+    <!-- BATCH ACTION & QUICK FILTER BAR (Refined Clean Version) -->
+    <div class="px-6 py-3 bg-white border-b border-gray-200 flex flex-wrap items-center justify-between gap-4 text-xs">
+      
+      <!-- Left side: Batch Actions & Clean Checkbox Filter -->
+      <div class="flex flex-wrap items-center gap-4">
+        
+        <!-- Batch Button -->
+        <button id="btn-batch-refund" class="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded font-medium transition flex items-center gap-1.5">
+          批量同意退款
+        </button>
+        
+        <span class="text-gray-500">已选择 <b class="text-blue-600 font-semibold" id="selected-count">0</b> 个售后单</span>
+
+        <span class="h-3.5 w-px bg-gray-200 mx-1 hidden sm:block"></span>
+
+        <!-- CLEAN STANDARD CHECKBOX (No extra icon, No count badge) -->
+        <label class="inline-flex items-center gap-2 cursor-pointer select-none text-gray-700 hover:text-blue-600 transition font-normal">
+          <input type="checkbox" id="quick-filter-signed" checked onchange="toggleQuickFilter(this)" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer">
+          <span class="text-xs">仅看退货物流已签收</span>
+        </label>
+
+      </div>
+
+      <!-- Right side: Auxiliary Polling Status -->
+      <div class="flex items-center gap-3 text-xs text-gray-500">
+        <div class="flex items-center gap-2 bg-gray-50 px-2.5 py-1 rounded border border-gray-200">
+          <span class="text-gray-400 text-[11px]">物流数据: <span id="last-sync-time" class="text-gray-600 font-medium">09:40 轮询</span></span>
+          <button onclick="manualSyncLogistics()" id="btn-sync" class="text-blue-600 hover:text-blue-800 font-medium text-[11px] flex items-center gap-1 hover:underline">
+            <i class="fa-solid fa-rotate text-[10px]" id="sync-icon"></i>
+            <span>刷新</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Toast (Simulating Polling Update) -->
+    <div id="toast-sync-success" class="hidden bg-green-50 border-b border-green-200 px-6 py-2 text-xs text-green-800 flex items-center justify-between transition-all">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-green-600"></i>
+        <span>已向快递平台发送轮询查件指令，成功同步最新物流轨迹！</span>
+      </div>
+      <button onclick="this.parentElement.classList.add('hidden')" class="text-green-600 hover:text-green-800">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Table Header (8-column structure matching user screenshot) -->
+    <div class="bg-gray-50/90 border-b border-gray-200 px-6 py-2.5 text-xs text-gray-600 font-medium grid grid-cols-12 gap-2 items-center">
+      <div class="col-span-4 flex items-center gap-2.5">
+        <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+        <span>商品</span>
+      </div>
+      <div class="col-span-1 text-center">商品单价/数量</div>
+      <div class="col-span-1 text-center">实付金额</div>
+      <div class="col-span-1 text-center">售后方式</div>
+      <div class="col-span-1 text-center">退款金额</div>
+      <div class="col-span-2 text-center">
+        <span>退货物流状态</span>
+      </div>
+      <div class="col-span-1 text-center">售后状态</div>
+      <div class="col-span-2 text-center">操作</div>
+    </div>
+
+    <!-- Table Body / Order Cards -->
+    <div class="divide-y divide-gray-100 p-4 space-y-3 bg-gray-50/30" id="order-list">
+      
+      <!-- Order Card 1: Delivered (Signed - exactly replicating user screenshot order) -->
+      <div class="order-item bg-white border border-gray-200 rounded shadow-2xs overflow-hidden transition hover:border-blue-300" data-status="delivered">
+        <!-- Order Header -->
+        <div class="bg-gray-50/60 px-4 py-2 border-b border-gray-100 flex flex-wrap items-center justify-between text-xs text-gray-600 gap-2">
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" onchange="updateSelectedCount()" class="order-checkbox rounded border-gray-300 text-blue-600">
+              <span class="text-gray-600">售后编号：<span class="font-mono text-gray-800">1788165510264810035</span></span>
+            </label>
+            <button onclick="navigator.clipboard.writeText('1788165510264810035');" class="text-gray-400 hover:text-blue-600" title="复制售后单号">
+              <i class="fa-regular fa-copy text-[11px]"></i>
+            </button>
+            <span class="text-gray-400">|</span>
+            <span>订单编号：<span class="font-mono text-gray-700">260831165438265378010035</span></span>
+            <span class="text-gray-400">|</span>
+            <span>申请时间：2026-08-31 16:38:51</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="text-blue-600 hover:underline text-xs flex items-center gap-1">
+              <i class="fa-regular fa-comment-dots"></i> 卖家备注
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Content Row -->
+        <div class="p-4 grid grid-cols-12 gap-2 items-center text-xs">
+          <!-- Col 1: Product -->
+          <div class="col-span-4 flex items-center gap-3">
+            <div class="w-12 h-12 rounded border border-gray-200 bg-gray-100 flex-shrink-0 overflow-hidden relative">
+              <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=120&auto=format&fit=crop&q=60" alt="商品" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <div class="font-medium text-gray-800 line-clamp-1">0.01商品</div>
+              <div class="text-gray-400 text-[11px] mt-0.5">75ml</div>
+            </div>
+          </div>
+
+          <!-- Col 2: Price / Quantity -->
+          <div class="col-span-1 text-center">
+            <div class="text-gray-800">¥0.01</div>
+            <div class="text-gray-400 text-[11px]">1件</div>
+          </div>
+
+          <!-- Col 3: Actual Paid -->
+          <div class="col-span-1 text-center font-medium text-gray-800">
+            ¥0.01
+          </div>
+
+          <!-- Col 4: After-sale Type -->
+          <div class="col-span-1 text-center text-gray-700">
+            退货退款
+          </div>
+
+          <!-- Col 5: Refund Amount -->
+          <div class="col-span-1 text-center">
+            <div class="font-medium text-red-600">¥0.01</div>
+          </div>
+
+          <!-- Col 6: Logistics Status with Polling Info -->
+          <div class="col-span-2 px-2 text-center">
+            <div class="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 font-medium">
+              <i class="fa-solid fa-circle-check text-green-600 text-[11px]"></i> 已签收
+            </div>
+            <div class="text-gray-500 text-[11px] mt-1">
+              顺丰速运 <span class="font-mono text-blue-600 cursor-pointer hover:underline" onclick="showLogisticsModal('SF1428572910')">SF1428572910</span>
+            </div>
+            <button onclick="showLogisticsModal('SF1428572910')" class="text-blue-600 hover:text-blue-800 text-[10px] mt-0.5 block mx-auto">
+              查看物流轨迹 >
+            </button>
+          </div>
+
+          <!-- Col 7: After-sale Status & Timeout -->
+          <div class="col-span-1 text-center">
+            <div class="text-gray-800 font-medium">待卖家收货</div>
+            <div class="text-gray-500 text-[11px] mt-0.5">
+              6天6小时53分后自动同意
+            </div>
+          </div>
+
+          <!-- Col 8: Actions (Exactly matching screenshot) -->
+          <div class="col-span-2 text-center space-y-1">
+            <a href="#" class="block text-blue-600 hover:underline text-xs">订单详情</a>
+            <a href="#" class="block text-blue-600 hover:underline text-xs">拒绝签收</a>
+            <button class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-medium transition shadow-2xs mt-1">
+              确认收货并退款
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Card 2: In Transit (Will be hidden when "仅看退货物流已签收" is checked) -->
+      <div class="order-item bg-white border border-gray-200 rounded shadow-2xs overflow-hidden transition hover:border-blue-300" data-status="transit">
+        <div class="bg-gray-50/60 px-4 py-2 border-b border-gray-100 flex flex-wrap items-center justify-between text-xs text-gray-600 gap-2">
+          <div class="flex items-center gap-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" onchange="updateSelectedCount()" class="order-checkbox rounded border-gray-300 text-blue-600">
+              <span class="text-gray-600">售后编号：<span class="font-mono text-gray-800">1788229103920192831</span></span>
+            </label>
+            <span class="text-gray-400">|</span>
+            <span>订单编号：<span class="font-mono text-gray-700">260830153920193820192841</span></span>
+            <span class="text-gray-400">|</span>
+            <span>申请时间：2026-08-30 14:10:00</span>
+          </div>
+          <button class="text-blue-600 hover:underline text-xs">卖家备注</button>
+        </div>
+
+        <div class="p-4 grid grid-cols-12 gap-2 items-center text-xs">
+          <div class="col-span-4 flex items-center gap-3">
+            <div class="w-12 h-12 rounded border border-gray-200 bg-gray-100 flex-shrink-0 overflow-hidden relative">
+              <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=120&auto=format&fit=crop&q=60" alt="商品" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <div class="font-medium text-gray-800 line-clamp-1">轻量透气减震跑步鞋</div>
+              <div class="text-gray-400 text-[11px] mt-0.5">42码 / 烈焰红</div>
+            </div>
+          </div>
+
+          <div class="col-span-1 text-center">
+            <div class="text-gray-800">¥259.00</div>
+            <div class="text-gray-400 text-[11px]">1件</div>
+          </div>
+
+          <div class="col-span-1 text-center font-medium text-gray-800">¥259.00</div>
+
+          <div class="col-span-1 text-center text-gray-700">退货退款</div>
+
+          <div class="col-span-1 text-center">
+            <div class="font-medium text-red-600">¥259.00</div>
+          </div>
+
+          <!-- Logistics Status: Transit -->
+          <div class="col-span-2 px-2 text-center">
+            <div class="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-medium">
+              <i class="fa-solid fa-truck-fast text-amber-600 text-[11px]"></i> 运输中
+            </div>
+            <div class="text-gray-500 text-[11px] mt-1">
+              圆通速递 <span class="font-mono text-blue-600 cursor-pointer hover:underline" onclick="showLogisticsModal('YT88291039201')">YT88291039201</span>
+            </div>
+            <button onclick="showLogisticsModal('YT88291039201')" class="text-blue-600 hover:text-blue-800 text-[10px] mt-0.5 block mx-auto">
+              查看物流轨迹 >
+            </button>
+          </div>
+
+          <div class="col-span-1 text-center">
+            <div class="text-gray-800 font-medium">待卖家收货</div>
+            <div class="text-gray-500 text-[11px] mt-0.5">8天12小时后自动同意</div>
+          </div>
+
+          <div class="col-span-2 text-center space-y-1">
+            <a href="#" class="block text-blue-600 hover:underline text-xs">订单详情</a>
+            <a href="#" class="block text-blue-600 hover:underline text-xs">拒绝签收</a>
+            <button class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded text-[11px] font-medium transition mt-1">
+              验货并退款
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-6 py-3 border-t border-gray-200 bg-white flex flex-wrap items-center justify-between text-xs text-gray-600 gap-2">
+      <div>共 <span class="font-semibold text-gray-800" id="total-count">1</span> 条</div>
+      <div class="flex items-center gap-1">
+        <button class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 text-gray-400 cursor-not-allowed">
+          <i class="fa-solid fa-chevron-left text-[10px]"></i>
+        </button>
+        <button class="w-7 h-7 flex items-center justify-center bg-blue-600 text-white font-medium rounded shadow-2xs">
+          1
+        </button>
+        <button class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 text-gray-400 cursor-not-allowed">
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+        <select class="ml-2 border border-gray-300 rounded px-2 py-1 text-xs text-gray-700 bg-white">
+          <option>10 条/页</option>
+          <option>20 条/页</option>
+          <option>50 条/页</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logistics Detail Modal -->
+  <div id="logistics-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 border border-gray-200 transform transition-all">
+      <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i class="fa-solid fa-truck"></i>
+          </span>
+          <div>
+            <h3 class="font-bold text-gray-900 text-sm" id="modal-title">退货物流轨迹</h3>
+            <p class="text-xs text-gray-500" id="modal-no">运单号：SF1428572910 (顺丰速运)</p>
+          </div>
+        </div>
+        <button onclick="closeLogisticsModal()" class="text-gray-400 hover:text-gray-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Timeline Content -->
+      <div class="py-4 space-y-4 max-h-80 overflow-y-auto custom-scrollbar text-xs">
+        <div class="flex items-start gap-3 relative">
+          <div class="w-5 flex flex-col items-center">
+            <span class="w-3.5 h-3.5 rounded-full bg-green-500 ring-4 ring-green-100 flex-shrink-0"></span>
+            <span class="w-0.5 h-12 bg-gray-200 my-1"></span>
+          </div>
+          <div class="flex-1 bg-green-50/50 p-2.5 rounded-lg border border-green-100">
+            <div class="font-bold text-green-700 flex items-center justify-between">
+              <span>【已签收】包裹已签收，签收人：公司仓库前台代收</span>
+              <span class="text-[10px] text-green-600 font-normal">今天 08:42</span>
+            </div>
+            <p class="text-gray-500 text-[11px] mt-1">如有疑问可联系派件员：李师傅 (13800138000)</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 relative">
+          <div class="w-5 flex flex-col items-center">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>
+            <span class="w-0.5 h-12 bg-gray-200 my-1"></span>
+          </div>
+          <div class="flex-1">
+            <div class="font-medium text-gray-800">【派送中】杭州市西湖区文三路营业点 正在派送中</div>
+            <div class="text-gray-400 text-[10px] mt-0.5">今天 07:15</div>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 relative">
+          <div class="w-5 flex flex-col items-center">
+            <span class="w-2.5 h-2.5 rounded-full bg-gray-300 flex-shrink-0"></span>
+          </div>
+          <div class="flex-1">
+            <div class="font-medium text-gray-700">【已发货】买家已填写退货单号，顺丰已揽收</div>
+            <div class="text-gray-400 text-[10px] mt-0.5">2026-08-31 18:20</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-100 pt-3 flex items-center justify-between text-xs">
+        <span class="text-gray-400">上次轮询：09:40</span>
+        <div class="flex items-center gap-2">
+          <button onclick="closeLogisticsModal()" class="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded">
+            关闭
+          </button>
+          <button onclick="alert('已确认收货并退款成功！'); closeLogisticsModal();" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium">
+            确认收货并退款
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleQuickFilter(checkbox) {
+      const items = document.querySelectorAll('.order-item');
+      let visibleCount = 0;
+
+      items.forEach(item => {
+        const isDelivered = item.getAttribute('data-status') === 'delivered';
+        if (checkbox.checked) {
+          if (isDelivered) {
+            item.classList.remove('hidden');
+            visibleCount++;
+          } else {
+            item.classList.add('hidden');
+          }
+        } else {
+          item.classList.remove('hidden');
+          visibleCount++;
+        }
+      });
+
+      document.getElementById('total-count').innerText = visibleCount;
+      updateSelectedCount();
+    }
+
+    function toggleSelectAll(masterCheckbox) {
+      const visibleItems = document.querySelectorAll('.order-item:not(.hidden) .order-checkbox');
+      visibleItems.forEach(cb => {
+        cb.checked = masterCheckbox.checked;
+      });
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      const checkedBoxes = document.querySelectorAll('.order-item:not(.hidden) .order-checkbox:checked');
+      document.getElementById('selected-count').innerText = checkedBoxes.length;
+      
+      const btn = document.getElementById('btn-batch-refund');
+      if (checkedBoxes.length === 0) {
+        btn.className = 'px-3.5 py-1.5 bg-gray-100 text-gray-400 rounded font-medium transition cursor-not-allowed';
+      } else {
+        btn.className = 'px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition shadow-xs cursor-pointer';
+      }
+    }
+
+    function manualSyncLogistics() {
+      const syncBtn = document.getElementById('btn-sync');
+      const syncIcon = document.getElementById('sync-icon');
+      syncIcon.classList.add('animate-spin-custom');
+      syncBtn.classList.add('pointer-events-none', 'text-gray-400');
+
+      setTimeout(() => {
+        syncIcon.classList.remove('animate-spin-custom');
+        syncBtn.classList.remove('pointer-events-none', 'text-gray-400');
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        document.getElementById('last-sync-time').innerText = `${timeStr} 刚轮询`;
+        
+        const toast = document.getElementById('toast-sync-success');
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 4000);
+      }, 1000);
+    }
+
+    function showLogisticsModal(trackingNo) {
+      const modal = document.getElementById('logistics-modal');
+      document.getElementById('modal-no').innerText = '运单号：' + trackingNo;
+      modal.classList.remove('hidden');
+    }
+
+    function closeLogisticsModal() {
+      document.getElementById('logistics-modal').classList.add('hidden');
+    }
+
+    // Initialize
+    toggleQuickFilter(document.getElementById('quick-filter-signed'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>定时开奖：中奖冷却规则（参与时自动降权）原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .fade-in { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-6">
+
+  <div class="max-w-7xl mx-auto space-y-4">
+    <!-- 顶部 Header -->
+    <header class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">高保真交互原型</span>
+          <h1 class="text-lg md:text-xl font-bold text-slate-900">定时开奖：中奖冷却规则（参与时自动降权）</h1>
+          <span class="text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">参与即置0 · 后续可手动改</span>
+          <span class="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-medium">人数不足不补发</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+          核心方案：在用户<b>参与活动时</b>校验「参与前 N 天内」是否中过定时开奖，命中则自动降权（保留原权重，当前权重置 0），天然兼容按时间/按人数开奖，且支持运营在参与数据列表中手动恢复或加权。
+        </p>
+      </div>
+
+      <!-- 阶段模式 & 快速用例切换 -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="inline-flex rounded-lg border border-slate-300 bg-slate-100 p-0.5 text-xs">
+          <button id="btnPhase1" onclick="setPhaseMode('PHASE_1')" class="px-2.5 py-1 rounded-md font-medium transition bg-white text-blue-600 shadow-sm">
+            一期落地版 (仅限周期)
+          </button>
+          <button id="btnPhase2" onclick="setPhaseMode('PHASE_2')" class="px-2.5 py-1 rounded-md font-medium transition text-slate-600 hover:text-slate-900">
+            二期规划预览 (+历史等级)
+          </button>
+        </div>
+
+        <button id="btnPresetNormal" onclick="applyPreset('normal')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition bg-white hover:bg-slate-50 border-slate-300 text-slate-700">
+          人数充足 (12人/5奖)
+        </button>
+        <button id="btnPresetInsufficient" onclick="applyPreset('insufficient')" class="px-3 py-1.5 text-xs font-medium rounded-lg border transition bg-blue-600 border-blue-600 text-white shadow-sm">
+          人数不足边界 (4有效/6奖)
+        </button>
+      </div>
+    </header>
+
+    <!-- 主体两栏 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      <!-- 左侧：B端后台配置区 -->
+      <div class="lg:col-span-7 space-y-4">
+        <!-- 基础与开奖方式 -->
+        <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span class="w-1 h-4 bg-blue-600 rounded-full inline-block"></span>
+              基础信息与开奖方式
+            </h2>
+            <span class="text-xs text-slate-400">timing-lottery / 规则设置</span>
+          </div>
+          <div class="p-5 space-y-4 text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+              <label class="w-32 text-slate-600 font-medium shrink-0"><span class="text-red-500">*</span> 活动名称：</label>
+              <input id="activityTitleInput" type="text" value="宠粉福利第12期 · 定时开好礼" maxlength="20" class="flex-1 max-w-md px-3 py-1.5 border border-slate-300 rounded-md focus:outline-none focus:border-blue-500" />
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+              <label class="w-32 text-slate-600 font-medium shrink-0"><span class="text-red-500">*</span> 开奖方式：</label>
+              <div class="flex items-center gap-5">
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="drawMode" value="1" checked class="text-blue-600" />
+                  <span>活动结束后自动开奖</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer">
+                  <input type="radio" name="drawMode" value="2" class="text-blue-600" />
+                  <span>按人数开奖</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 核心：防重复中奖限制（中奖冷却） -->
+        <section class="bg-white rounded-xl border border-blue-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-blue-100 bg-blue-50/50 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span class="w-1 h-4 bg-blue-600 rounded-full inline-block"></span>
+              防重复中奖限制（中奖冷却）
+              <span id="phaseBadge" class="text-[11px] font-medium px-2 py-0.5 rounded bg-blue-100 text-blue-700">一期 MVP</span>
+            </h2>
+            <span class="text-xs text-blue-600 font-medium">参与时自动降权 · 后续可手动修改</span>
+          </div>
+
+          <div class="p-5 text-xs space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-start gap-2">
+              <label class="w-36 text-slate-600 font-medium shrink-0 pt-1 flex items-center gap-1">
+                <span class="text-red-500">*</span>
+                <span>中奖冷却限制</span>
+                <span class="relative group inline-flex items-center cursor-pointer">
+                  <i class="fa-regular fa-circle-question text-slate-400 hover:text-blue-500 transition"></i>
+                  <span class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-60 p-2 rounded-md bg-slate-800 text-white text-[11px] font-normal leading-relaxed shadow-lg z-20">
+                    为了防止一个用户频繁中奖，让活动更加公平，可启用中奖冷却机制。
+                  </span>
+                </span>
+                <span>：</span>
+              </label>
+              <div class="flex-1 space-y-3">
+                <div class="flex items-center gap-6 pt-1">
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" name="cooldownEnabled" value="false" onchange="toggleCooldown(false)" />
+                    <span>不限制</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="radio" name="cooldownEnabled" value="true" checked onchange="toggleCooldown(true)" />
+                    <span class="font-semibold text-slate-800">限制（参与时自动降权）</span>
+                  </label>
+                </div>
+
+                <!-- 展开的规则明细框 -->
+                <div id="cooldownConfigBox" class="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3.5">
+                  <!-- 1. 限制周期 -->
+                  <div class="flex flex-col sm:flex-row sm:items-start gap-2">
+                    <label class="w-24 text-slate-600 font-medium shrink-0 pt-1.5">限制周期：</label>
+                    <div class="flex-1 space-y-1.5">
+                      <div class="flex items-center flex-wrap gap-2">
+                        <span>参与前</span>
+                        <input id="limitDaysInput" type="number" min="1" max="365" value="30" oninput="onLimitDaysChange(this.value)" class="w-20 px-2.5 py-1 border border-slate-300 rounded bg-white text-center font-semibold focus:outline-none focus:border-blue-500" />
+                        <span>天内已中奖用户，本次参与不予中奖</span>
+                        <div class="flex items-center gap-1.5 ml-1">
+                          <button type="button" onclick="setLimitDays(7)" class="day-chip px-2 py-0.5 rounded border text-[11px] bg-white border-slate-300 text-slate-600 hover:border-blue-500" data-days="7">7天</button>
+                          <button type="button" onclick="setLimitDays(15)" class="day-chip px-2 py-0.5 rounded border text-[11px] bg-white border-slate-300 text-slate-600 hover:border-blue-500" data-days="15">15天</button>
+                          <button type="button" onclick="setLimitDays(30)" class="day-chip px-2 py-0.5 rounded border text-[11px] bg-blue-50 border-blue-500 text-blue-600 font-semibold" data-days="30">30天</button>
+                          <button type="button" onclick="setLimitDays(90)" class="day-chip px-2 py-0.5 rounded border text-[11px] bg-white border-slate-300 text-slate-600 hover:border-blue-500" data-days="90">90天</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 关键执行逻辑与边界提示框 -->
+                  <div class="bg-blue-50 border border-blue-200 rounded-md p-3 text-slate-700 space-y-1.5">
+                    <div class="font-semibold text-blue-800 flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-info text-blue-600"></i> 规则与注意事项
+                    </div>
+                    <ul class="list-disc pl-4 space-y-1 text-[11.5px] leading-relaxed">
+                      <li>
+                        <b>参与时自动降权：</b>用户参与本活动时，系统校验其「<b>参与前 <span class="limit-days-inline">30</span> 天内</b>」至今在定时开奖的中奖记录；若已中过奖，用户仍可正常参与活动，但其本次参与记录将被自动降权（开奖时不中奖）。
+                      </li>
+                      <li>
+                        <b>支持人工后续调整：</b>自动降权记录会同步展示在【参与数据】列表中，运营可通过【人工干预】手动改回「不干预」。
+                      </li>
+                      <li>
+                        <b>人数不足奖品时不补发：</b>若排除降权及拉黑用户后，有效可中奖人数少于本场奖品总数，剩余奖品将不再补发。
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- 二期：历史中奖奖品等级 -->
+                  <div id="phase1Placeholder" class="bg-white border border-dashed border-slate-300 rounded-md px-3 py-2 flex items-center justify-between gap-2 flex-wrap text-slate-500">
+                    <span>📌 <b>二期规划预留：</b>按「历史中奖奖品等级」区分冷却（例如仅历史中过一/二等奖触发降权，安慰奖豁免）将在二期支持。</span>
+                    <button type="button" onclick="setPhaseMode('PHASE_2')" class="text-blue-600 hover:underline font-medium shrink-0">预览二期交互 →</button>
+                  </div>
+
+                  <div id="phase2LevelBox" class="hidden pt-2 border-t border-slate-200">
+                    <div class="flex flex-col sm:flex-row sm:items-start gap-2">
+                      <label class="w-24 text-slate-600 font-medium shrink-0 pt-0.5">
+                        历史中奖等级 <span class="text-[10px] px-1 py-0.2 bg-amber-100 text-amber-800 rounded">二期</span>：
+                      </label>
+                      <div class="flex-1 space-y-2">
+                        <div class="flex items-center gap-6">
+                          <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="radio" name="prizeLevelMode" value="ALL" checked onchange="setPrizeLevelMode('ALL')" />
+                            <span>全部历史奖品等级</span>
+                          </label>
+                          <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="radio" name="prizeLevelMode" value="SELECTED" onchange="setPrizeLevelMode('SELECTED')" />
+                            <span>指定历史中奖等级</span>
+                          </label>
+                        </div>
+
+                        <div id="selectedLevelsBox" class="hidden bg-white border border-slate-200 rounded-md p-3 space-y-2">
+                          <div class="text-slate-600">限制<b>历史中奖</b>的奖品等级（参与前 <span class="limit-days-inline">30</span> 天在定时开奖中获得过以下等级奖品的用户，参与时自动降权）：</div>
+                          <div id="levelCheckboxesContainer" class="flex flex-wrap gap-4"></div>
+                          <p class="text-[11px] text-slate-400">💡 语义说明：此处限制的是<b>历史中奖时的奖品等级</b>（非限制当次奖品）；例如仅勾选一、二等奖，则过去只中过三等奖安慰奖的用户参与时不触发降权。</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 动态规则摘要 & C端文案 -->
+                  <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 space-y-2">
+                    <div class="font-semibold text-sky-800 flex items-center gap-1.5">
+                      <i class="fa-solid fa-shield-halved"></i> 当前生效规则摘要
+                    </div>
+                    <div id="ruleSummaryText" class="text-slate-700 leading-relaxed"></div>
+                    <div class="bg-amber-50 border border-dashed border-amber-300 rounded p-2.5 text-amber-900">
+                      <b>C端活动页规则说明建议文案（温和合规，避免“降权/拉黑”等技术词）：</b>
+                      <div id="cEndRuleText" class="mt-1 leading-relaxed"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 本场奖品设置 -->
+        <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span class="w-1 h-4 bg-blue-600 rounded-full inline-block"></span>
+              本场奖品设置（可实时调数量测试边界）
+            </h2>
+            <div class="flex items-center gap-3 text-xs">
+              <span>共 <b id="prizeTypeCount">3</b> 种，总计 <b id="totalPrizeCountEl" class="text-blue-600">6</b> 件奖品</span>
+              <button onclick="addPrizeLevel()" class="px-2.5 py-1 bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 rounded text-xs transition">
+                <i class="fa-solid fa-plus mr-1"></i>添加等级
+              </button>
+            </div>
+          </div>
+          <div class="p-4">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-50 text-slate-500 border-b border-slate-200">
+                <tr>
+                  <th class="py-2 px-3">奖品等级</th>
+                  <th class="py-2 px-3">奖品名称 / 类型</th>
+                  <th class="py-2 px-3 w-36">奖品数量（件）</th>
+                  <th class="py-2 px-3 w-16 text-center">操作</th>
+                </tr>
+              </thead>
+              <tbody id="prizeTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- 右侧：实时参与池监控 & 算奖沙盒 -->
+      <div class="lg:col-span-5 space-y-4">
+        <!-- 实时参与资格监控 -->
+        <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span class="w-1 h-4 bg-blue-600 rounded-full inline-block"></span>
+              参与数据与人工干预（可手动修改降权）
+            </h2>
+            <div class="flex items-center gap-1.5">
+              <button onclick="addMockUser('normal')" class="px-2 py-1 text-xs border border-slate-300 rounded hover:border-blue-500 hover:text-blue-600 bg-white transition">+正常人</button>
+              <button onclick="addMockUser('cooldown')" class="px-2 py-1 text-xs border border-slate-300 rounded hover:border-orange-500 hover:text-orange-600 bg-white transition">+冷却人</button>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-3">
+            <!-- 四宫格统计 -->
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div class="bg-slate-50 border border-slate-200 rounded-lg py-2 px-1">
+                <div id="statTotal" class="text-lg font-bold text-blue-600">0</div>
+                <div class="text-[11px] text-slate-500">总参与</div>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg py-2 px-1">
+                <div id="statEffective" class="text-lg font-bold text-emerald-600">0</div>
+                <div id="statEffectiveSub" class="text-[10.5px] text-slate-500">有效候选</div>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg py-2 px-1">
+                <div id="statCooldown" class="text-lg font-bold text-orange-600">0</div>
+                <div class="text-[11px] text-slate-500">冷却自动降权</div>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg py-2 px-1">
+                <div id="statBlack" class="text-lg font-bold text-red-600">0</div>
+                <div class="text-[11px] text-slate-500">人工拉黑</div>
+              </div>
+            </div>
+
+            <!-- 边界预警 Banner -->
+            <div id="boundaryBanner" class="rounded-lg p-3 text-xs border"></div>
+
+            <!-- 用户池表格 -->
+            <div class="max-h-80 overflow-y-auto custom-scroll border border-slate-200 rounded-lg">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-slate-50 text-slate-500 sticky top-0 border-b border-slate-200">
+                  <tr>
+                    <th class="py-2 px-2.5">用户 / 参与时间</th>
+                    <th class="py-2 px-2">参与前中奖记录</th>
+                    <th class="py-2 px-2">当前状态</th>
+                    <th class="py-2 px-2.5 w-28">人工干预(可改)</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 模拟开奖算奖沙盒 -->
+        <section class="bg-white rounded-xl border border-blue-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-3 bg-gradient-to-r from-blue-50 to-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <div class="flex items-center gap-2 font-bold text-sm text-slate-800">
+              <i class="fa-solid fa-trophy text-blue-600"></i>
+              <span>定时开奖算奖沙盒（复用现行权重排序）</span>
+            </div>
+            <button onclick="runDrawSimulation()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+              <i class="fa-solid fa-play"></i> 模拟立即开奖
+            </button>
+          </div>
+          <div id="simResultContainer" class="p-4 text-xs">
+            <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-slate-500">
+              <i class="fa-solid fa-gift text-2xl text-blue-300 mb-2"></i>
+              <div class="font-medium text-slate-700">点击右上角「模拟立即开奖」按钮</div>
+              <div class="mt-1">可直观验证「参与时自动降权」「人工手动恢复/加权覆盖」及「人数不足奖品时不补发」的完整开奖结果</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CHINESE_NUMS = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+    function getChineseLevel(level) {
+      return level <= 10 ? CHINESE_NUMS[level] + '等奖' : '第' + level + '等奖';
+    }
+
+    let state = {
+      phaseMode: 'PHASE_1',
+      enabled: true,
+      limitDays: 30,
+      prizeLevelMode: 'ALL',
+      restrictedLevels: [1, 2],
+      prizes: [
+        { id: 'p1', level: 1, title: '戴森吹风机 HD15', prizeType: '赠品', prizeNum: 1 },
+        { id: 'p2', level: 2, title: '100元无门槛礼券', prizeType: '优惠券', prizeNum: 2 },
+        { id: 'p3', level: 3, title: '500 会员积分', prizeType: '积分', prizeNum: 3 }
+      ],
+      participants: []
+    };
+
+    const PRESET_NORMAL_USERS = [
+      { id: 'u1', nickname: '新客小李', avatarColor: '#1890ff', orgWeight: 920, manualOverride: 'NONE', winDaysBeforeJoin: null, lastWinLevel: null, lastWinPrizeTitle: null, joinTimeDesc: '11-10 10:12' },
+      { id: 'u2', nickname: '活跃陈姐', avatarColor: '#52c41a', orgWeight: 865, manualOverride: 'NONE', winDaysBeforeJoin: 45, lastWinLevel: 1, lastWinPrizeTitle: '戴森吹风机', joinTimeDesc: '11-10 11:05' },
+      { id: 'u3', nickname: '老粉阿强', avatarColor: '#13c2c2', orgWeight: 810, manualOverride: 'NONE', winDaysBeforeJoin: null, lastWinLevel: null, lastWinPrizeTitle: null, joinTimeDesc: '11-10 14:20' },
+      { id: 'u4', nickname: '美妆达人', avatarColor: '#eb2f96', orgWeight: 790, manualOverride: 'NONE', winDaysBeforeJoin: 6, lastWinLevel: 1, lastWinPrizeTitle: '苹果耳机', joinTimeDesc: '11-10 15:30' },
+      { id: 'u5', nickname: 'VIP小张', avatarColor: '#722ed1', orgWeight: 740, manualOverride: 'WHITE', winDaysBeforeJoin: 12, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-10 16:00' },
+      { id: 'u6', nickname: '薅羊毛A君', avatarColor: '#fa541c', orgWeight: 950, manualOverride: 'BLACK', winDaysBeforeJoin: 3, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-10 16:40' },
+      { id: 'u7', nickname: '周六逛逛', avatarColor: '#2f54eb', orgWeight: 720, manualOverride: 'DEFAULT', winDaysBeforeJoin: 18, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-10 17:10' },
+      { id: 'u8', nickname: '糖果妈妈', avatarColor: '#fa8c16', orgWeight: 695, manualOverride: 'NONE', winDaysBeforeJoin: null, lastWinLevel: null, lastWinPrizeTitle: null, joinTimeDesc: '11-11 09:15' },
+      { id: 'u9', nickname: '阳光小林', avatarColor: '#a0d911', orgWeight: 660, manualOverride: 'NONE', winDaysBeforeJoin: 10, lastWinLevel: 3, lastWinPrizeTitle: '500积分', joinTimeDesc: '11-11 10:02' },
+      { id: 'u10', nickname: '跨活动粉阿飞', avatarColor: '#08979c', orgWeight: 880, manualOverride: 'NONE', winDaysBeforeJoin: -1, lastWinLevel: 1, lastWinPrizeTitle: '戴森吹风机', joinTimeDesc: '11-08先参后中' },
+      { id: 'u11', nickname: '奶茶不加冰', avatarColor: '#eb2f96', orgWeight: 590, manualOverride: 'NONE', winDaysBeforeJoin: null, lastWinLevel: null, lastWinPrizeTitle: null, joinTimeDesc: '11-11 12:40' },
+      { id: 'u12', nickname: '清风徐来', avatarColor: '#52c41a', orgWeight: 540, manualOverride: 'NONE', winDaysBeforeJoin: 62, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-11 14:22' }
+    ];
+
+    const PRESET_INSUFFICIENT_USERS = [
+      { id: 's1', nickname: 'VIP小张', avatarColor: '#722ed1', orgWeight: 740, manualOverride: 'WHITE', winDaysBeforeJoin: 12, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-10 09:00' },
+      { id: 's2', nickname: '新客小李', avatarColor: '#1890ff', orgWeight: 920, manualOverride: 'NONE', winDaysBeforeJoin: null, lastWinLevel: null, lastWinPrizeTitle: null, joinTimeDesc: '11-10 10:15' },
+      { id: 's3', nickname: '活跃陈姐', avatarColor: '#52c41a', orgWeight: 840, manualOverride: 'NONE', winDaysBeforeJoin: 45, lastWinLevel: 1, lastWinPrizeTitle: '戴森吹风机', joinTimeDesc: '11-10 11:20' },
+      { id: 's4', nickname: '老粉阿强', avatarColor: '#13c2c2', orgWeight: 780, manualOverride: 'NONE', winDaysBeforeJoin: null, lastWinLevel: null, lastWinPrizeTitle: null, joinTimeDesc: '11-10 14:00' },
+      { id: 's5', nickname: '高频粉小红', avatarColor: '#fa8c16', orgWeight: 960, manualOverride: 'NONE', winDaysBeforeJoin: 25, lastWinLevel: 1, lastWinPrizeTitle: '戴森吹风机', joinTimeDesc: '11-10 15:10' },
+      { id: 's6', nickname: '复购老王', avatarColor: '#eb2f96', orgWeight: 890, manualOverride: 'NONE', winDaysBeforeJoin: 18, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-10 16:45' },
+      { id: 's7', nickname: '早鸟阿明', avatarColor: '#2f54eb', orgWeight: 810, manualOverride: 'NONE', winDaysBeforeJoin: 9, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-11 08:30' },
+      { id: 's8', nickname: '天天打卡君', avatarColor: '#13c2c2', orgWeight: 760, manualOverride: 'NONE', winDaysBeforeJoin: 4, lastWinLevel: 3, lastWinPrizeTitle: '500积分', joinTimeDesc: '11-11 09:50' },
+      { id: 's9', nickname: '幸运星小周', avatarColor: '#52c41a', orgWeight: 700, manualOverride: 'NONE', winDaysBeforeJoin: 2, lastWinLevel: 1, lastWinPrizeTitle: '苹果耳机', joinTimeDesc: '11-11 11:10' },
+      { id: 's10', nickname: '羊毛黑号B', avatarColor: '#ff4d4f', orgWeight: 990, manualOverride: 'BLACK', winDaysBeforeJoin: 5, lastWinLevel: 2, lastWinPrizeTitle: '100元券', joinTimeDesc: '11-11 13:05' }
+    ];
+
+    function evaluateUsers() {
+      const effectiveLevelMode = state.phaseMode === 'PHASE_1' ? 'ALL' : state.prizeLevelMode;
+      return state.participants.map(u => {
+        let autoTriggeredOnJoin = false;
+        if (state.enabled && u.winDaysBeforeJoin !== null && u.winDaysBeforeJoin >= 0 && u.winDaysBeforeJoin <= state.limitDays) {
+          if (effectiveLevelMode === 'ALL') {
+            autoTriggeredOnJoin = true;
+          } else if (u.lastWinLevel !== null && state.restrictedLevels.includes(u.lastWinLevel)) {
+            autoTriggeredOnJoin = true;
+          }
+        }
+        let effectiveStatus = 'NORMAL';
+        let effectiveWeight = u.orgWeight;
+        if (u.manualOverride === 'BLACK') {
+          effectiveStatus = 'MANUAL_BLACK';
+          effectiveWeight = 0;
+        } else if (u.manualOverride === 'WHITE') {
+          effectiveStatus = 'MANUAL_WHITE';
+          effectiveWeight = u.orgWeight + 1000000;
+        } else if (u.manualOverride === 'DEFAULT' && autoTriggeredOnJoin) {
+          effectiveStatus = 'MANUAL_RECOVERED';
+          effectiveWeight = u.orgWeight;
+        } else if (autoTriggeredOnJoin) {
+          effectiveStatus = 'AUTO_COOLDOWN';
+          effectiveWeight = 0;
+        } else if (u.winDaysBeforeJoin === -1) {
+          effectiveStatus = 'POST_JOIN_WIN_EXEMPT';
+          effectiveWeight = u.orgWeight;
+        }
+        return { ...u, autoTriggeredOnJoin, effectiveStatus, effectiveWeight };
+      });
+    }
+
+    function setPhaseMode(mode) {
+      state.phaseMode = mode;
+      const b1 = document.getElementById('btnPhase1');
+      const b2 = document.getElementById('btnPhase2');
+      if (mode === 'PHASE_1') {
+        b1.className = 'px-2.5 py-1 rounded-md font-medium transition bg-white text-blue-600 shadow-sm';
+        b2.className = 'px-2.5 py-1 rounded-md font-medium transition text-slate-600 hover:text-slate-900';
+        document.getElementById('phaseBadge').textContent = '一期 MVP';
+        document.getElementById('phase1Placeholder').classList.remove('hidden');
+        document.getElementById('phase2LevelBox').classList.add('hidden');
+      } else {
+        b2.className = 'px-2.5 py-1 rounded-md font-medium transition bg-white text-blue-600 shadow-sm';
+        b1.className = 'px-2.5 py-1 rounded-md font-medium transition text-slate-600 hover:text-slate-900';
+        document.getElementById('phaseBadge').textContent = '二期扩展预览';
+        document.getElementById('phase1Placeholder').classList.add('hidden');
+        document.getElementById('phase2LevelBox').classList.remove('hidden');
+      }
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function applyPreset(preset) {
+      ['btnPresetNormal', 'btnPresetInsufficient'].forEach(id => {
+        document.getElementById(id).className = 'px-3 py-1.5 text-xs font-medium rounded-lg border transition bg-white hover:bg-slate-50 border-slate-300 text-slate-700';
+      });
+      if (preset === 'normal') {
+        document.getElementById('btnPresetNormal').className = 'px-3 py-1.5 text-xs font-medium rounded-lg border transition bg-blue-600 border-blue-600 text-white shadow-sm';
+        state.enabled = true;
+        state.limitDays = 30;
+        state.prizes = [
+          { id: 'p1', level: 1, title: '戴森吹风机 HD15', prizeType: '赠品', prizeNum: 1 },
+          { id: 'p2', level: 2, title: '100元无门槛礼券', prizeType: '优惠券', prizeNum: 2 },
+          { id: 'p3', level: 3, title: '500 会员积分', prizeType: '积分', prizeNum: 2 }
+        ];
+        state.participants = JSON.parse(JSON.stringify(PRESET_NORMAL_USERS));
+      } else {
+        document.getElementById('btnPresetInsufficient').className = 'px-3 py-1.5 text-xs font-medium rounded-lg border transition bg-blue-600 border-blue-600 text-white shadow-sm';
+        state.enabled = true;
+        state.limitDays = 30;
+        state.prizes = [
+          { id: 'p1', level: 1, title: '戴森吹风机 HD15', prizeType: '赠品', prizeNum: 1 },
+          { id: 'p2', level: 2, title: '100元无门槛礼券', prizeType: '优惠券', prizeNum: 2 },
+          { id: 'p3', level: 3, title: '500 会员积分', prizeType: '积分', prizeNum: 3 }
+        ];
+        state.participants = JSON.parse(JSON.stringify(PRESET_INSUFFICIENT_USERS));
+      }
+      resetSimEmpty();
+      syncFormUI();
+      renderAll();
+    }
+
+    function toggleCooldown(val) {
+      state.enabled = val;
+      document.getElementById('cooldownConfigBox').classList.toggle('hidden', !val);
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function onLimitDaysChange(val) {
+      state.limitDays = Math.max(1, parseInt(val || '1', 10));
+      syncDayChips();
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function setLimitDays(days) {
+      state.limitDays = days;
+      document.getElementById('limitDaysInput').value = days;
+      syncDayChips();
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function syncDayChips() {
+      document.querySelectorAll('.limit-days-inline').forEach(el => (el.textContent = state.limitDays));
+      document.querySelectorAll('.day-chip').forEach(btn => {
+        const d = parseInt(btn.getAttribute('data-days'), 10);
+        if (d === state.limitDays) {
+          btn.className = 'day-chip px-2 py-0.5 rounded border text-[11px] bg-blue-50 border-blue-500 text-blue-600 font-semibold';
+        } else {
+          btn.className = 'day-chip px-2 py-0.5 rounded border text-[11px] bg-white border-slate-300 text-slate-600 hover:border-blue-500';
+        }
+      });
+    }
+
+    function setPrizeLevelMode(mode) {
+      state.prizeLevelMode = mode;
+      document.getElementById('selectedLevelsBox').classList.toggle('hidden', mode !== 'SELECTED');
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function toggleRestrictedLevel(lvl, checked) {
+      if (checked) {
+        if (!state.restrictedLevels.includes(lvl)) state.restrictedLevels.push(lvl);
+      } else {
+        state.restrictedLevels = state.restrictedLevels.filter(l => l !== lvl);
+      }
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function syncFormUI() {
+      document.querySelector(`input[name="cooldownEnabled"][value="${state.enabled}"]`).checked = true;
+      document.getElementById('cooldownConfigBox').classList.toggle('hidden', !state.enabled);
+      document.getElementById('limitDaysInput').value = state.limitDays;
+      syncDayChips();
+      document.querySelector(`input[name="prizeLevelMode"][value="${state.prizeLevelMode}"]`).checked = true;
+      document.getElementById('selectedLevelsBox').classList.toggle('hidden', state.prizeLevelMode !== 'SELECTED');
+    }
+
+    function updatePrizeNum(id, val) {
+      const num = Math.max(0, parseInt(val || '0', 10));
+      state.prizes = state.prizes.map(p => (p.id === id ? { ...p, prizeNum: num } : p));
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function addPrizeLevel() {
+      const next = state.prizes.length + 1;
+      if (next > 10) return;
+      state.prizes.push({ id: 'p_' + Date.now(), level: next, title: getChineseLevel(next) + '福利礼品', prizeType: '积分', prizeNum: 1 });
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function removePrize(id) {
+      if (state.prizes.length <= 1) return;
+      state.prizes = state.prizes.filter(p => p.id !== id).map((p, idx) => ({ ...p, level: idx + 1 }));
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function changeCheat(userId, val) {
+      state.participants = state.participants.map(u => (u.id === userId ? { ...u, manualOverride: val === 'AUTO' ? 'NONE' : val } : u));
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function addMockUser(kind) {
+      const idx = state.participants.length + 1;
+      const weight = Math.floor(400 + Math.random() * 550);
+      if (kind === 'cooldown') {
+        state.participants.push({ id: 'u_' + Date.now(), nickname: '冷却老客#' + idx, avatarColor: '#fa8c16', orgWeight: weight, manualOverride: 'NONE', winDaysBeforeJoin: Math.floor(3 + Math.random() * 20), lastWinLevel: 2, lastWinPrizeTitle: '100元无门槛礼券', joinTimeDesc: '刚刚参与' });
+      } else {
+        state.participants.push({ id: 'u_' + Date.now(), nickname: '新参与用户#' + idx, avatarColor: '#1890ff', orgWeight: weight, manualOverride: 'NONE', winDaysBeforeJoin: null, lastWinLevel: null, lastWinPrizeTitle: null, joinTimeDesc: '刚刚参与' });
+      }
+      resetSimEmpty();
+      renderAll();
+    }
+
+    function resetSimEmpty() {
+      document.getElementById('simResultContainer').innerHTML = `
+        <div class="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-slate-500">
+          <i class="fa-solid fa-gift text-2xl text-blue-300 mb-2"></i>
+          <div class="font-medium text-slate-700">配置已变更，点击右上角「模拟立即开奖」重新验算</div>
+          <div class="mt-1">可直观验证「参与时自动降权」「人工手动恢复/加权覆盖」及「人数不足奖品时不补发」的完整开奖结果</div>
+        </div>
+      `;
+    }
+
+    function renderAll() {
+      const levels = Array.from(new Set(state.prizes.map(p => p.level))).sort((a, b) => a - b);
+      document.getElementById('levelCheckboxesContainer').innerHTML = levels
+        .map(lvl => `
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" ${state.restrictedLevels.includes(lvl) ? 'checked' : ''} onchange="toggleRestrictedLevel(${lvl}, this.checked)" />
+            <span>历史${getChineseLevel(lvl)}</span>
+          </label>
+        `)
+        .join('');
+
+      const totalPrizes = state.prizes.reduce((s, p) => s + p.prizeNum, 0);
+      document.getElementById('prizeTypeCount').textContent = state.prizes.length;
+      document.getElementById('totalPrizeCountEl').textContent = totalPrizes;
+      document.getElementById('prizeTableBody').innerHTML = state.prizes
+        .map(p => {
+          const badgeCls = p.level === 1 ? 'bg-red-50 text-red-600 border-red-200' : p.level === 2 ? 'bg-orange-50 text-orange-600 border-orange-200' : 'bg-blue-50 text-blue-600 border-blue-200';
+          return `
+            <tr>
+              <td class="py-2 px-3"><span class="px-2 py-0.5 rounded border text-[11px] font-semibold ${badgeCls}">${getChineseLevel(p.level)}</span></td>
+              <td class="py-2 px-3"><span class="font-medium text-slate-800">${p.title}</span> <span class="ml-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[10px]">${p.prizeType}</span></td>
+              <td class="py-2 px-3"><input type="number" min="0" max="999" value="${p.prizeNum}" onchange="updatePrizeNum('${p.id}', this.value)" class="w-20 px-2 py-1 border border-slate-300 rounded text-center" /></td>
+              <td class="py-2 px-3 text-center"><button onclick="removePrize('${p.id}')" class="text-red-500 hover:text-red-700 disabled:opacity-30" ${state.prizes.length <= 1 ? 'disabled' : ''}><i class="fa-solid fa-trash-can"></i></button></td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      const levelSummary = state.phaseMode === 'PHASE_2' && state.prizeLevelMode === 'SELECTED'
+        ? ('历史' + (state.restrictedLevels.sort((a, b) => a - b).map(getChineseLevel).join('、') || '（未选等级）'))
+        : '任意奖品';
+      document.getElementById('ruleSummaryText').innerHTML = `用户参与活动时，若参与前 <b>${state.limitDays} 天</b> 内在定时开奖中过 <b>${levelSummary}</b> ，则自动降权（权重置 0）；后台列表后续可手动取消降权或加权。有效人数不足奖品总数时<b>不补发</b>。`;
+      const cLevelDesc = state.phaseMode === 'PHASE_2' && state.prizeLevelMode === 'SELECTED'
+        ? ('曾获得过' + (state.restrictedLevels.sort((a, b) => a - b).map(getChineseLevel).join('、') || '指定等级') + '的')
+        : '已中过奖的';
+      document.getElementById('cEndRuleText').textContent = `为让更多小伙伴体验中奖乐趣，若您参与本活动前 ${state.limitDays} 天内已在本店定时开奖活动中${cLevelDesc}，本次仍可正常参与活动及互动任务，但开奖时将优先把中奖机会留给近期未中奖的小伙伴哦~（若符合条件的有效参与人数少于奖品总数，剩余奖品不予补发）`;
+
+      const evalUsers = evaluateUsers();
+      const white = evalUsers.filter(u => u.effectiveStatus === 'MANUAL_WHITE').length;
+      const normal = evalUsers.filter(u => u.effectiveStatus === 'NORMAL' || u.effectiveStatus === 'POST_JOIN_WIN_EXEMPT').length;
+      const recovered = evalUsers.filter(u => u.effectiveStatus === 'MANUAL_RECOVERED').length;
+      const cooldown = evalUsers.filter(u => u.effectiveStatus === 'AUTO_COOLDOWN').length;
+      const black = evalUsers.filter(u => u.effectiveStatus === 'MANUAL_BLACK').length;
+      const effective = white + normal + recovered;
+      const shortage = Math.max(0, totalPrizes - effective);
+
+      document.getElementById('statTotal').textContent = evalUsers.length;
+      document.getElementById('statEffective').textContent = effective;
+      document.getElementById('statEffectiveSub').textContent = `有效(含恢复${recovered})`;
+      document.getElementById('statCooldown').textContent = cooldown;
+      document.getElementById('statBlack').textContent = black;
+
+      const banner = document.getElementById('boundaryBanner');
+      if (totalPrizes > 0 && effective < totalPrizes) {
+        banner.className = 'rounded-lg p-3 text-xs border bg-amber-50 border-amber-300 text-amber-900';
+        banner.innerHTML = `
+          <div class="font-semibold flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation text-amber-600"></i> 提示：有效候选人数 (${effective} 人) &lt; 本场奖品总数 (${totalPrizes} 件)，存在 ${shortage} 件缺口</div>
+          <div class="mt-1">与当前降权规则一致：仅向 <b>${effective} 名</b> 有效候选人派发奖品，剩余 <b>${shortage} 件</b> 奖品不补发（流抽保留库存）。可在下方将冷却用户手动改回「恢复不干预」释放名额。</div>
+        `;
+      } else {
+        banner.className = 'rounded-lg p-3 text-xs border bg-emerald-50 border-emerald-200 text-emerald-800';
+        banner.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> 当前有效候选人数 (<b>${effective} 人</b>) ≥ 本场奖品总数 (<b>${totalPrizes} 件</b>)，可完全在有效候选队列中发完。`;
+      }
+
+      document.getElementById('userTableBody').innerHTML = evalUsers
+        .map(u => {
+          let historyHtml = '<span class="text-slate-400">从未中奖</span>';
+          if (u.winDaysBeforeJoin === -1) {
+            historyHtml = `<div class="text-cyan-700">参与时无记录</div><div class="text-[10px] text-slate-400">参与后中过${getChineseLevel(u.lastWinLevel)}</div>`;
+          } else if (u.winDaysBeforeJoin !== null) {
+            historyHtml = `<div class="font-medium text-slate-700">参与前 ${u.winDaysBeforeJoin} 天中过</div><div class="text-[10.5px] text-slate-400">${getChineseLevel(u.lastWinLevel)} · ${u.lastWinPrizeTitle}</div>`;
+          }
+          let statusHtml = '<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px]">正常参与</span>';
+          if (u.effectiveStatus === 'MANUAL_BLACK') {
+            statusHtml = '<span class="px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 text-[11px]">人工拉黑</span>';
+          } else if (u.effectiveStatus === 'MANUAL_WHITE') {
+            statusHtml = `<span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 text-[11px]">人工加权</span>${u.autoTriggeredOnJoin ? '<div class="text-[10px] text-purple-600 mt-0.5">手动覆盖降权</div>' : ''}`;
+          } else if (u.effectiveStatus === 'MANUAL_RECOVERED') {
+            statusHtml = `<span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[11px]">已手动取消降权</span><div class="text-[10px] text-blue-600 mt-0.5">恢复原权重 ${u.orgWeight}</div>`;
+          } else if (u.effectiveStatus === 'AUTO_COOLDOWN') {
+            statusHtml = '<span class="px-2 py-0.5 rounded bg-orange-50 text-orange-700 border border-orange-200 text-[11px]">冷却自动降权</span><div class="text-[10px] text-orange-600 mt-0.5">参与时置0 · 可改</div>';
+          } else if (u.effectiveStatus === 'POST_JOIN_WIN_EXEMPT') {
+            statusHtml = '<span class="px-2 py-0.5 rounded bg-cyan-50 text-cyan-700 border border-cyan-200 text-[11px]">正常(后中他奖)</span>';
+          }
+
+          const selectVal = u.manualOverride === 'NONE' ? (u.autoTriggeredOnJoin ? 'AUTO' : 'DEFAULT') : u.manualOverride;
+          const optionsHtml = u.autoTriggeredOnJoin
+            ? `
+              <option value="AUTO" ${selectVal === 'AUTO' ? 'selected' : ''}>冷却降权(默认)</option>
+              <option value="DEFAULT" ${selectVal === 'DEFAULT' ? 'selected' : ''}>恢复不干预</option>
+              <option value="WHITE" ${selectVal === 'WHITE' ? 'selected' : ''}>改为加权</option>
+              <option value="BLACK" ${selectVal === 'BLACK' ? 'selected' : ''}>人工拉黑</option>
+            `
+            : `
+              <option value="DEFAULT" ${selectVal === 'DEFAULT' ? 'selected' : ''}>不干预</option>
+              <option value="WHITE" ${selectVal === 'WHITE' ? 'selected' : ''}>加权</option>
+              <option value="BLACK" ${selectVal === 'BLACK' ? 'selected' : ''}>拉黑</option>
+            `;
+
+          return `
+            <tr class="hover:bg-slate-50/80">
+              <td class="py-2 px-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-semibold shrink-0" style="background:${u.avatarColor}">${u.nickname.slice(0, 1)}</span>
+                  <div>
+                    <div class="font-medium text-slate-800">${u.nickname}</div>
+                    <div class="text-[10.5px] text-slate-400">原权重: <b>${u.orgWeight}</b> · ${u.joinTimeDesc}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-2 px-2">${historyHtml}</td>
+              <td class="py-2 px-2">${statusHtml}</td>
+              <td class="py-2 px-2.5">
+                <select onchange="changeCheat('${u.id}', this.value)" class="px-1.5 py-1 border border-slate-300 rounded bg-white text-[11px] w-full">
+                  ${optionsHtml}
+                </select>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    function runDrawSimulation() {
+      const sortedPrizes = [...state.prizes].sort((a, b) => a.level - b.level);
+      const slots = [];
+      sortedPrizes.forEach(p => {
+        for (let i = 0; i < p.prizeNum; i++) {
+          slots.push({ prizeLevel: p.level, prizeTitle: p.title });
+        }
+      });
+      if (slots.length === 0) return;
+
+      const evalUsers = evaluateUsers();
+      const whiteQueue = evalUsers.filter(u => u.effectiveStatus === 'MANUAL_WHITE').sort((a, b) => b.effectiveWeight - a.effectiveWeight);
+      const normalQueue = evalUsers.filter(u => u.effectiveStatus === 'NORMAL' || u.effectiveStatus === 'MANUAL_RECOVERED' || u.effectiveStatus === 'POST_JOIN_WIN_EXEMPT').sort((a, b) => b.effectiveWeight - a.effectiveWeight);
+      const recoveredCount = evalUsers.filter(u => u.effectiveStatus === 'MANUAL_RECOVERED').length;
+      const cooldownUsers = evalUsers.filter(u => u.effectiveStatus === 'AUTO_COOLDOWN');
+      const blackUsers = evalUsers.filter(u => u.effectiveStatus === 'MANUAL_BLACK');
+      const primaryQueue = [...whiteQueue, ...normalQueue];
+      const triggeredInsufficient = primaryQueue.length < slots.length;
+
+      const levelDesc = state.phaseMode === 'PHASE_2' && state.prizeLevelMode === 'SELECTED'
+        ? ('历史' + (state.restrictedLevels.map(getChineseLevel).join('、') || '未选等级'))
+        : '任意定时开奖奖品';
+
+      const steps = [
+        `Step 1：待发奖品共 ${slots.length} 件，总参与人 ${evalUsers.length} 人。`,
+        `Step 2：各用户【参与时】已自动校验「参与时间前 ${state.limitDays} 天内是否中过${levelDesc}」，自动触发降权（存原权重，当前权重置 0）且未被人工恢复共 ${cooldownUsers.length} 人；由运营手动恢复权重 ${recoveredCount} 人。`,
+        `Step 3：开奖直接按权重查询（weightRandom > 0）：人工加权 ${whiteQueue.length} 人置顶；其余有效用户 ${normalQueue.length} 人按权重降序；人工拉黑 ${blackUsers.length} 人已置 0 过滤。`,
+        triggeredInsufficient
+          ? `Step 4 ⚠️：有效人数 (${primaryQueue.length} 人) < 奖品总数 (${slots.length} 件)，与现行降权规则一致：发完 ${primaryQueue.length} 名有效人后结束开奖，剩余 ${slots.length - primaryQueue.length} 件不补发（流抽保留库存）。`
+          : `Step 4 ✅：有效人数 (${primaryQueue.length} 人) ≥ 奖品总数 (${slots.length} 件)，全部奖品在有效候选队列中派发完毕。`
+      ];
+
+      let pIdx = 0;
+      let issued = 0;
+      let aborted = 0;
+
+      const results = slots.map((slot, idx) => {
+        if (pIdx < primaryQueue.length) {
+          const w = primaryQueue[pIdx++];
+          issued++;
+          const isWhite = w.effectiveStatus === 'MANUAL_WHITE';
+          const isRec = w.effectiveStatus === 'MANUAL_RECOVERED';
+          return {
+            idx: idx + 1,
+            ...slot,
+            winner: w,
+            type: isWhite ? 'WHITE' : isRec ? 'RECOVERED' : 'NORMAL',
+            note: isWhite
+              ? `人工加权优先派发（权重 ${w.effectiveWeight}）`
+              : isRec
+                ? `参与时自动降权后由运营手动恢复原权重（权重 ${w.orgWeight}）`
+                : `正常未冷却中奖（权重 ${w.orgWeight}）`
+          };
+        } else {
+          aborted++;
+          return {
+            idx: idx + 1,
+            ...slot,
+            winner: null,
+            type: 'ABORTED',
+            note: '有效人数不足奖品数：与现行降权规则一致，剩余奖品不补发（保留库存）'
+          };
+        }
+      });
+
+      document.getElementById('simResultContainer').innerHTML = `
+        <div class="fade-in space-y-3">
+          <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1 text-slate-600 leading-relaxed">
+            <div class="font-semibold text-slate-800 flex items-center justify-between mb-1">
+              <span><i class="fa-solid fa-bolt text-amber-500 mr-1"></i> 开奖演算执行链路</span>
+              <span class="text-[11px] font-normal text-slate-400">演算时间：${new Date().toLocaleTimeString()}</span>
+            </div>
+            ${steps.map(s => `<div>${s}</div>`).join('')}
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">奖品总数：${slots.length} 件</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">实际派发：${issued} 件</span>
+            ${aborted > 0 ? `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-300">人数不足不补发（保留库存）：${aborted} 件</span>` : ''}
+          </div>
+
+          <div class="border border-slate-200 rounded-lg divide-y divide-slate-100 overflow-hidden">
+            ${results.map(r => {
+              const rowBg = r.type === 'ABORTED' ? 'bg-slate-50 text-slate-400' : 'bg-white';
+              const tagHtml = r.type === 'WHITE'
+                ? '<span class="px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 text-[10.5px]">人工加权</span>'
+                : r.type === 'RECOVERED'
+                  ? '<span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 text-[10.5px]">手动恢复中奖</span>'
+                  : r.type === 'NORMAL'
+                    ? '<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10.5px]">正常中奖</span>'
+                    : '<span class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-[10.5px]">不补发 · 流抽保留库存</span>';
+              return `
+                <div class="px-3 py-2.5 flex items-center justify-between gap-2 ${rowBg}">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="text-[11px] text-slate-400 w-5">#${r.idx}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold text-[11px]">${getChineseLevel(r.prizeLevel)}</span>
+                    <span class="font-medium truncate">${r.prizeTitle}</span>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="flex items-center justify-end gap-1.5">
+                      ${r.winner ? `<span class="font-semibold text-slate-800">${r.winner.nickname}</span>` : ''}
+                      ${tagHtml}
+                    </div>
+                    <div class="text-[10.5px] text-slate-400 mt-0.5">${r.note}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    applyPreset('insufficient');
+  </script>
+</body>
+</html>

@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商品搬家 (/dtmall/prod/moveProd) & 淘宝第三方 ISV 授权交互原型</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #f5f7fa;
+      color: #262626;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    a {
+      color: #1890ff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    a:hover {
+      color: #40a9ff;
+    }
+
+    /* 顶部原型切换栏 */
+    .proto-top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .proto-top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .proto-badge {
+      background: #ff5000;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .proto-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .proto-tab-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e2e8f0;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .proto-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .proto-tab-btn.active {
+      background: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* 整体后台框架 */
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 49px);
+    }
+    .admin-sider {
+      width: 200px;
+      background: #fff;
+      border-right: 1px solid #ebedf0;
+      padding-top: 12px;
+      flex-shrink: 0;
+    }
+    .sider-group-title {
+      padding: 8px 20px;
+      font-size: 12px;
+      color: #8c8c8c;
+      font-weight: 600;
+    }
+    .sider-item {
+      padding: 10px 24px;
+      font-size: 14px;
+      color: #262626;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sider-item:hover {
+      background: #f5f5f5;
+    }
+    .sider-item.active {
+      background: #e6f7ff;
+      color: #1890ff;
+      font-weight: 500;
+      border-right: 3px solid #1890ff;
+    }
+    .admin-main {
+      flex: 1;
+      padding: 20px 24px;
+      max-width: calc(100vw - 200px);
+    }
+
+    /* 通用卡片与页面结构 */
+    .dt-page-card {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    .dt-page-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dt-page-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #262626;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .route-pill {
+      font-size: 12px;
+      color: #8c8c8c;
+      background: #f5f5f5;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: 400;
+    }
+
+    /* 搜索栏 */
+    .dt-search-bar {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .search-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .search-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .input, .select {
+      height: 32px;
+      padding: 4px 11px;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+      color: #262626;
+    }
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: #40a9ff;
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.15);
+    }
+
+    /* 按钮 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 15px;
+      font-size: 14px;
+      border-radius: 2px;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      color: #262626;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .btn:hover {
+      border-color: #40a9ff;
+      color: #40a9ff;
+    }
+    .btn-primary {
+      background: #1890ff;
+      border-color: #1890ff;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #40a9ff;
+      border-color: #40a9ff;
+      color: #fff;
+    }
+    .btn-taobao {
+      background: linear-gradient(90deg, #ff9000 0%, #ff5000 100%);
+      border: none;
+      color: #fff;
+      font-weight: 500;
+    }
+    .btn-taobao:hover {
+      opacity: 0.92;
+      color: #fff;
+    }
+    .btn-taobao-outline {
+      background: #fff7f0;
+      border: 1px solid #ff7a45;
+      color: #ff5000;
+      font-weight: 500;
+    }
+    .btn-taobao-outline:hover {
+      background: #ffe7d6;
+      border-color: #ff5000;
+      color: #ff5000;
+    }
+
+    /* 表格 */
+    .table-wrap {
+      padding: 20px 24px;
+    }
+    table.dt-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    table.dt-table th {
+      background: #fafafa;
+      padding: 14px 16px;
+      font-weight: 600;
+      color: #262626;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    table.dt-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #262626;
+    }
+    table.dt-table tr:hover td {
+      background: #fafafa;
+    }
+
+    /* 标签 */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 2px;
+      border: 1px solid transparent;
+    }
+    .tag-green {
+      background: #f6ffed;
+      border-color: #b7eb8f;
+      color: #52c41a;
+    }
+    .tag-yellow {
+      background: #fffbe6;
+      border-color: #ffe58f;
+      color: #faad14;
+    }
+    .tag-red {
+      background: #fff2f0;
+      border-color: #ffccc7;
+      color: #ff4d4f;
+    }
+    .tag-orange {
+      background: #fff7e6;
+      border-color: #ffd591;
+      color: #fa8c16;
+    }
+
+    /* Alert */
+    .dt-alert {
+      padding: 10px 16px;
+      border-radius: 2px;
+      font-size: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .dt-alert-info {
+      background: #e6f7ff;
+      border: 1px solid #91d5ff;
+      color: #262626;
+    }
+
+    /* 弹窗 */
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-mask.open {
+      display: flex;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 4px;
+      width: 800px;
+      max-width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    }
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .modal-close {
+      cursor: pointer;
+      color: #8c8c8c;
+      font-size: 20px;
+      line-height: 1;
+      border: none;
+      background: none;
+    }
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-footer {
+      padding: 14px 24px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* 表单项 */
+    .form-row {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .form-label {
+      width: 110px;
+      padding-top: 5px;
+      color: #262626;
+      flex-shrink: 0;
+    }
+    .form-label .req {
+      color: #ff4d4f;
+      margin-right: 4px;
+    }
+    .form-control {
+      flex: 1;
+    }
+    .channel-cards {
+      display: flex;
+      gap: 14px;
+    }
+    .channel-card {
+      position: relative;
+      display: flex;
+      width: 124px;
+      height: 64px;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #d9d9d9;
+      border-radius: 2px;
+      user-select: none;
+      background: #fff;
+    }
+    .channel-card.active {
+      border: 1px solid #2474ff;
+      background: #f8fbff;
+    }
+    .channel-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+    .channel-logo.dy { background: #161823; }
+    .channel-logo.tb { background: linear-gradient(135deg, #ff9000 0%, #ff5000 100%); }
+    .corner-check {
+      display: none;
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 0 24px 24px;
+      border-color: transparent transparent #2474ff transparent;
+    }
+    .corner-check-mark {
+      display: none;
+      position: absolute;
+      right: 2px;
+      bottom: 0px;
+      color: #fff;
+      font-size: 11px;
+    }
+    .channel-card.active .corner-check,
+    .channel-card.active .corner-check-mark {
+      display: block;
+    }
+
+    /* 新增授权弹窗 —— 两步式卡片 */
+    .two-step-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .auth-step-card {
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 18px 20px;
+      background: #fafafa;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .auth-step-card:hover {
+      border-color: #91d5ff;
+      background: #fcfeff;
+    }
+    .auth-step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .auth-step-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #262626;
+    }
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #1890ff;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .auth-step-desc {
+      color: #595959;
+      font-size: 13px;
+      line-height: 1.6;
+      padding-left: 34px;
+      margin-bottom: 14px;
+    }
+    .auth-step-actions {
+      padding-left: 34px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* 授权成功跳回弹窗 */
+    .success-result-box {
+      text-align: center;
+      padding: 12px 16px 4px;
+    }
+    .success-icon-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #f6ffed;
+      border: 2px solid #b7eb8f;
+      color: #52c41a;
+      font-size: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .success-shop-info-card {
+      margin-top: 18px;
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 16px 20px;
+      text-align: left;
+    }
+    .info-kv-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #ececec;
+    }
+    .info-kv-row:last-child {
+      border-bottom: none;
+    }
+    .info-kv-label {
+      color: #8c8c8c;
+      font-size: 13px;
+    }
+    .info-kv-val {
+      color: #262626;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* 淘宝服务市场 & 淘宝授权外部页模拟 */
+    .tb-market-box {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .tb-market-header {
+      padding: 14px 24px;
+      border-bottom: 2px solid #ff5000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+    }
+    .tb-market-logo {
+      background: linear-gradient(135deg, #ff9000 0%, #ff5000 100%);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .tb-market-content {
+      padding: 28px 32px;
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .tb-app-icon-box {
+      width: 140px;
+      height: 140px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ff7a00 0%, #ff4400 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 16px rgba(255, 80, 0, 0.22);
+    }
+
+    /* Toast */
+    .toast-msg {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      color: #262626;
+      padding: 10px 20px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      border: 1px solid #e8e8e8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toast 提示 -->
+  <div id="toast" class="toast-msg"></div>
+
+  <!-- 顶部交互演示栏 -->
+  <div class="proto-top-bar">
+    <div class="proto-top-left">
+      <span class="proto-badge">交互原型 Demo</span>
+      <span>商品搬家 (/dtmall/prod/moveProd) 支持淘宝 &amp; 两步式淘宝 ISV 应用授权交互</span>
+    </div>
+    <div class="proto-tabs">
+      <button id="tab-moveProd" class="proto-tab-btn active" onclick="switchView('moveProd')">
+        页面1：商品搬家页 (/dtmall/prod/moveProd)
+      </button>
+      <button id="tab-taobaoAuth" class="proto-tab-btn" onclick="switchView('taobaoAuth')">
+        页面2：授权店铺列表页 (含「新增授权」两步弹窗)
+      </button>
+      <button id="tab-taobaoOrder" class="proto-tab-btn" onclick="switchView('taobaoOrder')">
+        外链1：淘宝应用市场(订购应用)
+      </button>
+      <button id="tab-taobaoOAuth" class="proto-tab-btn" onclick="switchView('taobaoOAuth')">
+        外链2：淘宝开放平台(卖家账号授权)
+      </button>
+    </div>
+  </div>
+
+  <div class="admin-layout">
+    <!-- 左侧菜单 -->
+    <aside class="admin-sider">
+      <div class="sider-group-title">小店 · 商品管理</div>
+      <div id="menu-moveProd" class="sider-item active" onclick="switchView('moveProd')">
+        <span>商品搬家</span>
+      </div>
+      <div id="menu-taobaoAuth" class="sider-item" onclick="switchView('taobaoAuth')">
+        <span>淘宝店铺授权</span>
+      </div>
+      <div class="sider-item" style="color:#8c8c8c"><span>商品列表</span></div>
+      <div class="sider-item" style="color:#8c8c8c"><span>商品分组</span></div>
+      <div class="sider-item" style="color:#8c8c8c"><span>商品分类</span></div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="admin-main">
+
+      <!-- ==================== 页面 1：/dtmall/prod/moveProd ==================== -->
+      <section id="view-moveProd" class="dt-page-card">
+        <div class="dt-page-header">
+          <div class="dt-page-title">
+            <span>商品搬家</span>
+            <span class="route-pill">/dtmall/prod/moveProd</span>
+          </div>
+          <div>
+            <button class="btn" onclick="switchView('taobaoAuth')">
+              淘宝店铺授权列表 (<span id="authorized-tb-count">1</span>家已授权)
+            </button>
+          </div>
+        </div>
+
+        <div class="dt-search-bar">
+          <div class="search-left">
+            <div class="search-field">
+              <span>任务ID:</span>
+              <input id="search-task-id" class="input" placeholder="请输入" style="width: 180px;" />
+            </div>
+            <div class="search-field">
+              <span>搬出平台:</span>
+              <select id="search-channel" class="select" style="width: 140px;" onchange="renderTaskTable()">
+                <option value="">全部</option>
+                <option value="1">淘宝</option>
+                <option value="4">抖音</option>
+              </select>
+            </div>
+            <div class="search-field">
+              <span>搬家状态:</span>
+              <select id="search-status" class="select" style="width: 150px;" onchange="renderTaskTable()">
+                <option value="">全部</option>
+                <option value="1">执行中</option>
+                <option value="2">执行完成</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="renderTaskTable()">查询</button>
+            <button class="btn" onclick="resetTaskSearch()">重置</button>
+          </div>
+          <button class="btn btn-primary" onclick="openCreateTaskModal()">创建搬家任务</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="dt-table">
+            <thead>
+              <tr>
+                <th>任务ID</th>
+                <th>添加商品数</th>
+                <th>成功数/失败数</th>
+                <th>搬出平台</th>
+                <th>搬出店铺</th>
+                <th>搬家状态</th>
+                <th>操作时间</th>
+                <th>操作人</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="task-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 页面 2：淘宝店铺授权列表页（简洁列表 + 新增授权按钮弹窗） ==================== -->
+      <section id="view-taobaoAuth" class="dt-page-card" style="display: none;">
+        <div class="dt-page-header">
+          <div class="dt-page-title">
+            <button class="btn" style="height:28px;padding:0 10px;" onclick="switchView('moveProd')">&larr; 返回商品搬家</button>
+            <span>淘宝授权店铺管理</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" onclick="simulateAuthCallbackSuccess('100208', '星云官方淘宝旗舰店')">
+              演示：模拟授权完成跳回弹窗
+            </button>
+            <button class="btn btn-primary" onclick="openAddAuthModal()">
+              + 新增授权
+            </button>
+          </div>
+        </div>
+
+        <!-- 搜索与操作栏 -->
+        <div class="dt-search-bar">
+          <div class="search-left">
+            <div class="search-field">
+              <span>淘宝账号:</span>
+              <input id="search-shop-name" class="input" placeholder="请输入淘宝账号" style="width: 200px;" />
+            </div>
+            <div class="search-field">
+              <span>授权状态:</span>
+              <select id="search-shop-status" class="select" style="width: 150px;" onchange="renderAuthShopTable()">
+                <option value="">全部</option>
+                <option value="authorized">已授权</option>
+                <option value="expired">授权已过期</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="renderAuthShopTable()">查询</button>
+            <button class="btn" onclick="resetShopSearch()">重置</button>
+          </div>
+          <button class="btn btn-primary" onclick="openAddAuthModal()">+ 新增授权</button>
+        </div>
+
+        <!-- 授权店铺列表 -->
+        <div class="table-wrap">
+          <table class="dt-table">
+            <thead>
+              <tr>
+                <th>店铺ID</th>
+                <th>淘宝账号</th>
+                <th>授权状态</th>
+                <th>授权时间</th>
+                <th>授权到期时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="auth-shop-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ==================== 外链模拟 1：淘宝应用市场（第一步：订购应用） ==================== -->
+      <section id="view-taobaoOrder" class="tb-market-box" style="display: none;">
+        <div class="tb-market-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="tb-market-logo">淘宝服务市场 fuwu.taobao.com</span>
+            <span style="font-size:13px;color:#595959;">第一步：订购第三方 ISV 商品搬家应用</span>
+          </div>
+          <button class="btn" onclick="switchView('taobaoAuth');openAddAuthModal();">&larr; 返回我方系统弹窗</button>
+        </div>
+
+        <div class="tb-market-content">
+          <div class="tb-app-icon-box">
+            <div style="font-size:32px;font-weight:700;">ISV应用</div>
+            <div style="font-size:13px;">商品互通助手</div>
+            <span class="tag tag-orange" style="background:#fff;color:#ff5000;">第一步：应用订购</span>
+          </div>
+
+          <div style="flex:1;min-width:300px;">
+            <h2 style="font-size:20px;margin-bottom:6px;">火牛商品互通助手（淘宝服务市场应用订购页）</h2>
+            <p style="color:#595959;font-size:13px;margin-bottom:20px;">
+              请使用需要搬出商品的淘宝店铺主账号完成应用订购。完成订购后，请返回系统点击第二步「已订购，去授权」或直接点击下方按钮继续完成卖家账号授权。
+            </p>
+
+            <div class="form-row">
+              <div class="form-label" style="width:140px;">订购周期</div>
+              <div class="form-control">
+                <span class="tag tag-orange" style="padding:6px 14px;font-size:13px;border:2px solid #ff5000;color:#ff5000;font-weight:600;">
+                  1年期标准版 (¥0.00 合作专享)
+                </span>
+              </div>
+            </div>
+
+            <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+              <button class="btn btn-taobao" style="height:40px;padding:0 24px;" onclick="finishStep1AndGoStep2()">
+                立即免费订购（订购成功去第二步授权 &rarr;）
+              </button>
+              <button class="btn" style="height:40px;" onclick="switchView('taobaoAuth');openAddAuthModal();showToast('已完成订购，请点击第二步「已订购，去授权」');">
+                已完成订购，返回系统弹窗点第二步
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 外链模拟 2：淘宝开放平台授权页（第二步：已订购，去授权） ==================== -->
+      <section id="view-taobaoOAuth" class="tb-market-box" style="display: none;">
+        <div class="tb-market-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="tb-market-logo">淘宝开放平台 oauth.taobao.com</span>
+            <span style="font-size:13px;color:#595959;">第二步：使用淘宝卖家账号登录并确认授权</span>
+          </div>
+          <button class="btn" onclick="switchView('taobaoAuth');openAddAuthModal();">&larr; 返回我方系统</button>
+        </div>
+
+        <div class="tb-market-content">
+          <div class="tb-app-icon-box" style="background:linear-gradient(135deg, #1890ff 0%, #096dd9 100%);box-shadow:0 6px 16px rgba(24,144,255,0.22);">
+            <div style="font-size:30px;font-weight:700;">OAuth 2.0</div>
+            <div style="font-size:13px;">卖家店铺授权</div>
+            <span class="tag" style="background:#fff;color:#1890ff;">第二步：账号授权</span>
+          </div>
+
+          <div style="flex:1;min-width:300px;">
+            <h2 style="font-size:20px;margin-bottom:6px;">确认将您的淘宝店铺商品权限授权给「火牛商品互通助手」</h2>
+            <p style="color:#595959;font-size:13px;margin-bottom:20px;">
+              授权完成后将自动跳回您的商城后台，并弹窗显示授权成功的<strong>店铺ID</strong>与<strong>店铺昵称</strong>。
+            </p>
+
+            <div class="form-row">
+              <div class="form-label" style="width:150px;"><span class="req">*</span>淘宝店铺ID</div>
+              <div class="form-control">
+                <input id="oauth-shop-id" class="input" style="width:340px;" value="100208" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label" style="width:150px;"><span class="req">*</span>淘宝店铺昵称</div>
+              <div class="form-control">
+                <input id="oauth-shop-nick" class="input" style="width:340px;" value="星云官方淘宝旗舰店" />
+                <div style="margin-top:6px;font-size:12px;color:#8c8c8c;">
+                  快速切换测试店铺：
+                  <a onclick="fillOAuthShop('100208','星云官方淘宝旗舰店','tb_xingyun_flagship')">星云官方淘宝旗舰店(100208)</a> |
+                  <a onclick="fillOAuthShop('100209','极光美妆淘宝自营店','tb_aurora_beauty')">极光美妆淘宝自营店(100209)</a> |
+                  <a onclick="fillOAuthShop('100202','星云服饰奥莱淘宝老店','tb_outlet_old')">星云服饰奥莱淘宝老店(100202 重授权)</a>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label" style="width:150px;">淘宝卖家账号</div>
+              <div class="form-control">
+                <input id="oauth-seller-nick" class="input" style="width:340px;" value="tb_xingyun_flagship" />
+              </div>
+            </div>
+
+            <div style="margin-top:24px;display:flex;gap:12px;">
+              <button class="btn btn-taobao" style="height:42px;padding:0 28px;font-size:15px;" onclick="completeOAuthAndCallback()">
+                确认授权并跳回系统
+              </button>
+              <button class="btn" style="height:42px;" onclick="switchView('taobaoAuth')">取消</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== 弹窗 1：新增授权（分成两步走） ==================== -->
+  <div id="add-auth-modal" class="modal-mask">
+    <div class="modal-box" style="width: 620px;">
+      <div class="modal-header">
+        <span>新增淘宝店铺授权</span>
+        <button class="modal-close" onclick="closeAddAuthModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="dt-alert dt-alert-info" style="margin-bottom: 18px;">
+          <span>ℹ️</span>
+          <span>淘宝店铺商品搬家需通过第三方合作 ISV 应用完成授权，请按以下两步依次操作：</span>
+        </div>
+
+        <div class="two-step-container">
+          <!-- 第一步：点击订购应用 -->
+          <div class="auth-step-card">
+            <div class="auth-step-header">
+              <div class="auth-step-title">
+                <span class="step-badge">1</span>
+                <span>第一步：订购淘宝服务市场应用</span>
+              </div>
+              <span class="tag tag-orange">首次授权必做</span>
+            </div>
+            <div class="auth-step-desc">
+              请先点击链接跳转至淘宝服务市场完成第三方 ISV 应用订购（请使用需要搬出商品的淘宝店铺主账号登录订购；若该店铺已订购且在有效期内，可直接进行第二步）。
+            </div>
+            <div class="auth-step-actions">
+              <button class="btn btn-taobao" onclick="goStep1OrderApp()">
+                1、点击订购应用 &rarr;
+              </button>
+              <a onclick="showToast('已复制淘宝服务市场应用订购链接')" style="font-size:13px;">复制订购链接</a>
+            </div>
+          </div>
+
+          <!-- 第二步：已订购，去授权 -->
+          <div class="auth-step-card">
+            <div class="auth-step-header">
+              <div class="auth-step-title">
+                <span class="step-badge">2</span>
+                <span>第二步：淘宝卖家账号确认授权</span>
+              </div>
+              <span class="tag tag-green">订购后操作</span>
+            </div>
+            <div class="auth-step-desc">
+              应用订购完成后，请点击下方链接使用同一淘宝卖家账号登录并完成店铺授权。授权完成后将自动跳回本页面并同步店铺信息。
+            </div>
+            <div class="auth-step-actions">
+              <button class="btn btn-primary" onclick="goStep2OAuthApp()">
+                2、已订购，去授权 &rarr;
+              </button>
+              <a onclick="showToast('已复制淘宝卖家店铺授权链接')" style="font-size:13px;">复制授权链接</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeAddAuthModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗 2：授权完成跳回 —— 直接弹窗提示授权成功（显示店铺ID和店铺昵称） ==================== -->
+  <div id="auth-success-modal" class="modal-mask">
+    <div class="modal-box" style="width: 460px;">
+      <div class="modal-header">
+        <span>授权结果提示</span>
+        <button class="modal-close" onclick="closeAuthSuccessModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="success-result-box">
+          <div class="success-icon-circle">✓</div>
+          <div style="font-size: 18px; font-weight: 600; color: #262626;">淘宝店铺授权成功</div>
+          <div style="font-size: 13px; color: #8c8c8c; margin-top: 4px;">
+            已成功获取该淘宝店铺授权，现在可以拉取店铺商品进行搬家了
+          </div>
+
+          <div class="success-shop-info-card">
+            <div class="info-kv-row">
+              <span class="info-kv-label">店铺ID</span>
+              <span id="success-modal-shop-id" class="info-kv-val" style="font-family: monospace;">100208</span>
+            </div>
+            <div class="info-kv-row">
+              <span class="info-kv-label">店铺昵称</span>
+              <span id="success-modal-shop-name" class="info-kv-val">星云官方淘宝旗舰店</span>
+            </div>
+            <div class="info-kv-row">
+              <span class="info-kv-label">授权状态</span>
+              <span class="tag tag-green">已授权</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeAuthSuccessModal()">我知道了</button>
+        <button class="btn btn-primary" onclick="goMoveFromSuccessModal()">去创建搬家任务</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗 3：创建搬家任务 (还原 addMoveTask.vue) ==================== -->
+  <div id="create-task-modal" class="modal-mask">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>创建搬家任务</span>
+        <button class="modal-close" onclick="closeCreateTaskModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="dt-alert dt-alert-info" style="margin-bottom:20px;">
+          <span>ℹ️</span>
+          <span>商品搬入成功后默认放入「仓库中」，可核对商品价格等关键信息后再进行批量上架</span>
+        </div>
+
+        <!-- 搬出平台 -->
+        <div class="form-row">
+          <div class="form-label"><span class="req">*</span>搬出平台</div>
+          <div class="form-control">
+            <div class="channel-cards">
+              <div id="card-ch-4" class="channel-card" onclick="selectModalChannel(4)">
+                <div class="channel-logo dy">抖</div>
+                <span>抖音</span>
+                <div class="corner-check"></div>
+                <span class="corner-check-mark">✓</span>
+              </div>
+              <div id="card-ch-1" class="channel-card active" onclick="selectModalChannel(1)">
+                <div class="channel-logo tb">淘</div>
+                <span>淘宝</span>
+                <div class="corner-check"></div>
+                <span class="corner-check-mark">✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 搬出店铺 -->
+        <div class="form-row">
+          <div class="form-label"><span class="req">*</span>搬出店铺</div>
+          <div class="form-control">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <select id="modal-shop-select" class="select" style="width:320px;"></select>
+              <a onclick="goAuthFromModal()">+ 去授权店铺</a>
+              <span style="color:#bfbfbf;">|</span>
+              <a onclick="renderModalShopSelect();showToast('已刷新授权店铺列表')">刷新</a>
+            </div>
+            <div id="modal-tb-tip" style="margin-top:6px;font-size:12px;color:#8c8c8c;">
+              淘宝店铺通过第三方淘宝 ISV 应用授权，点击「<a onclick="goAuthFromModal()">+ 去授权店铺</a>」可跳转至淘宝授权店铺列表页新增授权。
+            </div>
+          </div>
+        </div>
+
+        <!-- 商品ID -->
+        <div class="form-row">
+          <div class="form-label"><span class="req">*</span>商品ID</div>
+          <div class="form-control">
+            <div style="position:relative;width:478px;max-width:100%;">
+              <textarea
+                id="modal-prod-ids"
+                class="textarea input"
+                style="width:100%;height:160px;padding:8px 11px 28px;resize:none;"
+                placeholder="请输入淘宝商品ID，多个请换行输入，最多可输入 500 个"
+                oninput="updateProdCounter()"
+              ></textarea>
+              <span id="prod-id-counter" style="position:absolute;bottom:8px;right:12px;color:#999;font-size:12px;">0/500</span>
+            </div>
+            <div style="margin-top:6px;font-size:12px;">
+              <a onclick="fillSampleIds()">填入示例商品ID</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 运费模板 -->
+        <div class="form-row">
+          <div class="form-label"><span class="req">*</span>运费模板</div>
+          <div class="form-control">
+            <select class="select" style="width:320px;">
+              <option value="1">全国包邮运费模板（除偏远地区）</option>
+              <option value="2">江浙沪皖包邮_其他地区首重8元</option>
+            </select>
+            <span style="margin-left:8px;"><a onclick="showToast('跳转至运费模板管理')">管理运费模板</a> | <a onclick="showToast('已刷新')">刷新</a></span>
+          </div>
+        </div>
+
+        <!-- 商品分组 -->
+        <div class="form-row">
+          <div class="form-label">商品分组</div>
+          <div class="form-control">
+            <select class="select" style="width:320px;">
+              <option value="102">淘宝搬家待核对商品</option>
+              <option value="101">双11主推爆款组</option>
+            </select>
+            <span style="margin-left:8px;"><a onclick="showToast('跳转至商品分组')">管理分组</a> | <a onclick="showToast('已刷新')">刷新</a></span>
+          </div>
+        </div>
+
+        <!-- 商品后台类目 -->
+        <div class="form-row" style="margin-bottom:0;">
+          <div class="form-label">商品后台类目</div>
+          <div class="form-control">
+            <select class="select" style="width:320px;">
+              <option value="21">居家日用 / 餐饮具</option>
+              <option value="11">美妆护肤 / 面部护理</option>
+            </select>
+            <span style="margin-left:8px;"><a onclick="showToast('跳转至商品分类')">管理分类</a> | <a onclick="showToast('已刷新')">刷新</a></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeCreateTaskModal()">取消</button>
+        <button class="btn btn-primary" onclick="submitMoveTask()">开始搬家</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentModalChannel = 1; // 1: 淘宝, 4: 抖音
+    let latestAuthedShopId = 100201;
+
+    const shops = [
+      {
+        xyShopId: 100201,
+        shopName: '星云生活家居淘宝企业店',
+        sellerNick: 'tb_xingyun_home',
+        channel: 1,
+        orderSourceDesc: '淘宝第三方ISV授权',
+        authStatus: 'authorized',
+        authStatusText: '已授权',
+        authTime: '2026-10-20 11:30:15',
+        expireTime: '2027-10-20 11:30:15',
+        isNew: false
+      },
+      {
+        xyShopId: 100202,
+        shopName: '星云服饰奥莱淘宝老店',
+        sellerNick: 'tb_outlet_old',
+        channel: 1,
+        orderSourceDesc: '淘宝第三方ISV授权',
+        authStatus: 'expired',
+        authStatusText: '授权已过期',
+        authTime: '2025-10-01 09:00:00',
+        expireTime: '2026-10-01 09:00:00',
+        isNew: false
+      },
+      {
+        xyShopId: 400101,
+        shopName: '星云美妆抖音官方旗舰店',
+        sellerNick: 'xy_douyin_official',
+        channel: 4,
+        orderSourceDesc: '抖店开放平台授权',
+        authStatus: 'authorized',
+        authStatusText: '已授权',
+        authTime: '2026-09-15 10:20:00',
+        expireTime: '2027-09-15 10:20:00'
+      }
+    ];
+
+    const tasks = [
+      {
+        id: 10289,
+        prodCnt: 25,
+        succCnt: 24,
+        failCnt: 1,
+        channel: 1,
+        shopName: '星云生活家居淘宝企业店',
+        moveStatus: 2,
+        moveStatusStr: '执行完成',
+        createTime: '2026-11-05 15:18:42',
+        operator: '管理员(周宽)'
+      },
+      {
+        id: 10288,
+        prodCnt: 40,
+        succCnt: 40,
+        failCnt: 0,
+        channel: 4,
+        shopName: '星云美妆抖音官方旗舰店',
+        moveStatus: 2,
+        moveStatusStr: '执行完成',
+        createTime: '2026-11-04 11:05:19',
+        operator: '运营专员(林晓)'
+      }
+    ];
+
+    function showToast(text) {
+      const el = document.getElementById('toast');
+      el.textContent = text;
+      el.style.display = 'inline-flex';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        el.style.display = 'none';
+      }, 2400);
+    }
+
+    function switchView(view) {
+      ['moveProd', 'taobaoAuth', 'taobaoOrder', 'taobaoOAuth'].forEach((v) => {
+        document.getElementById('view-' + v).style.display = v === view ? 'block' : 'none';
+        const tabBtn = document.getElementById('tab-' + v);
+        if (tabBtn) tabBtn.className = 'proto-tab-btn' + (v === view ? ' active' : '');
+      });
+      document.getElementById('menu-moveProd').className = 'sider-item' + (view === 'moveProd' ? ' active' : '');
+      document.getElementById('menu-taobaoAuth').className = 'sider-item' + (view !== 'moveProd' ? ' active' : '');
+      renderTaskTable();
+      renderAuthShopTable();
+    }
+
+    function renderTaskTable() {
+      const idFilter = document.getElementById('search-task-id').value.trim();
+      const chFilter = document.getElementById('search-channel').value;
+      const stFilter = document.getElementById('search-status').value;
+
+      const filtered = tasks.filter((t) => {
+        if (idFilter && !String(t.id).includes(idFilter)) return false;
+        if (chFilter && String(t.channel) !== chFilter) return false;
+        if (stFilter && String(t.moveStatus) !== stFilter) return false;
+        return true;
+      });
+
+      const tbody = document.getElementById('task-tbody');
+      tbody.innerHTML = filtered.map((t) => `
+        <tr>
+          <td>${t.id}</td>
+          <td>${t.prodCnt}</td>
+          <td>${t.succCnt} / ${t.failCnt}</td>
+          <td>${t.channel === 1 ? '<span class="tag tag-orange">淘宝</span>' : '<span class="tag">抖音</span>'}</td>
+          <td>${t.shopName}</td>
+          <td><span class="tag ${t.moveStatus === 2 ? 'tag-green' : 'tag-yellow'}">${t.moveStatusStr}</span></td>
+          <td>${t.createTime}</td>
+          <td>${t.operator}</td>
+          <td><a onclick="showToast('查看任务 ${t.id} 的商品搬入记录')">查看记录</a></td>
+        </tr>
+      `).join('');
+
+      const authCount = shops.filter((s) => s.channel === 1 && s.authStatus === 'authorized').length;
+      document.getElementById('authorized-tb-count').textContent = authCount;
+    }
+
+    function resetTaskSearch() {
+      document.getElementById('search-task-id').value = '';
+      document.getElementById('search-channel').value = '';
+      document.getElementById('search-status').value = '';
+      renderTaskTable();
+    }
+
+    function renderAuthShopTable() {
+      const nameFilter = (document.getElementById('search-shop-name')?.value || '').trim();
+      const statusFilter = document.getElementById('search-shop-status')?.value || '';
+      const tbShops = shops.filter((s) => {
+        if (s.channel !== 1) return false;
+        if (nameFilter && !s.sellerNick.includes(nameFilter) && !s.shopName.includes(nameFilter)) return false;
+        if (statusFilter && s.authStatus !== statusFilter) return false;
+        return true;
+      });
+      const tbody = document.getElementById('auth-shop-tbody');
+      tbody.innerHTML = tbShops.map((s) => `
+        <tr>
+          <td style="font-family:monospace;">${s.xyShopId}</td>
+          <td>
+            <strong>${s.sellerNick}</strong>
+            ${s.isNew ? '<span class="tag tag-orange" style="margin-left:6px;">新授权</span>' : ''}
+          </td>
+          <td>
+            <span class="tag ${s.authStatus === 'authorized' ? 'tag-green' : 'tag-red'}">
+              ${s.authStatusText}
+            </span>
+          </td>
+          <td>${s.authTime}</td>
+          <td>${s.expireTime}</td>
+          <td>
+            ${
+              s.authStatus === 'authorized'
+                ? `<a onclick="openCreateTaskModal(1, ${s.xyShopId})">去搬家商品</a> &nbsp;|&nbsp; <a onclick="openAddAuthModal()">更新授权</a>`
+                : `<a style="color:#ff5000;font-weight:600;" onclick="openAddAuthModal()">重新授权</a>`
+            }
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function resetShopSearch() {
+      document.getElementById('search-shop-name').value = '';
+      document.getElementById('search-shop-status').value = '';
+      renderAuthShopTable();
+    }
+
+    /* 新增授权两步弹窗 */
+    function openAddAuthModal() {
+      document.getElementById('add-auth-modal').className = 'modal-mask open';
+    }
+
+    function closeAddAuthModal() {
+      document.getElementById('add-auth-modal').className = 'modal-mask';
+    }
+
+    function goStep1OrderApp() {
+      closeAddAuthModal();
+      switchView('taobaoOrder');
+      showToast('已跳转至淘宝服务市场应用订购页');
+    }
+
+    function finishStep1AndGoStep2() {
+      switchView('taobaoOAuth');
+      showToast('应用订购成功！请继续完成第二步：淘宝卖家账号确认授权');
+    }
+
+    function goStep2OAuthApp() {
+      closeAddAuthModal();
+      switchView('taobaoOAuth');
+      showToast('已跳转至淘宝卖家账号授权页面');
+    }
+
+    function fillOAuthShop(id, name, seller) {
+      document.getElementById('oauth-shop-id').value = id;
+      document.getElementById('oauth-shop-nick').value = name;
+      document.getElementById('oauth-seller-nick').value = seller;
+    }
+
+    function completeOAuthAndCallback() {
+      const shopId = document.getElementById('oauth-shop-id').value.trim() || '100208';
+      const shopNick = document.getElementById('oauth-shop-nick').value.trim();
+      const seller = document.getElementById('oauth-seller-nick').value.trim() || 'tb_seller';
+      if (!shopNick) {
+        showToast('请输入淘宝店铺昵称');
+        return;
+      }
+      simulateAuthCallbackSuccess(shopId, shopNick, seller);
+    }
+
+    /* 授权完成跳回页面时：更新列表并直接弹窗提示授权成功（显示店铺ID和店铺昵称） */
+    function simulateAuthCallbackSuccess(shopIdStr, shopNick, sellerNick) {
+      const numericId = Number(shopIdStr) || 100208;
+      const seller = sellerNick || 'tb_xingyun_flagship';
+      const nowStr = '2026-11-06 15:02:18';
+
+      shops.forEach((s) => (s.isNew = false));
+      const existing = shops.find((s) => s.channel === 1 && (s.xyShopId === numericId || s.shopName === shopNick));
+      if (existing) {
+        existing.xyShopId = numericId;
+        existing.shopName = shopNick;
+        existing.sellerNick = seller;
+        existing.authStatus = 'authorized';
+        existing.authStatusText = '已授权';
+        existing.authTime = nowStr;
+        existing.expireTime = '2027-11-06 15:02:18';
+        existing.isNew = true;
+      } else {
+        shops.unshift({
+          xyShopId: numericId,
+          shopName: shopNick,
+          sellerNick: seller,
+          channel: 1,
+          orderSourceDesc: '淘宝第三方ISV授权',
+          authStatus: 'authorized',
+          authStatusText: '已授权',
+          authTime: nowStr,
+          expireTime: '2027-11-06 15:02:18',
+          isNew: true
+        });
+      }
+
+      latestAuthedShopId = numericId;
+      switchView('taobaoAuth');
+
+      // 设置并打开「授权成功」结果弹窗
+      document.getElementById('success-modal-shop-id').textContent = String(numericId);
+      document.getElementById('success-modal-shop-name').textContent = shopNick;
+      document.getElementById('auth-success-modal').className = 'modal-mask open';
+    }
+
+    function closeAuthSuccessModal() {
+      document.getElementById('auth-success-modal').className = 'modal-mask';
+    }
+
+    function goMoveFromSuccessModal() {
+      closeAuthSuccessModal();
+      openCreateTaskModal(1, latestAuthedShopId);
+    }
+
+    /* 创建搬家任务弹窗 */
+    function openCreateTaskModal(defaultCh, defaultShopId) {
+      switchView('moveProd');
+      document.getElementById('create-task-modal').className = 'modal-mask open';
+      selectModalChannel(defaultCh || 1, defaultShopId);
+    }
+
+    function closeCreateTaskModal() {
+      document.getElementById('create-task-modal').className = 'modal-mask';
+    }
+
+    function selectModalChannel(ch, preferredShopId) {
+      currentModalChannel = ch;
+      document.getElementById('card-ch-1').className = 'channel-card' + (ch === 1 ? ' active' : '');
+      document.getElementById('card-ch-4').className = 'channel-card' + (ch === 4 ? ' active' : '');
+      document.getElementById('modal-prod-ids').placeholder =
+        `请输入${ch === 1 ? '淘宝' : '抖音'}商品ID，多个请换行输入，最多可输入 500 个`;
+      document.getElementById('modal-tb-tip').style.display = ch === 1 ? 'block' : 'none';
+      renderModalShopSelect(preferredShopId);
+    }
+
+    function renderModalShopSelect(preferredShopId) {
+      const list = shops.filter((s) => s.channel === currentModalChannel);
+      const select = document.getElementById('modal-shop-select');
+      select.innerHTML = list.map((s) => `
+        <option value="${s.xyShopId}" ${s.authStatus !== 'authorized' ? 'disabled' : ''}>
+          ${s.shopName}（${s.authStatusText}）
+        </option>
+      `).join('');
+      if (preferredShopId) {
+        select.value = String(preferredShopId);
+      }
+    }
+
+    function goAuthFromModal() {
+      closeCreateTaskModal();
+      if (currentModalChannel === 1) {
+        switchView('taobaoAuth');
+        openAddAuthModal();
+      } else {
+        showToast('跳转至抖店授权管理页面：/cdp/cloudOrders/shopList');
+      }
+    }
+
+    function updateProdCounter() {
+      const val = document.getElementById('modal-prod-ids').value;
+      const lines = val.split('\n').map((s) => s.trim()).filter(Boolean);
+      document.getElementById('prod-id-counter').textContent = `${lines.length}/500`;
+    }
+
+    function fillSampleIds() {
+      const sample = currentModalChannel === 1
+        ? ['738291049581', '738291049582', '738291049589']
+        : ['3619283746501928371', '3619283746501928372'];
+      document.getElementById('modal-prod-ids').value = sample.join('\n');
+      updateProdCounter();
+    }
+
+    function submitMoveTask() {
+      const shopId = Number(document.getElementById('modal-shop-select').value);
+      const shop = shops.find((s) => s.xyShopId === shopId);
+      const val = document.getElementById('modal-prod-ids').value;
+      const lines = val.split('\n').map((s) => s.trim()).filter(Boolean);
+      if (!shop || lines.length === 0) {
+        showToast('请选择搬出店铺并输入商品ID');
+        return;
+      }
+      tasks.unshift({
+        id: 10290 + tasks.length,
+        prodCnt: lines.length,
+        succCnt: lines.length,
+        failCnt: 0,
+        channel: currentModalChannel,
+        shopName: shop.shopName,
+        moveStatus: 2,
+        moveStatusStr: '执行完成',
+        createTime: '2026-11-06 15:05:00',
+        operator: '管理员(周宽)'
+      });
+      document.getElementById('modal-prod-ids').value = '';
+      updateProdCounter();
+      closeCreateTaskModal();
+      renderTaskTable();
+      showToast('搬家任务创建成功！');
+    }
+
+    renderTaskTable();
+    renderAuthShopTable();
+  </script>
+</body>
+</html>
