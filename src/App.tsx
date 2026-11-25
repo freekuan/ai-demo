@@ -158,6 +158,7 @@ export const shopSecondaryMenuItems: MenuProps['items'] = [
       { key: 'shop-invite-reward', label: '邀请有礼' },
       { key: 'shop-timed-lottery', label: '定时开奖 (中奖冷却规则)' },
       { key: 'shop-timed-lottery-prototype-link', label: <a href="/timed_lottery_cooldown_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>定时开奖冷却原型(独立页)</a> },
+      { key: 'shop-activity-registration-prototype', label: <a href="/activity_registration_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>线下活动报名原型(独立页)</a> },
     ],
   },
   {
@@ -212,6 +213,7 @@ const placeholderMenus: Record<PrimaryKey, MenuProps['items']> = {
     { key: 'dash-home-field-option', label: <a href="/single_choice_option_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>单选选项变更与停用原型</a> },
     { key: 'dash-home-assessment-fillblank', label: <a href="/assessment_fill_blank_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>测评填空题(文本/数值单位)原型</a> },
     { key: 'dash-home-oneid-wecom-reconnect', label: <a href="/oneid_wecom_reconnect_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>客户画像企微OneID重新打通原型</a> },
+    { key: 'dash-home-activity-registration', label: <a href="/activity_registration_prototype.html" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>线下活动报名原型(B/C双端)</a> },
   ],
   customer: [
     { key: 'dash-customer-assets', label: '客户资产' },
