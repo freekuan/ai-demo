@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>线下活动报名 · SaaS B/C 端双端联动原型 Demo</title>
+  <style>
+    :root {
+      --bg-canvas: #F3F4F6;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F8FAFC;
+      --border: #E5E7EB;
+      --border-strong: #D1D5DB;
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #9CA3AF;
+
+      --b-primary: #0F766E;
+      --b-primary-hover: #115E59;
+      --b-primary-soft: #F0FDFA;
+      --b-primary-border: #99F6E4;
+
+      --c-accent: #FF521B;
+      --c-accent-hover: #E04312;
+      --c-accent-soft: #FFF4F0;
+      --c-volt: #C8F135;
+      --c-dark: #14171F;
+
+      --success: #059669;
+      --success-soft: #ECFDF5;
+      --warning: #D97706;
+      --warning-soft: #FFFBEB;
+      --danger: #DC2626;
+      --danger-soft: #FEF2F2;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.08);
+      --shadow-phone: 0 24px 60px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .num { font-variant-numeric: tabular-nums; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    input, select, textarea { font-family: inherit; }
+
+    /* Top Workspace Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: 58px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--b-primary), #14B8A6);
+      color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 15px;
+    }
+    .brand-title { font-weight: 700; font-size: 15px; }
+    .brand-sub {
+      font-size: 12px; color: var(--b-primary); background: var(--b-primary-soft);
+      border: 1px solid var(--b-primary-border); padding: 2px 8px; border-radius: 999px; font-weight: 600;
+    }
+
+    .view-switcher { display: flex; background: #EEF0F4; padding: 3px; border-radius: 10px; gap: 2px; }
+    .view-btn { padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; color: var(--text-secondary); transition: all 0.18s; }
+    .view-btn.active { background: #fff; color: var(--text-primary); box-shadow: var(--shadow-sm); }
+
+    .sync-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18); }
+
+    /* Main Workspace */
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 416px;
+      gap: 22px;
+      padding: 20px 24px 36px;
+      max-width: 1580px;
+      margin: 0 auto;
+      align-items: start;
+    }
+    .workspace.only-b { grid-template-columns: 1fr; max-width: 1280px; }
+    .workspace.only-b .c-pane { display: none; }
+    .workspace.only-c { grid-template-columns: 1fr; justify-items: center; }
+    .workspace.only-c .b-pane { display: none; }
+    @media (max-width: 1120px) {
+      .workspace { grid-template-columns: 1fr; }
+      .c-pane { justify-self: center; }
+    }
+
+    /* ==================== B-END SAAS ADMIN ==================== */
+    .b-pane {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      min-height: 780px;
+      display: flex;
+      flex-direction: column;
+    }
+    .b-header {
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #FCFDFE;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .b-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .b-tab {
+      padding: 7px 13px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      color: var(--text-secondary); display: flex; align-items: center; gap: 6px; transition: all 0.15s;
+    }
+    .b-tab:hover { background: #F3F4F6; color: var(--text-primary); }
+    .b-tab.active { background: var(--b-primary-soft); color: var(--b-primary); }
+    .count-pill { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: rgba(15, 118, 110, 0.12); color: var(--b-primary); }
+    .b-body { padding: 20px 22px; flex: 1; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.15s;
+    }
+    .btn-primary { background: var(--b-primary); color: #fff; }
+    .btn-primary:hover { background: var(--b-primary-hover); }
+    .btn-outline { background: #fff; color: var(--text-primary); border: 1px solid var(--border-strong); }
+    .btn-outline:hover { background: #F9FAFB; }
+    .btn-ghost { color: var(--text-secondary); padding: 5px 8px; }
+    .btn-ghost:hover { background: #F3F4F6; color: var(--text-primary); }
+    .btn-danger-soft { background: var(--danger-soft); color: var(--danger); }
+    .btn-danger-soft:hover { background: #FEE2E2; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* KPI Strip */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .kpi-card { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; }
+    .kpi-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+    .kpi-val { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+    .kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Filters & Table */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .toolbar-left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .input, .select {
+      height: 34px; padding: 0 10px; border: 1px solid var(--border-strong);
+      border-radius: 8px; font-size: 13px; color: var(--text-primary); background: #fff; outline: none;
+    }
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: var(--b-primary); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+    .textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border-strong); border-radius: 8px; font-size: 13px; resize: vertical; outline: none; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      text-align: left; padding: 10px 10px; background: #F8FAFC; color: var(--text-secondary);
+      font-weight: 600; font-size: 12px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    td { padding: 11px 10px; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
+    tr:hover td { background: #FAFBFD; }
+
+    .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .tag-green { background: var(--success-soft); color: var(--success); }
+    .tag-orange { background: var(--warning-soft); color: var(--warning); }
+    .tag-gray { background: #F3F4F6; color: #6B7280; }
+    .tag-red { background: var(--danger-soft); color: var(--danger); }
+    .tag-teal { background: var(--b-primary-soft); color: var(--b-primary); }
+
+    .act-cell { display: flex; align-items: center; gap: 10px; }
+    .act-thumb {
+      width: 46px; height: 36px; border-radius: 6px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 11px;
+    }
+    .act-name { font-weight: 600; color: var(--text-primary); }
+    .act-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* B-End Form Editor */
+    .form-section { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 14px; background: #fff; }
+    .form-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+    .form-section-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .form-section-tip { font-size: 12px; color: var(--text-muted); }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .sub-row {
+      display: grid; gap: 8px; align-items: center; padding: 10px;
+      background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px;
+    }
+    .session-row { grid-template-columns: 1.5fr 1fr 0.65fr auto; }
+    .ticket-row { grid-template-columns: 1.4fr 0.65fr 1.35fr auto; }
+    .custom-field-row { grid-template-columns: 1.1fr 0.85fr 1.1fr 0.65fr auto; }
+
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .check-chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px;
+      border-radius: 8px; border: 1px solid var(--border-strong); font-size: 12px; font-weight: 500;
+      cursor: pointer; user-select: none; background: #fff;
+    }
+    .check-chip.checked { border-color: var(--b-primary); background: var(--b-primary-soft); color: var(--b-primary); font-weight: 600; }
+
+    .rule-radio-row {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      padding: 10px 12px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px;
+    }
+    .rule-radio-row label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+
+    /* Stats Dashboard Cards */
+    .stats-two-col { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; margin-top: 14px; }
+    .stat-panel { border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; background: #fff; }
+    .stat-panel-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .bar-track { height: 7px; background: #EEF2F6; border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    .bar-fill { height: 100%; background: var(--b-primary); border-radius: 999px; }
+    .size-pill-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .size-pill {
+      padding: 6px 12px; border-radius: 8px; background: var(--bg-subtle); border: 1px solid var(--border);
+      font-size: 12px; display: flex; gap: 6px; align-items: center;
+    }
+
+    /* ==================== C-END MINI PROGRAM SIMULATOR ==================== */
+    .c-pane { position: sticky; top: 76px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .role-pill-bar { display: flex; background: #E5E7EB; padding: 3px; border-radius: 999px; width: 390px; }
+    .role-pill { flex: 1; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--text-secondary); transition: all 0.18s; }
+    .role-pill.active { background: var(--c-dark); color: #fff; box-shadow: var(--shadow-sm); }
+
+    .phone-frame {
+      width: 390px; height: 760px; background: #F5F6F8; border-radius: 38px;
+      border: 8px solid #181B22; box-shadow: var(--shadow-phone); overflow: hidden;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .mp-nav {
+      height: 52px; background: #fff; display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px 0; border-bottom: 1px solid #F0F1F3; flex-shrink: 0;
+    }
+    .mp-nav-left { width: 72px; display: flex; align-items: center; }
+    .mp-back { font-size: 18px; color: var(--text-primary); width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; }
+    .mp-back:hover { background: #F3F4F6; }
+    .mp-title { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+    .mp-capsule {
+      width: 72px; height: 28px; border: 1px solid #E5E7EB; border-radius: 999px;
+      display: flex; align-items: center; justify-content: space-around; padding: 0 6px; font-size: 12px;
+    }
+    .mp-capsule-div { width: 1px; height: 14px; background: #E5E7EB; }
+
+    .mp-content { flex: 1; overflow-y: auto; position: relative; padding-bottom: 74px; }
+    .mp-content::-webkit-scrollbar { width: 4px; }
+    .mp-content::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+
+    /* C-end List & Detail */
+    .c-cat-tabs { display: flex; gap: 16px; padding: 10px 14px 0; background: #fff; overflow-x: auto; border-bottom: 1px solid #F1F2F4; }
+    .c-cat-tab { padding-bottom: 9px; font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; position: relative; }
+    .c-cat-tab.active { color: var(--c-dark); }
+    .c-cat-tab.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 3px; background: var(--c-accent); }
+
+    .c-filter-bar { display: flex; justify-content: space-around; padding: 9px 12px; background: #fff; font-size: 12px; border-bottom: 1px solid #F1F2F4; }
+    .c-filter-chip { padding: 3px 10px; border-radius: 999px; font-size: 12px; color: var(--text-secondary); }
+    .c-filter-chip.active { background: var(--c-accent-soft); color: var(--c-accent); font-weight: 600; }
+
+    .c-card-list { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+    .c-act-card { background: #fff; border-radius: 14px; padding: 12px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04); cursor: pointer; transition: transform 0.15s; }
+    .c-act-card:active { transform: scale(0.985); }
+    .c-act-top { display: flex; gap: 11px; }
+    .c-poster-sm {
+      width: 104px; height: 82px; border-radius: 10px; position: relative; overflow: hidden;
+      flex-shrink: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; color: #fff;
+    }
+    .c-status-badge { position: absolute; top: 6px; left: 6px; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: var(--c-accent); color: #fff; }
+    .c-status-badge.ended { background: rgba(17, 24, 39, 0.72); }
+    .c-act-info { flex: 1; min-width: 0; }
+    .c-act-title { font-size: 14px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
+    .c-act-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; background: #F3F4F6; color: var(--text-secondary); margin-bottom: 5px; }
+    .c-act-meta { font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .c-act-bottom { margin-top: 10px; padding-top: 9px; border-top: 1px dashed #ECEEF2; display: flex; align-items: center; justify-content: space-between; }
+
+    .avatar-stack { display: flex; align-items: center; }
+    .avatar-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; margin-left: -6px; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; }
+    .avatar-dot:first-child { margin-left: 0; }
+    .avatar-text { font-size: 11px; color: var(--text-secondary); margin-left: 6px; }
+
+    .c-price { font-size: 15px; font-weight: 800; color: var(--c-accent); }
+    .c-cta-sm { padding: 5px 12px; border-radius: 999px; background: var(--c-dark); color: #fff; font-size: 12px; font-weight: 600; }
+    .c-cta-sm.disabled { background: #D1D5DB; }
+
+    .c-hero { height: 185px; padding: 18px 16px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; }
+    .c-hero-eyebrow { display: inline-flex; align-self: flex-start; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); font-size: 11px; font-weight: 600; }
+    .c-hero-headline { font-size: 21px; font-weight: 800; line-height: 1.25; }
+    .c-hero-sub { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+
+    .c-section-card { background: #fff; margin: 10px 12px; border-radius: 14px; padding: 14px; box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04); }
+    .c-info-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+    .c-nav-icon-btn { padding: 4px 9px; border-radius: 999px; background: #EFF6FF; color: #2563EB; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+    .progress-track { height: 6px; background: #F1F5F9; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--c-accent), #FF8A3D); border-radius: 999px; }
+
+    /* Compact Summary Card (for Single Session / Single SKU) */
+    .c-compact-summary {
+      background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFC 100%);
+      border: 1px solid #E5E7EB;
+      border-left: 4px solid var(--c-accent);
+      margin: 10px 12px;
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .c-adaptive-hint {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #EFF6FF;
+      color: #1D4ED8;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .c-option-card {
+      border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-top: 8px;
+      cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.15s;
+    }
+    .c-option-card.selected { border-color: var(--c-accent); background: var(--c-accent-soft); }
+    .c-option-card.soldout { opacity: 0.5; pointer-events: none; background: #F9FAFB; }
+    .stepper { display: inline-flex; align-items: center; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+    .stepper button { width: 28px; height: 28px; background: #F9FAFB; font-size: 15px; font-weight: 700; }
+    .stepper span { width: 34px; text-align: center; font-weight: 700; font-size: 13px; }
+    .attendee-box { background: #F8FAFC; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px; margin-top: 10px; }
+    .attendee-box-title { font-size: 12px; font-weight: 700; color: var(--c-dark); margin-bottom: 8px; }
+    .c-field-row { display: grid; grid-template-columns: 78px 1fr; align-items: center; gap: 6px; margin-bottom: 7px; font-size: 12px; }
+    .c-input { height: 30px; padding: 0 8px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 12px; background: #fff; width: 100%; }
+
+    .mp-bottom-bar {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: #fff;
+      border-top: 1px solid #ECEEF2; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; z-index: 20;
+    }
+    .mp-tabbar { justify-content: space-around; }
+    .mp-tab-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .mp-tab-item.active { color: var(--c-accent); }
+    .mp-tab-icon { font-size: 18px; line-height: 1; }
+    .c-primary-btn {
+      flex: 1; height: 40px; border-radius: 999px; background: var(--c-accent); color: #fff;
+      font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    }
+    .c-primary-btn:hover { background: var(--c-accent-hover); }
+    .c-primary-btn:disabled { background: #D1D5DB; cursor: not-allowed; }
+
+    .qr-box { margin-top: 10px; padding: 12px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 10px; text-align: center; }
+    .fake-qr {
+      width: 106px; height: 106px; margin: 0 auto 6px;
+      background: repeating-linear-gradient(90deg, #111 0 6px, #fff 6px 12px), repeating-linear-gradient(0deg, #111 0 6px, transparent 6px 12px);
+      background-blend-mode: multiply; border: 6px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 6px;
+    }
+    .verify-code-text { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; font-weight: 800; letter-spacing: 2px; color: var(--c-dark); }
+
+    .scanner-hero { background: var(--c-dark); color: #fff; padding: 18px 16px; text-align: center; }
+    .scanner-frame {
+      width: 156px; height: 156px; margin: 12px auto; border: 2px solid rgba(200, 241, 53, 0.85);
+      border-radius: 16px; position: relative; display: grid; place-items: center;
+      background: radial-gradient(circle, rgba(200,241,53,0.12), transparent 70%);
+    }
+    .scanner-line { position: absolute; left: 10px; right: 10px; height: 2px; background: var(--c-volt); box-shadow: 0 0 10px var(--c-volt); animation: scanMove 2.2s ease-in-out infinite; }
+    @keyframes scanMove { 0%, 100% { top: 18px; } 50% { top: 136px; } }
+    .verify-success-card { margin: 12px; padding: 16px; border-radius: 14px; background: #ECFDF5; border: 2px solid #10B981; }
+    .verify-highlight-kit { margin-top: 10px; padding: 12px; border-radius: 10px; background: #14171F; color: var(--c-volt); text-align: center; }
+
+    .mp-modal-mask { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.55); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
+    .mp-modal-sheet { width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 18px 16px 24px; max-height: 75%; overflow-y: auto; }
+
+    .toast {
+      position: fixed; top: 72px; left: 50%; transform: translateX(-50%) translateY(-16px);
+      background: #111827; color: #fff; padding: 9px 18px; border-radius: 999px; font-size: 13px; font-weight: 600;
+      box-shadow: var(--shadow-md); opacity: 0; pointer-events: none; transition: all 0.22s ease; z-index: 100;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .theme-run { background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 52%, #FF521B 100%); }
+    .theme-pet { background: linear-gradient(135deg, #064E3B 0%, #059669 60%, #F59E0B 100%); }
+    .theme-beauty { background: linear-gradient(135deg, #4C0519 0%, #BE123C 58%, #FB7185 100%); }
+  </style>
+</head>
+<body>
+
+  <header class="top-bar">
+    <div class="brand">
+      <div class="brand-mark">活</div>
+      <div class="brand-title">线下活动报名 · SaaS 增值模块 Demo</div>
+      <span class="brand-sub">V2 升级：自定义字段 / 活动数据 / 退改控制 / 单场次自适应</span>
+    </div>
+
+    <div class="view-switcher">
+      <button class="view-btn active" onclick="setLayout('both', this)">双端联动视图</button>
+      <button class="view-btn" onclick="setLayout('b', this)">仅看 B 端后台</button>
+      <button class="view-btn" onclick="setLayout('c', this)">仅看 C 端小程序</button>
+    </div>
+
+    <div class="sync-badge">
+      <span class="sync-dot"></span>
+      <span>B 端编辑 / C 端报名 / 核销数据实时同步</span>
+    </div>
+  </header>
+
+  <div id="toast" class="toast"></div>
+
+  <main id="workspace" class="workspace">
+    <section class="b-pane">
+      <div class="b-header">
+        <div class="b-tabs" id="bTabs"></div>
+        <button class="btn btn-primary btn-sm" onclick="openCreateActivity()">+ 发布新活动</button>
+      </div>
+      <div class="b-body" id="bBody"></div>
+    </section>
+
+    <section class="c-pane">
+      <div class="role-pill-bar">
+        <button class="role-pill active" id="roleUserBtn" onclick="setCRole('user')">普通用户视角（报名/核销码）</button>
+        <button class="role-pill" id="roleVerifierBtn" onclick="setCRole('verifier')">现场核销员视角（扫码发物资）</button>
+      </div>
+
+      <div class="phone-frame">
+        <div class="mp-nav">
+          <div class="mp-nav-left" id="mpNavLeft"></div>
+          <div class="mp-title" id="mpTitle">线下活动报名</div>
+          <div class="mp-capsule">
+            <span>•••</span>
+            <span class="mp-capsule-div"></span>
+            <span>◎</span>
+          </div>
+        </div>
+
+        <div class="mp-content" id="mpContent"></div>
+        <div id="mpBottomContainer"></div>
+        <div id="mpModalContainer"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ==================== PRESET FORM FIELDS ====================
+    const PRESET_FIELDS = [
+      { key: 'name', label: '姓名', type: 'text', required: true, placeholder: '请输入真实姓名' },
+      { key: 'phone', label: '手机号', type: 'text', required: true, placeholder: '请输入11位手机号' },
+      { key: 'gender', label: '性别', type: 'select', required: true, options: ['男', '女'] },
+      { key: 'size', label: 'T恤尺码', type: 'select', required: true, options: ['S', 'M', 'L', 'XL', 'XXL'] },
+      { key: 'idCard', label: '身份证号', type: 'text', required: false, placeholder: '用于线下投保意外险' },
+      { key: 'petInfo', label: '宠物品种/疫苗', type: 'text', required: false, placeholder: '如：金毛 / 已接种狂犬' },
+      { key: 'skinType', label: '肤质偏好', type: 'select', required: false, options: ['干性肌肤', '油性肌肤', '混合肌', '敏感肌'] }
+    ];
+
+    const state = {
+      bTab: 'activities', // activities | editor | stats | attendees | verifiers
+      editingActivityId: null,
+      statsActivityId: 'act-1',
+      bFilterCat: '全部',
+      bAttendeeActFilter: 'all',
+
+      cRole: 'user',
+      cPage: 'list',
+      cCat: '全部',
+      cStatusFilter: 'all',
+      cOrderTab: 'all',
+      selectedActivityId: 'act-1',
+      checkout: { sessionId: null, ticketId: null, qty: 1, agreed: false, attendees: [] },
+      cModal: null,
+      lastVerifiedResult: null,
+      verifierInputCode: '',
+
+      verifiers: [
+        { id: 'v1', name: '李店长（主理人）', phone: '138****6601', scope: '全部活动' },
+        { id: 'v2', name: '王志愿（起点物资组）', phone: '153****8783', scope: '深马赛前轻功早餐跑' }
+      ],
+
+      activities: [
+        {
+          id: 'act-1',
+          title: '深马赛前轻功早餐跑',
+          category: '赛前早餐跑',
+          theme: 'theme-run',
+          tagline: '明天最痛的 6 公里，今天先笑着完成',
+          location: '广东省深圳市南山区桂湾四路华润前海中心北侧前海香港印象',
+          city: '深圳市',
+          ctaText: '立即报名',
+          status: 'active',
+          cancelPolicy: { type: 'before_hours', hours: 24 }, // none | before_hours
+          agreementTitle: '运动安全及免责协议',
+          agreementBody: '1. 本人确认身体健康，无高血压、心脏病等不适宜剧烈运动的疾病；\n2. 活动期间服从领跑员及现场工作人员指挥，注意交通安全；\n3. 主办方将依据本人提交的实名信息统一购买活动当日意外险。',
+          formFields: ['name', 'phone', 'gender', 'size', 'idCard'],
+          customFields: [
+            { id: 'cf-1', label: '预计配速(分/公里)', type: 'number', required: false, options: '' }
+          ],
+          sessions: [
+            { id: 's-101', label: '12-05 (周六) 05:40 - 08:40', quota: 300, booked: 171 },
+            { id: 's-102', label: '12-06 (周日) 06:30 - 09:00', quota: 120, booked: 118 }
+          ],
+          tickets: [
+            { id: 't-101', name: '早餐 + 完赛礼', price: 9.9, stockMode: 'shared', limit: null, sold: 142 },
+            { id: 't-102', name: '早餐 + 完赛礼 + 限定跑步T恤', price: 99.9, stockMode: 'limited', limit: 50, sold: 47 }
+          ]
+        },
+        {
+          id: 'act-2',
+          title: '周末携宠公园徒步派对',
+          category: '宠物聚会',
+          theme: 'theme-pet',
+          tagline: '带毛孩子撒欢 3 公里 · 免费领冻干补给包',
+          location: '上海市徐汇区西岸滨江宠物友好草坪集合点',
+          city: '上海市',
+          ctaText: '立即报名',
+          status: 'active',
+          cancelPolicy: { type: 'before_hours', hours: 12 },
+          agreementTitle: '携宠活动安全承诺书',
+          agreementBody: '1. 参与宠物须已完成有效狂犬疫苗接种，活动全程须佩戴牵引绳；\n2. 主人须全程看护宠物，自行承担因宠物引发的第三方安全责任。',
+          formFields: ['name', 'phone', 'petInfo'],
+          customFields: [
+            { id: 'cf-2', label: '宠物生日', type: 'date', required: false, options: '' }
+          ],
+          sessions: [
+            { id: 's-201', label: '12-12 (周六) 09:30 - 11:30', quota: 60, booked: 42 },
+            { id: 's-202', label: '12-12 (周六) 14:30 - 16:30', quota: 60, booked: 28 }
+          ],
+          tickets: [
+            { id: 't-201', name: '1人1宠 · 免费体验名额', price: 0, stockMode: 'shared', limit: null, sold: 50 },
+            { id: 't-202', name: '1人1宠 + 定制宠物飞盘零食包', price: 39.9, stockMode: 'limited', limit: 30, sold: 20 }
+          ]
+        },
+        {
+          id: 'act-3',
+          title: '冬日高定彩妆 VIP 试妆沙龙（单场次单SKU示例）',
+          category: 'VIP沙龙',
+          theme: 'theme-beauty',
+          tagline: '点进报名页体验「单场次+单套餐」自动收起精简模式',
+          location: '杭州市上城区湖滨银泰 in77 A区品牌快闪空间',
+          city: '杭州市',
+          ctaText: '抢占名额',
+          status: 'active',
+          cancelPolicy: { type: 'none', hours: 0 },
+          agreementTitle: '沙龙预约须知',
+          agreementBody: '1. 每场严格限流 15 人，报名成功后不支持取消退款，请确认时间后再报名；\n2. 到店核销即送 ¥50 无门槛正装券。',
+          formFields: ['name', 'phone', 'skinType'],
+          customFields: [],
+          sessions: [
+            { id: 's-301', label: '12-13 (周日) 14:00 - 15:30', quota: 15, booked: 11 }
+          ],
+          tickets: [
+            { id: 't-301', name: 'VIP 占位费（到店核销返50元券+小样）', price: 29.9, stockMode: 'shared', limit: null, sold: 11 }
+          ]
+        }
+      ],
+
+      orders: [
+        {
+          id: 'REG-20261201-01',
+          tradeOrderNo: 'TRD-882910442',
+          activityId: 'act-1',
+          sessionId: 's-101',
+          ticketId: 't-102',
+          qty: 1,
+          totalPrice: 99.9,
+          status: 'pending_verify',
+          createdAt: '2026-11-25 10:12',
+          attendees: [
+            {
+              id: 'ATT-1001',
+              code: '892410',
+              status: 'pending_verify',
+              data: { name: '周明远', phone: '15382328783', gender: '男', size: 'L', idCard: '4403051992****281X', 'cf-1': '5.5' }
+            }
+          ]
+        },
+        {
+          id: 'REG-20261201-02',
+          tradeOrderNo: 'TRD-882910199',
+          activityId: 'act-1',
+          sessionId: 's-101',
+          ticketId: 't-102',
+          qty: 1,
+          totalPrice: 99.9,
+          status: 'completed',
+          createdAt: '2026-11-24 19:20',
+          attendees: [
+            {
+              id: 'ATT-1003',
+              code: '334812',
+              status: 'completed',
+              data: { name: '张晓雯', phone: '13600001122', gender: '女', size: 'M', idCard: '4403051995****1120', 'cf-1': '6.0' }
+            }
+          ]
+        },
+        {
+          id: 'REG-20261201-03',
+          tradeOrderNo: null,
+          activityId: 'act-2',
+          sessionId: 's-201',
+          ticketId: 't-201',
+          qty: 1,
+          totalPrice: 0,
+          status: 'completed',
+          createdAt: '2026-11-24 18:40',
+          attendees: [
+            {
+              id: 'ATT-1002',
+              code: '551920',
+              status: 'completed',
+              data: { name: '林小溪', phone: '13911223344', petInfo: '柯基 / 已打齐三针', 'cf-2': '2024-03-15' }
+            }
+          ]
+        }
+      ]
+    };
+
+    // ==================== HELPERS ====================
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    function setLayout(mode, btn) {
+      const ws = document.getElementById('workspace');
+      ws.className = 'workspace' + (mode === 'b' ? ' only-b' : mode === 'c' ? ' only-c' : '');
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function getActivity(id) { return state.activities.find(a => a.id === id); }
+    function getSession(act, sid) { return act?.sessions.find(s => s.id === sid); }
+    function getTicket(act, tid) { return act?.tickets.find(t => t.id === tid); }
+
+    function getActiveFormSchema(act) {
+      const preset = act.formFields.map(k => PRESET_FIELDS.find(f => f.key === k)).filter(Boolean);
+      const custom = (act.customFields || []).map(cf => ({
+        key: cf.id,
+        label: cf.label || '未命名字段',
+        type: cf.type, // text | number | date | select
+        required: !!cf.required,
+        options: cf.type === 'select' ? String(cf.options || '').split(/[,，]/).map(s => s.trim()).filter(Boolean) : [],
+        placeholder: cf.type === 'number' ? '请输入数字' : '请输入' + (cf.label || '')
+      }));
+      return [...preset, ...custom];
+    }
+
+    function formatCancelRule(act) {
+      if (!act.cancelPolicy || act.cancelPolicy.type === 'none') {
+        return '报名成功后不支持取消及退款';
+      }
+      return `场次开始前 ${act.cancelPolicy.hours} 小时可自助免费取消并原路退款，逾期不可退`;
+    }
+
+    function canOrderCancel(order, act) {
+      if (order.status !== 'pending_verify') return { ok: false, reason: '' };
+      if (!act?.cancelPolicy || act.cancelPolicy.type === 'none') {
+        return { ok: false, reason: '按活动规则不可取消' };
+      }
+      return { ok: true, reason: `开始前${act.cancelPolicy.hours}小时可免费退` };
+    }
+
+    function getActStats(act) {
+      const totalQuota = act.sessions.reduce((s, x) => s + Number(x.quota || 0), 0);
+      const totalBooked = act.sessions.reduce((s, x) => s + Number(x.booked || 0), 0);
+      const prices = act.tickets.map(t => Number(t.price || 0));
+      const minPrice = prices.length ? Math.min(...prices) : 0;
+      const maxPrice = prices.length ? Math.max(...prices) : 0;
+      return { totalQuota, totalBooked, minPrice, maxPrice };
+    }
+
+    function formatPriceRange(act) {
+      const { minPrice, maxPrice } = getActStats(act);
+      if (maxPrice === 0) return '0元免费';
+      if (minPrice === maxPrice) return `¥${minPrice.toFixed(2)}`;
+      return `¥${minPrice.toFixed(2)} - ${maxPrice.toFixed(2)}`;
+    }
+
+    function formatMinPrice(act) {
+      const { minPrice, maxPrice } = getActStats(act);
+      if (maxPrice === 0) return '0元报名';
+      return minPrice === maxPrice ? `¥${minPrice.toFixed(2)}` : `¥${minPrice.toFixed(2)}起`;
+    }
+
+    function allAttendeesFlat() {
+      const list = [];
+      state.orders.forEach(o => {
+        const act = getActivity(o.activityId);
+        const ses = getSession(act, o.sessionId);
+        const tic = getTicket(act, o.ticketId);
+        o.attendees.forEach(att => list.push({ order: o, act, ses, tic, att }));
+      });
+      return list;
+    }
+
+    // ==================== B-END RENDERING ====================
+    function renderBEnd() {
+      const flat = allAttendeesFlat();
+      const pendingCount = flat.filter(x => x.att.status === 'pending_verify').length;
+
+      const tabs = [
+        { id: 'activities', label: '活动列表', count: state.activities.length },
+        { id: 'attendees', label: '参与人名单 & 导出', count: flat.length },
+        { id: 'verifiers', label: '核销员授权', count: state.verifiers.length }
+      ];
+      if (state.bTab === 'editor') {
+        tabs.splice(1, 0, { id: 'editor', label: state.editingActivityId ? '编辑活动' : '发布新活动' });
+      }
+      if (state.bTab === 'stats') {
+        tabs.splice(1, 0, { id: 'stats', label: '活动数据看板' });
+      }
+
+      document.getElementById('bTabs').innerHTML = tabs.map(t => `
+        <button class="b-tab ${state.bTab === t.id ? 'active' : ''}" onclick="switchBTab('${t.id}')">
+          <span>${t.label}</span>
+          ${t.count !== undefined ? `<span class="count-pill num">${t.count}</span>` : ''}
+        </button>
+      `).join('');
+
+      const body = document.getElementById('bBody');
+      if (state.bTab === 'activities') renderBActivities(body, pendingCount);
+      else if (state.bTab === 'editor') renderBEditor(body);
+      else if (state.bTab === 'stats') renderBStats(body);
+      else if (state.bTab === 'attendees') renderBAttendees(body, flat);
+      else if (state.bTab === 'verifiers') renderBVerifiers(body);
+    }
+
+    function switchBTab(tab) { state.bTab = tab; renderBEnd(); }
+
+    function openActStats(actId) {
+      state.statsActivityId = actId;
+      state.bTab = 'stats';
+      renderBEnd();
+    }
+
+    function renderBActivities(container, pendingCount) {
+      const totalBookedAll = state.activities.reduce((s, a) => s + getActStats(a).totalBooked, 0);
+      const cats = ['全部', ...new Set(state.activities.map(a => a.category))];
+      const filtered = state.bFilterCat === '全部'
+        ? state.activities
+        : state.activities.filter(a => a.category === state.bFilterCat);
+
+      container.innerHTML = `
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">进行中活动</div>
+            <div class="kpi-val num">${state.activities.filter(a => a.status === 'active').length}</div>
+            <div class="kpi-sub">点击每行「数据」查看单活动复盘</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">累计报名人次</div>
+            <div class="kpi-val num">${totalBookedAll}</div>
+            <div class="kpi-sub">场次名额主控，防止超卖</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">待核销凭证（实时）</div>
+            <div class="kpi-val num" style="color:var(--b-primary)">${pendingCount}</div>
+            <div class="kpi-sub">可在右侧 C 端扫码核销</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">已授权核销员</div>
+            <div class="kpi-val num">${state.verifiers.length}</div>
+            <div class="kpi-sub">小程序扫码 · 零企微门槛</div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            ${cats.map(c => `
+              <button class="btn btn-sm ${state.bFilterCat === c ? 'btn-primary' : 'btn-outline'}"
+                onclick="state.bFilterCat='${c}';renderBEnd()">${c}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>活动信息</th>
+              <th>场次排期（主库存）</th>
+              <th>套餐 SKU & 退改规则</th>
+              <th>总进度</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(act => {
+              const st = getActStats(act);
+              const cancelBadge = act.cancelPolicy?.type === 'none'
+                ? '<span class="tag tag-gray">不可取消</span>'
+                : `<span class="tag tag-teal">前${act.cancelPolicy.hours}h可退</span>`;
+              return `
+                <tr>
+                  <td>
+                    <div class="act-cell">
+                      <div class="act-thumb ${act.theme}">${act.category.slice(0,2)}</div>
+                      <div>
+                        <div class="act-name">${act.title}</div>
+                        <div class="act-meta">${act.category} · ${act.city} · 按钮:${act.ctaText}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    ${act.sessions.map(s => `
+                      <div style="font-size:12px;margin-bottom:2px" class="num">
+                        ${s.label} <span style="color:var(--b-primary);font-weight:600">(${s.booked}/${s.quota})</span>
+                      </div>
+                    `).join('')}
+                  </td>
+                  <td>
+                    <div class="num" style="font-weight:700">${formatPriceRange(act)} <span style="font-size:11px;font-weight:400;color:var(--text-muted)">(${act.tickets.length} SKU)</span></div>
+                    <div style="margin-top:3px">${cancelBadge}</div>
+                  </td>
+                  <td class="num">
+                    <div style="font-weight:600">${st.totalBooked} / ${st.totalQuota}</div>
+                    <div style="font-size:11px;color:var(--text-muted)">余 ${Math.max(0, st.totalQuota - st.totalBooked)}</div>
+                  </td>
+                  <td>
+                    ${act.status === 'active' ? '<span class="tag tag-green">报名中</span>' : '<span class="tag tag-gray">已结束</span>'}
+                  </td>
+                  <td style="white-space:nowrap">
+                    <button class="btn btn-ghost btn-sm" style="color:var(--b-primary)" onclick="openActStats('${act.id}')">数据</button>
+                    <button class="btn btn-ghost btn-sm" onclick="openEditActivity('${act.id}')">编辑</button>
+                    <button class="btn btn-ghost btn-sm" onclick="duplicateActivity('${act.id}')">复制</button>
+                    <button class="btn btn-ghost btn-sm" onclick="toggleActivityStatus('${act.id}')">${act.status === 'active' ? '结束' : '开启'}</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ==================== B-END ACTIVITY STATS DASHBOARD ====================
+    function renderBStats(container) {
+      const act = getActivity(state.statsActivityId) || state.activities[0];
+      const st = getActStats(act);
+      const actOrders = state.orders.filter(o => o.activityId === act.id);
+      const actAtts = allAttendeesFlat().filter(x => x.act?.id === act.id);
+
+      const validAtts = actAtts.filter(x => x.att.status !== 'cancelled');
+      const verifiedAtts = actAtts.filter(x => x.att.status === 'completed');
+      const cancelledAtts = actAtts.filter(x => x.att.status === 'cancelled');
+      const netRevenue = actOrders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.totalPrice, 0);
+      const verifyRate = validAtts.length ? Math.round((verifiedAtts.length / validAtts.length) * 100) : 0;
+
+      // Aggregate T-shirt sizes or select fields from valid attendees
+      const sizeCounts = {};
+      validAtts.forEach(x => {
+        if (x.att.data.size) {
+          const k = (x.att.data.gender ? x.att.data.gender + ' · ' : '') + x.att.data.size + '码';
+          sizeCounts[k] = (sizeCounts[k] || 0) + 1;
+        }
+      });
+
+      container.innerHTML = `
+        <div class="toolbar">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="btn btn-outline btn-sm" onclick="switchBTab('activities')">← 返回列表</button>
+              <h3 style="font-size:16px">活动数据复盘：${act.title}</h3>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:4px">
+              以下包含历史存量名额统计与本次演示实时产生的报名/核销明细数据
+            </p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <select class="select" onchange="openActStats(this.value)">
+              ${state.activities.map(a => `<option value="${a.id}" ${a.id===act.id?'selected':''}>${a.title}</option>`).join('')}
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="state.bAttendeeActFilter='${act.id}';switchBTab('attendees')">查看参与人明细</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">总报名进度（含存量）</div>
+            <div class="kpi-val num">${st.totalBooked} <span style="font-size:13px;color:var(--text-muted)">/ ${st.totalQuota}</span></div>
+            <div class="kpi-sub">名额使用率 ${st.totalQuota ? Math.round(st.totalBooked/st.totalQuota*100) : 0}%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">演示实收净额（主订单表）</div>
+            <div class="kpi-val num" style="color:var(--b-primary)">¥${netRevenue.toFixed(2)}</div>
+            <div class="kpi-sub">有效订单 ${actOrders.filter(o=>o.status!=='cancelled').length} 笔（已剔除退款）</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">现场到场核销率</div>
+            <div class="kpi-val num" style="color:var(--success)">${verifyRate}%</div>
+            <div class="kpi-sub">已核销 ${verifiedAtts.length} 人 / 有效报名 ${validAtts.length} 人</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">取消 / 退款人次</div>
+            <div class="kpi-val num" style="color:${cancelledAtts.length?'var(--danger)':'var(--text-primary)'}">${cancelledAtts.length}</div>
+            <div class="kpi-sub">规则：${act.cancelPolicy?.type==='none'?'不可取消':'前'+act.cancelPolicy.hours+'h可退'}</div>
+          </div>
+        </div>
+
+        <div class="stats-two-col">
+          <div class="stat-panel">
+            <div class="stat-panel-title">
+              <span>各场次名额与签到情况</span>
+              <span class="tag tag-teal">${act.sessions.length} 个场次</span>
+            </div>
+            ${act.sessions.map(s => {
+              const pct = s.quota ? Math.min(100, Math.round(s.booked / s.quota * 100)) : 0;
+              const sesVerified = verifiedAtts.filter(x => x.ses?.id === s.id).length;
+              return `
+                <div style="margin-bottom:12px">
+                  <div style="display:flex;justify-content:space-between;font-size:12px">
+                    <span style="font-weight:600">${s.label}</span>
+                    <span class="num">已报 <strong>${s.booked}</strong>/${s.quota} · 已核销 ${sesVerified}</span>
+                  </div>
+                  <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="stat-panel">
+            <div class="stat-panel-title">
+              <span>各套餐 SKU 销量 & 备货参考</span>
+              <span class="tag tag-gray">${act.tickets.length} 个套餐</span>
+            </div>
+            ${act.tickets.map(t => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed #F1F5F9;font-size:12px">
+                <div>
+                  <div style="font-weight:600">${t.name}</div>
+                  <div style="font-size:11px;color:var(--text-muted)">
+                    ${t.stockMode === 'limited' ? `独立限量 ${t.limit} 份` : '共享场次名额'}
+                  </div>
+                </div>
+                <div style="text-align:right" class="num">
+                  <div style="font-weight:700;color:var(--b-primary)">已售 ${t.sold} 份</div>
+                  <div style="font-size:11px;color:var(--text-muted)">¥${t.price.toFixed(2)}</div>
+                </div>
+              </div>
+            `).join('')}
+
+            ${Object.keys(sizeCounts).length ? `
+              <div style="margin-top:12px">
+                <div style="font-size:12px;font-weight:700;color:var(--text-secondary)">物资尺码汇总（实时统计）</div>
+                <div class="size-pill-grid">
+                  ${Object.entries(sizeCounts).map(([k, v]) => `
+                    <div class="size-pill"><span>${k}</span><strong class="num" style="color:var(--b-primary)">${v} 件</strong></div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // ==================== B-END EDITOR ====================
+    let editorDraft = null;
+
+    function openCreateActivity() {
+      state.editingActivityId = null;
+      editorDraft = {
+        id: 'act-' + Date.now(),
+        title: '周末城市轻骑行体验团',
+        category: '赛前早餐跑',
+        theme: 'theme-run',
+        tagline: '15公里滨海绿道骑行 · 含咖啡补给',
+        location: '深圳市深圳湾公园海风运动广场集合',
+        city: '深圳市',
+        ctaText: '立即报名',
+        status: 'active',
+        cancelPolicy: { type: 'before_hours', hours: 24 },
+        agreementTitle: '户外骑行安全免责协议',
+        agreementBody: '1. 参与人需佩戴头盔并遵守交通规则；\n2. 确认自身健康状况适合中低强度骑行运动。',
+        formFields: ['name', 'phone', 'gender', 'idCard'],
+        customFields: [
+          { id: 'cf-' + Date.now(), label: '骑行经验', type: 'select', required: false, options: '新手,进阶,资深' }
+        ],
+        sessions: [
+          { id: 's-' + Date.now(), label: '12-19 (周六) 07:30 - 10:00', quota: 40, booked: 0 }
+        ],
+        tickets: [
+          { id: 't-' + Date.now(), name: '自带车 · 咖啡补给包', price: 19.9, stockMode: 'shared', limit: null, sold: 0 },
+          { id: 't-' + (Date.now() + 1), name: '含租公路车 + 补给包', price: 89.9, stockMode: 'limited', limit: 15, sold: 0 }
+        ]
+      };
+      state.bTab = 'editor';
+      renderBEnd();
+    }
+
+    function openEditActivity(id) {
+      state.editingActivityId = id;
+      editorDraft = JSON.parse(JSON.stringify(getActivity(id)));
+      state.bTab = 'editor';
+      renderBEnd();
+    }
+
+    function duplicateActivity(id) {
+      const orig = getActivity(id);
+      const copy = JSON.parse(JSON.stringify(orig));
+      copy.id = 'act-' + Date.now();
+      copy.title = orig.title + '（副本）';
+      copy.sessions.forEach((s, i) => { s.id = 's-' + Date.now() + i; s.booked = 0; });
+      copy.tickets.forEach((t, i) => { t.id = 't-' + Date.now() + i; t.sold = 0; });
+      state.activities.unshift(copy);
+      showToast('已一键复制活动，并同步至右侧小程序');
+      renderAll();
+    }
+
+    function toggleActivityStatus(id) {
+      const act = getActivity(id);
+      act.status = act.status === 'active' ? 'ended' : 'active';
+      showToast(act.status === 'active' ? '活动已重新开启报名' : '活动已设为已结束');
+      renderAll();
+    }
+
+    function renderBEditor(container) {
+      const d = editorDraft;
+      container.innerHTML = `
+        <div class="toolbar" style="margin-bottom:14px">
+          <div>
+            <h3 style="font-size:16px">${state.editingActivityId ? '编辑活动：' + d.title : '发布新活动'}</h3>
+            <p style="font-size:12px;color:var(--text-muted)">提示：可尝试把场次和套餐都删到只剩 1 个，观察右侧 C 端确认页自动收起为紧凑卡片</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" onclick="switchBTab('activities')">取消</button>
+            <button class="btn btn-primary" onclick="saveEditor()">保存并实时同步到小程序</button>
+          </div>
+        </div>
+
+        <!-- 1. Basic -->
+        <div class="form-section">
+          <div class="form-section-head">
+            <div class="form-section-title">1. 活动基础信息</div>
+          </div>
+          <div class="form-grid-2">
+            <div class="field">
+              <label>活动标题</label>
+              <input class="input" value="${d.title}" oninput="editorDraft.title=this.value" />
+            </div>
+            <div class="field">
+              <label>活动分类</label>
+              <select class="select" onchange="editorDraft.category=this.value">
+                ${['赛前早餐跑','宠物聚会','VIP沙龙','会员线下活动'].map(c => `<option ${d.category===c?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>C 端按钮文案</label>
+              <select class="select" onchange="editorDraft.ctaText=this.value">
+                ${['立即报名','立即预约','抢占名额'].map(c => `<option ${d.ctaText===c?'selected':''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>视觉海报主题</label>
+              <select class="select" onchange="editorDraft.theme=this.value">
+                <option value="theme-run" ${d.theme==='theme-run'?'selected':''}>运动燃橙（跑步/户外）</option>
+                <option value="theme-pet" ${d.theme==='theme-pet'?'selected':''}>森系活力（宠物/亲子）</option>
+                <option value="theme-beauty" ${d.theme==='theme-beauty'?'selected':''}>高定酒红（美妆/沙龙）</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>活动地点</label>
+            <input class="input" value="${d.location}" oninput="editorDraft.location=this.value" />
+          </div>
+        </div>
+
+        <!-- 2. Sessions -->
+        <div class="form-section">
+          <div class="form-section-head">
+            <div class="form-section-title">2. 场次排期与名额（主库存，必填）</div>
+            <button class="btn btn-outline btn-sm" onclick="addDraftSession()">+ 添加场次</button>
+          </div>
+          ${d.sessions.map((s, idx) => `
+            <div class="sub-row session-row">
+              <input class="input" placeholder="场次时间" value="${s.label}" oninput="editorDraft.sessions[${idx}].label=this.value" />
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">总名额*</span>
+                <input type="number" min="1" class="input num" style="width:80px" value="${s.quota}"
+                  oninput="editorDraft.sessions[${idx}].quota=Number(this.value)" />
+              </div>
+              <span style="font-size:12px;color:var(--text-muted)" class="num">已报 ${s.booked}</span>
+              <button class="btn btn-danger-soft btn-sm" ${d.sessions.length<=1?'disabled':''}
+                onclick="editorDraft.sessions.splice(${idx},1);renderBEnd()">删除</button>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- 3. Tickets / SKU -->
+        <div class="form-section">
+          <div class="form-section-head">
+            <div class="form-section-title">3. 套餐 SKU 定价（挂在活动上，与场次名额解耦防冲突）</div>
+            <button class="btn btn-outline btn-sm" onclick="addDraftTicket()">+ 添加套餐</button>
+          </div>
+          <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px">
+            说明：选「共享场次名额」时，底层商品中心 SKU 自动同步兜底大库存(999999)，由场次名额主控；选「独立限量」时同步具体限量值并双层校验。
+          </p>
+          ${d.tickets.map((t, idx) => `
+            <div class="sub-row ticket-row">
+              <input class="input" placeholder="套餐名称" value="${t.name}" oninput="editorDraft.tickets[${idx}].name=this.value" />
+              <div style="display:flex;align-items:center;gap:4px">
+                <span style="font-size:12px">¥</span>
+                <input type="number" step="0.1" min="0" class="input num" style="width:74px" value="${t.price}"
+                  oninput="editorDraft.tickets[${idx}].price=Number(this.value)" />
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <select class="select" style="flex:1;font-size:12px" onchange="changeTicketStockMode(${idx}, this.value)">
+                  <option value="shared" ${t.stockMode==='shared'?'selected':''}>共享场次名额</option>
+                  <option value="limited" ${t.stockMode==='limited'?'selected':''}>设置独立限量</option>
+                </select>
+                ${t.stockMode === 'limited' ? `
+                  <input type="number" min="1" class="input num" style="width:68px" placeholder="份数*" value="${t.limit ?? 50}"
+                    oninput="editorDraft.tickets[${idx}].limit=Number(this.value)" />
+                ` : ''}
+              </div>
+              <button class="btn btn-danger-soft btn-sm" ${d.tickets.length<=1?'disabled':''}
+                onclick="editorDraft.tickets.splice(${idx},1);renderBEnd()">删除</button>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- 4. Form Fields (Preset + Custom) -->
+        <div class="form-section">
+          <div class="form-section-head">
+            <div class="form-section-title">4. 报名收集字段（快捷预设 + 自定义添加）</div>
+            <button class="btn btn-outline btn-sm" onclick="addDraftCustomField()">+ 添加自定义字段</button>
+          </div>
+          <div class="field">
+            <label>常用快捷字段</label>
+            <div class="chip-group">
+              ${PRESET_FIELDS.map(f => {
+                const checked = d.formFields.includes(f.key);
+                return `
+                  <div class="check-chip ${checked ? 'checked' : ''}" onclick="toggleDraftField('${f.key}')">
+                    <span>${checked ? '✓' : '+'}</span>
+                    <span>${f.label}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:12px">
+            <label>自定义扩展字段（支持文字 / 数字 / 日期 / 单选）</label>
+            ${(d.customFields || []).length === 0 ? `<div style="font-size:12px;color:var(--text-muted);padding:6px 0">暂无自定义字段，点击右上角「+ 添加自定义字段」新增</div>` : ''}
+            ${(d.customFields || []).map((cf, idx) => `
+              <div class="sub-row custom-field-row">
+                <input class="input" placeholder="字段名，如 宠物生日" value="${cf.label}"
+                  oninput="editorDraft.customFields[${idx}].label=this.value" />
+                <select class="select" onchange="editorDraft.customFields[${idx}].type=this.value;renderBEnd()">
+                  <option value="text" ${cf.type==='text'?'selected':''}>单行文字</option>
+                  <option value="number" ${cf.type==='number'?'selected':''}>数字</option>
+                  <option value="date" ${cf.type==='date'?'selected':''}>日期选择</option>
+                  <option value="select" ${cf.type==='select'?'selected':''}>单选下拉</option>
+                </select>
+                ${cf.type === 'select'
+                  ? `<input class="input" placeholder="选项用逗号隔开，如 A,B,C" value="${cf.options||''}" oninput="editorDraft.customFields[${idx}].options=this.value" />`
+                  : `<span style="font-size:11px;color:var(--text-muted)">C端渲染为${cf.type==='date'?'日期选择器':cf.type==='number'?'数字输入框':'文本输入框'}</span>`}
+                <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer">
+                  <input type="checkbox" ${cf.required?'checked':''} onchange="editorDraft.customFields[${idx}].required=this.checked" /> 必填
+                </label>
+                <button class="btn btn-danger-soft btn-sm" onclick="editorDraft.customFields.splice(${idx},1);renderBEnd()">删除</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- 5. Cancel Policy & Agreement -->
+        <div class="form-section">
+          <div class="form-section-head">
+            <div class="form-section-title">5. 退改规则（结构化控制前台取消按钮）& 免责协议</div>
+          </div>
+          <div class="field">
+            <label>取消与退款策略</label>
+            <div class="rule-radio-row">
+              <label>
+                <input type="radio" name="cancelType" value="none" ${d.cancelPolicy.type==='none'?'checked':''}
+                  onchange="editorDraft.cancelPolicy.type='none';renderBEnd()" />
+                <span>不支持取消（C 端隐藏取消按钮）</span>
+              </label>
+              <label>
+                <input type="radio" name="cancelType" value="before_hours" ${d.cancelPolicy.type==='before_hours'?'checked':''}
+                  onchange="editorDraft.cancelPolicy.type='before_hours';if(!editorDraft.cancelPolicy.hours)editorDraft.cancelPolicy.hours=24;renderBEnd()" />
+                <span>场次开始前</span>
+                <input type="number" min="1" class="input num" style="width:66px;height:28px"
+                  value="${d.cancelPolicy.hours || 24}" ${d.cancelPolicy.type!=='before_hours'?'disabled':''}
+                  oninput="editorDraft.cancelPolicy.hours=Number(this.value)" />
+                <span>小时可自助免费取消</span>
+              </label>
+            </div>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label>免责协议内容</label>
+            <textarea class="textarea" rows="3" oninput="editorDraft.agreementBody=this.value">${d.agreementBody}</textarea>
+          </div>
+        </div>
+      `;
+    }
+
+    function addDraftSession() {
+      editorDraft.sessions.push({ id: 's-' + Date.now(), label: '12-20 (周日) 08:00 - 10:00', quota: 50, booked: 0 });
+      renderBEnd();
+    }
+
+    function addDraftTicket() {
+      editorDraft.tickets.push({ id: 't-' + Date.now(), name: '新增权益套餐', price: 0, stockMode: 'shared', limit: null, sold: 0 });
+      renderBEnd();
+    }
+
+    function changeTicketStockMode(idx, mode) {
+      editorDraft.tickets[idx].stockMode = mode;
+      editorDraft.tickets[idx].limit = mode === 'limited' ? (editorDraft.tickets[idx].limit || 50) : null;
+      renderBEnd();
+    }
+
+    function addDraftCustomField() {
+      if (!editorDraft.customFields) editorDraft.customFields = [];
+      editorDraft.customFields.push({ id: 'cf-' + Date.now(), label: '紧急联系人电话', type: 'text', required: false, options: '' });
+      renderBEnd();
+    }
+
+    function toggleDraftField(key) {
+      if (key === 'name' || key === 'phone') { showToast('姓名与手机号为默认必填字段'); return; }
+      const idx = editorDraft.formFields.indexOf(key);
+      if (idx > -1) editorDraft.formFields.splice(idx, 1);
+      else editorDraft.formFields.push(key);
+      renderBEnd();
+    }
+
+    function saveEditor() {
+      if (!editorDraft.title.trim()) { showToast('请填写活动标题'); return; }
+      if (state.editingActivityId) {
+        const idx = state.activities.findIndex(a => a.id === state.editingActivityId);
+        state.activities[idx] = editorDraft;
+        showToast('活动修改已保存，右侧小程序已实时更新！');
+      } else {
+        state.activities.unshift(editorDraft);
+        state.selectedActivityId = editorDraft.id;
+        showToast('新活动已发布，可在右侧小程序体验报名！');
+      }
+      state.bTab = 'activities';
+      renderAll();
+    }
+
+    // ==================== B-END ATTENDEES & VERIFIERS ====================
+    function renderBAttendees(container, flat) {
+      const filtered = state.bAttendeeActFilter === 'all'
+        ? flat
+        : flat.filter(x => x.act?.id === state.bAttendeeActFilter);
+
+      container.innerHTML = `
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <select class="select" onchange="state.bAttendeeActFilter=this.value;renderBEnd()">
+              <option value="all">全部活动参与人</option>
+              ${state.activities.map(a => `<option value="${a.id}" ${state.bAttendeeActFilter===a.id?'selected':''}>${a.title}</option>`).join('')}
+            </select>
+            <span style="font-size:12px;color:var(--text-muted)">付费单同步写入主订单表（展示关联交易单号）</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="exportAttendeesCSV()">↓ 一键导出 CSV / Excel</button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>参与人</th>
+              <th>活动与场次</th>
+              <th>套餐 / 收集信息（含自定义字段）</th>
+              <th>主订单号 / 核销码</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.length === 0 ? `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--text-muted)">暂无参与人数据</td></tr>` : ''}
+            ${filtered.map(({ order, act, ses, tic, att }) => {
+              const schema = act ? getActiveFormSchema(act) : [];
+              const extraInfo = Object.entries(att.data)
+                .filter(([k, v]) => k !== 'name' && k !== 'phone' && v)
+                .map(([k, v]) => {
+                  const f = schema.find(x => x.key === k) || PRESET_FIELDS.find(x => x.key === k);
+                  return `${f ? f.label : k}: ${v}`;
+                }).join(' ｜ ');
+              return `
+                <tr>
+                  <td>
+                    <div style="font-weight:700">${att.data.name || '-'}</div>
+                    <div style="font-size:11px;color:var(--text-muted)" class="num">${att.data.phone || '-'}</div>
+                  </td>
+                  <td>
+                    <div style="font-weight:600;font-size:12px">${act?.title || '-'}</div>
+                    <div style="font-size:11px;color:var(--text-muted)">${ses?.label || '-'}</div>
+                  </td>
+                  <td>
+                    <div style="font-size:12px;font-weight:600;color:var(--b-primary)">${tic?.name || '-'}</div>
+                    <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${extraInfo || '无额外字段'}</div>
+                  </td>
+                  <td class="num">
+                    <div style="font-family:monospace;font-weight:700;font-size:13px">${att.code}</div>
+                    <div style="font-size:10px;color:var(--text-muted)">${order.tradeOrderNo ? '主单:' + order.tradeOrderNo : '0元单(不进交易表)'}</div>
+                  </td>
+                  <td>
+                    ${att.status === 'pending_verify' ? '<span class="tag tag-orange">待核销</span>' :
+                      att.status === 'completed' ? '<span class="tag tag-green">已核销</span>' :
+                      '<span class="tag tag-gray">已取消</span>'}
+                  </td>
+                  <td style="white-space:nowrap">
+                    ${att.status === 'pending_verify' ? `
+                      <button class="btn btn-outline btn-sm" onclick="verifyByCode('${att.code}', true)">补核销</button>
+                      <button class="btn btn-danger-soft btn-sm" onclick="cancelOrder('${order.id}', true)">代取消</button>
+                    ` : '<span style="font-size:11px;color:var(--text-muted)">—</span>'}
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function exportAttendeesCSV() {
+      const flat = allAttendeesFlat();
+      const headers = ['报名单号', '主交易单号', '活动名称', '场次', '套餐', '姓名', '手机号', '全部表单明细', '核销码', '状态'];
+      const rows = flat.map(({ order, act, ses, tic, att }) => {
+        const schema = act ? getActiveFormSchema(act) : [];
+        const detail = Object.entries(att.data)
+          .filter(([k, v]) => k !== 'name' && k !== 'phone' && v)
+          .map(([k, v]) => `${(schema.find(x => x.key === k)?.label || k)}:${v}`).join(' | ');
+        return [
+          order.id, order.tradeOrderNo || '0元免交易', act?.title || '', ses?.label || '', tic?.name || '',
+          att.data.name || '', att.data.phone || '', detail, att.code,
+          att.status === 'completed' ? '已核销' : att.status === 'cancelled' ? '已取消' : '待核销'
+        ];
+      });
+      const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `活动报名参与人名单_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('已导出参与人 CSV 名单（含自定义字段）');
+    }
+
+    function renderBVerifiers(container) {
+      container.innerHTML = `
+        <div class="form-section" style="background:var(--b-primary-soft);border-color:var(--b-primary-border)">
+          <div style="font-weight:700;color:var(--b-primary);margin-bottom:4px">线下核销方案：小程序内置核销员扫码</div>
+          <p style="font-size:12px;color:var(--text-secondary)">无需企微与额外 App，临时志愿者绑定手机号即可打开小程序扫码核销，扫完大字高亮展示物资/尺码。</p>
+        </div>
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input id="newVerName" class="input" placeholder="核销员/志愿者姓名" style="width:160px" />
+            <input id="newVerPhone" class="input" placeholder="微信绑定手机号" style="width:160px" />
+            <button class="btn btn-primary btn-sm" onclick="addVerifier()">+ 添加临时核销员</button>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="setCRole('verifier')">去右侧体验「现场核销员视角」 →</button>
+        </div>
+        <table>
+          <thead><tr><th>姓名</th><th>绑定手机号</th><th>授权范围</th><th>操作</th></tr></thead>
+          <tbody>
+            ${state.verifiers.map((v, i) => `
+              <tr>
+                <td style="font-weight:600">${v.name}</td>
+                <td class="num">${v.phone}</td>
+                <td><span class="tag tag-teal">${v.scope}</span></td>
+                <td><button class="btn btn-danger-soft btn-sm" onclick="state.verifiers.splice(${i},1);renderBEnd();showToast('已撤权')">撤权</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function addVerifier() {
+      const name = document.getElementById('newVerName').value.trim();
+      const phone = document.getElementById('newVerPhone').value.trim();
+      if (!name || !phone) { showToast('请输入姓名和手机号'); return; }
+      state.verifiers.push({ id: 'v-' + Date.now(), name, phone, scope: '全部活动（临时授权）' });
+      showToast(`已授权 ${name} 为核销员`);
+      renderBEnd();
+    }
+
+    // ==================== C-END MINI PROGRAM ====================
+    function setCRole(role) {
+      state.cRole = role;
+      document.getElementById('roleUserBtn').classList.toggle('active', role === 'user');
+      document.getElementById('roleVerifierBtn').classList.toggle('active', role === 'verifier');
+      renderCEnd();
+    }
+
+    function renderCEnd() {
+      const navLeft = document.getElementById('mpNavLeft');
+      const title = document.getElementById('mpTitle');
+      const content = document.getElementById('mpContent');
+      const bottom = document.getElementById('mpBottomContainer');
+      const modal = document.getElementById('mpModalContainer');
+      modal.innerHTML = '';
+
+      if (state.cRole === 'verifier') {
+        navLeft.innerHTML = '';
+        title.textContent = '现场核销工作台';
+        renderCVerifier(content, bottom);
+        return;
+      }
+
+      if (state.cPage === 'list') {
+        navLeft.innerHTML = '';
+        title.textContent = '线下活动报名';
+        renderCList(content, bottom);
+      } else if (state.cPage === 'detail') {
+        navLeft.innerHTML = `<button class="mp-back" onclick="goCPage('list')">‹</button>`;
+        title.textContent = '活动详情';
+        renderCDetail(content, bottom);
+      } else if (state.cPage === 'checkout') {
+        navLeft.innerHTML = `<button class="mp-back" onclick="goCPage('detail')">‹</button>`;
+        title.textContent = '确认报名信息';
+        renderCCheckout(content, bottom);
+      } else if (state.cPage === 'orders') {
+        navLeft.innerHTML = '';
+        title.textContent = '我的报名单';
+        renderCOrders(content, bottom);
+      }
+
+      if (state.cModal) renderCModal(modal);
+    }
+
+    function goCPage(page, actId) {
+      if (actId) state.selectedActivityId = actId;
+      state.cPage = page;
+      state.cModal = null;
+      renderCEnd();
+      document.getElementById('mpContent').scrollTop = 0;
+    }
+
+    function renderCList(content, bottom) {
+      const cats = ['全部', ...new Set(state.activities.map(a => a.category))];
+      let list = state.activities;
+      if (state.cCat !== '全部') list = list.filter(a => a.category === state.cCat);
+      if (state.cStatusFilter !== 'all') list = list.filter(a => a.status === state.cStatusFilter);
+
+      content.innerHTML = `
+        <div class="c-cat-tabs">
+          ${cats.map(c => `<button class="c-cat-tab ${state.cCat === c ? 'active' : ''}" onclick="state.cCat='${c}';renderCEnd()">${c}</button>`).join('')}
+        </div>
+        <div class="c-filter-bar">
+          <button class="c-filter-chip ${state.cStatusFilter==='all'?'active':''}" onclick="state.cStatusFilter='all';renderCEnd()">全部状态</button>
+          <button class="c-filter-chip ${state.cStatusFilter==='active'?'active':''}" onclick="state.cStatusFilter='active';renderCEnd()">报名中</button>
+          <button class="c-filter-chip ${state.cStatusFilter==='ended'?'active':''}" onclick="state.cStatusFilter='ended';renderCEnd()">已结束</button>
+        </div>
+
+        <div class="c-card-list">
+          ${list.map(act => {
+            const st = getActStats(act);
+            const firstSes = act.sessions[0];
+            return `
+              <div class="c-act-card" onclick="goCPage('detail', '${act.id}')">
+                <div class="c-act-top">
+                  <div class="c-poster-sm ${act.theme}">
+                    <span class="c-status-badge ${act.status==='ended'?'ended':''}">${act.status==='active'?'报名中':'已结束'}</span>
+                    <div style="font-size:11px;font-weight:800;line-height:1.2">${act.category}</div>
+                  </div>
+                  <div class="c-act-info">
+                    <div class="c-act-title">${act.title}</div>
+                    <span class="c-act-tag">${act.sessions.length > 1 ? act.sessions.length + '个场次可选' : '单场次活动'}</span>
+                    <div class="c-act-meta">🕒 ${firstSes ? firstSes.label : '待定'}</div>
+                    <div class="c-act-meta">📍 ${act.location}</div>
+                  </div>
+                </div>
+                <div class="c-act-bottom">
+                  <div class="avatar-stack">
+                    <span class="avatar-dot" style="background:#F97316">周</span>
+                    <span class="avatar-dot" style="background:#0F766E">林</span>
+                    <span class="avatar-dot" style="background:#4F46E5">陈</span>
+                    <span class="avatar-text num">${st.totalBooked}人已报名</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span class="c-price num">${formatMinPrice(act)}</span>
+                    <span class="c-cta-sm ${act.status==='ended'?'disabled':''}">${act.status==='active'?act.ctaText:'已结束'}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      bottom.innerHTML = renderCTabBar('list');
+    }
+
+    function renderCTabBar(active) {
+      const pendingOrders = state.orders.filter(o => o.status === 'pending_verify').length;
+      return `
+        <div class="mp-bottom-bar mp-tabbar">
+          <button class="mp-tab-item ${active==='list'?'active':''}" onclick="goCPage('list')">
+            <span class="mp-tab-icon">🏃</span><span>活动广场</span>
+          </button>
+          <button class="mp-tab-item ${active==='orders'?'active':''}" onclick="goCPage('orders')">
+            <span class="mp-tab-icon">🎫</span><span>我的报名单${pendingOrders ? `(${pendingOrders})` : ''}</span>
+          </button>
+        </div>
+      `;
+    }
+
+    function renderCDetail(content, bottom) {
+      const act = getActivity(state.selectedActivityId) || state.activities[0];
+      const st = getActStats(act);
+      const pct = st.totalQuota ? Math.min(100, Math.round((st.totalBooked / st.totalQuota) * 100)) : 0;
+
+      content.innerHTML = `
+        <div class="c-hero ${act.theme}">
+          <span class="c-hero-eyebrow">${act.category} · ${act.city}</span>
+          <div>
+            <div class="c-hero-headline">${act.title}</div>
+            <div class="c-hero-sub">${act.tagline}</div>
+          </div>
+        </div>
+
+        <div class="c-section-card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="c-price num" style="font-size:20px">${formatPriceRange(act)}</span>
+            <span class="tag ${act.status==='active'?'tag-green':'tag-gray'}">${act.status==='active'?'火热报名中':'已结束'}</span>
+          </div>
+          <div class="c-info-row"><span>🕒 ${act.sessions[0]?.label}${act.sessions.length > 1 ? ` 等${act.sessions.length}场` : ''}</span></div>
+          <div class="c-info-row">
+            <span style="flex:1">📍 ${act.location}</span>
+            <button class="c-nav-icon-btn" onclick="showToast('已唤起微信内置地图导航 → ${act.city}')">🗺️ 导航</button>
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid #F1F5F9">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="avatar-stack">
+                <span class="avatar-dot" style="background:#F97316">周</span>
+                <span class="avatar-dot" style="background:#0F766E">林</span>
+                <span class="avatar-dot" style="background:#4F46E5">陈</span>
+              </div>
+              <span style="font-size:12px;color:var(--text-secondary)" class="num"><strong>${st.totalBooked}</strong> / ${st.totalQuota} 已报名</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          </div>
+        </div>
+
+        <div class="c-section-card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px">退改与签到说明</div>
+          <p style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+            • <strong>退改规则</strong>：${formatCancelRule(act)}<br/>
+            • <strong>现场核销</strong>：报名成功后凭「我的报名单」电子核销码到场扫码签到。
+          </p>
+        </div>
+      `;
+
+      bottom.innerHTML = `
+        <div class="mp-bottom-bar" style="gap:12px">
+          <button class="mp-tab-item" onclick="goCPage('list')"><span class="mp-tab-icon">🏠</span><span>首页</span></button>
+          <button class="mp-tab-item" onclick="showToast('已生成分享海报')"><span class="mp-tab-icon">↗️</span><span>分享</span></button>
+          <button class="c-primary-btn" ${act.status!=='active'?'disabled':''} onclick="startCheckout('${act.id}')">
+            ${act.status === 'active' ? act.ctaText : '活动已结束'}
+          </button>
+        </div>
+      `;
+    }
+
+    function startCheckout(actId) {
+      const act = getActivity(actId);
+      const availSes = act.sessions.find(s => s.booked < s.quota) || act.sessions[0];
+      const availTic = act.tickets.find(t => t.stockMode !== 'limited' || t.sold < t.limit) || act.tickets[0];
+      state.checkout = {
+        sessionId: availSes.id,
+        ticketId: availTic.id,
+        qty: 1,
+        agreed: false,
+        attendees: [makeDefaultAttendee(act, 0)]
+      };
+      goCPage('checkout', actId);
+    }
+
+    function makeDefaultAttendee(act, idx) {
+      const schema = getActiveFormSchema(act);
+      const defaults = idx === 0
+        ? { name: '陈思远', phone: '13800138000', gender: '男', size: 'L', idCard: '440305199405121234', petInfo: '边牧 / 已接种', skinType: '混合肌' }
+        : { name: '', phone: '', gender: '女', size: 'M', idCard: '', petInfo: '', skinType: '干性肌肤' };
+      const obj = {};
+      schema.forEach(f => {
+        if (defaults[f.key] !== undefined) obj[f.key] = defaults[f.key];
+        else if (f.type === 'select' && f.options.length) obj[f.key] = f.options[0];
+        else obj[f.key] = '';
+      });
+      return obj;
+    }
+
+    function updateCheckoutQty(delta) {
+      const act = getActivity(state.selectedActivityId);
+      const next = Math.max(1, Math.min(3, state.checkout.qty + delta));
+      state.checkout.qty = next;
+      while (state.checkout.attendees.length < next) {
+        state.checkout.attendees.push(makeDefaultAttendee(act, state.checkout.attendees.length));
+      }
+      state.checkout.attendees.length = next;
+      renderCEnd();
+    }
+
+    function renderCCheckout(content, bottom) {
+      const act = getActivity(state.selectedActivityId);
+      const ses = getSession(act, state.checkout.sessionId);
+      const tic = getTicket(act, state.checkout.ticketId);
+      const schema = getActiveFormSchema(act);
+      const total = (tic ? tic.price : 0) * state.checkout.qty;
+
+      const singleSession = act.sessions.length === 1;
+      const singleTicket = act.tickets.length === 1;
+      const bothSingle = singleSession && singleTicket;
+
+      let selectionHtml = '';
+      if (bothSingle) {
+        const rem = Math.max(0, ses.quota - ses.booked);
+        selectionHtml = `
+          <div class="c-compact-summary">
+            <span class="c-adaptive-hint">单场次 + 单套餐：已自动选中，省去重复点选</span>
+            <div style="font-size:14px;font-weight:700">${act.title}</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:4px" class="num">
+              🕒 ${ses.label} <span style="color:var(--b-primary);font-weight:600">（剩余 ${rem} 名额）</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding-top:6px;border-top:1px dashed #E5E7EB">
+              <span style="font-size:12px;font-weight:600">${tic.name}</span>
+              <span class="c-price num">${tic.price === 0 ? '0元' : '¥' + tic.price.toFixed(2)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid #F1F5F9">
+              <span style="font-size:12px;font-weight:700">报名人数</span>
+              <div class="stepper">
+                <button onclick="updateCheckoutQty(-1)">−</button>
+                <span class="num">${state.checkout.qty}</span>
+                <button onclick="updateCheckoutQty(1)">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        selectionHtml = `
+          ${singleTicket ? `
+            <div class="c-section-card" style="padding:11px 14px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:12px;font-weight:600">已选套餐：${tic.name}</span>
+                <span class="c-price num">${tic.price === 0 ? '0元' : '¥' + tic.price.toFixed(2)}</span>
+              </div>
+            </div>
+          ` : `
+            <div class="c-section-card">
+              <div style="font-size:13px;font-weight:700">选择套餐规格</div>
+              ${act.tickets.map(t => {
+                const rem = t.stockMode === 'limited' ? Math.max(0, t.limit - t.sold) : null;
+                const soldout = rem !== null && rem <= 0;
+                return `
+                  <div class="c-option-card ${state.checkout.ticketId===t.id?'selected':''} ${soldout?'soldout':''}"
+                    onclick="state.checkout.ticketId='${t.id}';renderCEnd()">
+                    <div>
+                      <div style="font-size:13px;font-weight:600">${t.name}</div>
+                      ${rem !== null ? `<div style="font-size:11px;color:var(--warning)" class="num">限量剩余 ${rem} 份</div>` : ''}
+                    </div>
+                    <div class="c-price num">${t.price === 0 ? '0元' : '¥' + t.price.toFixed(2)}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+
+          <div class="c-section-card">
+            ${singleSession ? `
+              <div style="display:flex;justify-content:space-between;font-size:12px">
+                <span style="font-weight:600">🕒 活动场次：${ses.label}</span>
+                <span style="color:var(--b-primary);font-weight:700" class="num">余 ${Math.max(0, ses.quota - ses.booked)}</span>
+              </div>
+            ` : `
+              <div style="font-size:13px;font-weight:700">选择场次时间</div>
+              ${act.sessions.map(s => {
+                const rem = Math.max(0, s.quota - s.booked);
+                return `
+                  <div class="c-option-card ${state.checkout.sessionId===s.id?'selected':''} ${rem<=0?'soldout':''}"
+                    onclick="state.checkout.sessionId='${s.id}';renderCEnd()">
+                    <div style="font-size:13px;font-weight:600" class="num">${s.label}</div>
+                    <div style="font-size:12px;font-weight:700;color:${rem>0?'var(--b-primary)':'var(--text-muted)'}" class="num">
+                      ${rem > 0 ? `剩余 ${rem}` : '已报满'}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            `}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #F1F5F9">
+              <div>
+                <div style="font-size:13px;font-weight:700">报名人数</div>
+                <div style="font-size:11px;color:var(--text-muted)">每人独立核销码</div>
+              </div>
+              <div class="stepper">
+                <button onclick="updateCheckoutQty(-1)">−</button>
+                <span class="num">${state.checkout.qty}</span>
+                <button onclick="updateCheckoutQty(1)">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      content.innerHTML = `
+        ${selectionHtml}
+
+        <div class="c-section-card">
+          <div style="font-size:13px;font-weight:700">填写参与人信息</div>
+          ${state.checkout.attendees.map((att, idx) => `
+            <div class="attendee-box">
+              <div class="attendee-box-title">参与人 ${idx + 1}</div>
+              ${schema.map(f => {
+                const reqMark = f.required ? '<span style="color:var(--danger)">*</span>' : '';
+                if (f.type === 'select') {
+                  return `
+                    <div class="c-field-row">
+                      <label>${f.label}${reqMark}</label>
+                      <select class="c-input" onchange="state.checkout.attendees[${idx}]['${f.key}']=this.value">
+                        ${f.options.map(opt => `<option ${att[f.key]===opt?'selected':''}>${opt}</option>`).join('')}
+                      </select>
+                    </div>
+                  `;
+                }
+                const inputType = f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text';
+                return `
+                  <div class="c-field-row">
+                    <label>${f.label}${reqMark}</label>
+                    <input type="${inputType}" class="c-input" placeholder="${f.placeholder||''}" value="${att[f.key]||''}"
+                      oninput="state.checkout.attendees[${idx}]['${f.key}']=this.value" />
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="c-section-card">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer">
+            <input type="checkbox" ${state.checkout.agreed?'checked':''} onchange="state.checkout.agreed=this.checked" />
+            <span>我已阅读并同意 <a href="javascript:void(0)" style="color:var(--c-accent);font-weight:600" onclick="event.stopPropagation();state.cModal='agreement';renderCEnd()">《${act.agreementTitle}》</a></span>
+          </label>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-muted)">
+            退改规则：${formatCancelRule(act)}
+          </div>
+        </div>
+      `;
+
+      bottom.innerHTML = `
+        <div class="mp-bottom-bar" style="gap:12px">
+          <div>
+            <div style="font-size:11px;color:var(--text-muted)">合计</div>
+            <div class="c-price num" style="font-size:18px">${total === 0 ? '0元' : '¥' + total.toFixed(2)}</div>
+          </div>
+          <button class="c-primary-btn" onclick="submitRegistration()">
+            ${total === 0 ? '确认 0 元报名' : '立即支付并报名'}
+          </button>
+        </div>
+      `;
+    }
+
+    function submitRegistration() {
+      const act = getActivity(state.selectedActivityId);
+      const ses = getSession(act, state.checkout.sessionId);
+      const tic = getTicket(act, state.checkout.ticketId);
+      const schema = getActiveFormSchema(act);
+
+      if (!state.checkout.agreed) { showToast('请先勾选同意免责协议'); return; }
+      for (let i = 0; i < state.checkout.attendees.length; i++) {
+        for (const f of schema) {
+          if (f.required && !String(state.checkout.attendees[i][f.key] || '').trim()) {
+            showToast(`请完善参与人 ${i + 1} 的「${f.label}」`);
+            return;
+          }
+        }
+      }
+      if (ses.booked + state.checkout.qty > ses.quota) { showToast('该场次剩余名额不足'); return; }
+      if (tic.stockMode === 'limited' && tic.sold + state.checkout.qty > tic.limit) { showToast('该套餐剩余限量不足'); return; }
+
+      const total = tic.price * state.checkout.qty;
+      if (total > 0) { state.cModal = 'pay'; renderCEnd(); }
+      else finalizeRegistration();
+    }
+
+    function finalizeRegistration() {
+      const act = getActivity(state.selectedActivityId);
+      const ses = getSession(act, state.checkout.sessionId);
+      const tic = getTicket(act, state.checkout.ticketId);
+
+      ses.booked += state.checkout.qty;
+      tic.sold += state.checkout.qty;
+
+      const total = tic.price * state.checkout.qty;
+      const newOrder = {
+        id: 'REG-' + Date.now().toString().slice(-6),
+        tradeOrderNo: total > 0 ? 'TRD-' + Math.floor(100000000 + Math.random() * 899999999) : null,
+        activityId: act.id,
+        sessionId: ses.id,
+        ticketId: tic.id,
+        qty: state.checkout.qty,
+        totalPrice: total,
+        status: 'pending_verify',
+        createdAt: '刚刚',
+        attendees: state.checkout.attendees.map((data, idx) => ({
+          id: 'ATT-' + Date.now() + idx,
+          code: String(Math.floor(100000 + Math.random() * 900000)),
+          status: 'pending_verify',
+          data: { ...data }
+        }))
+      };
+
+      state.orders.unshift(newOrder);
+      state.cModal = null;
+      state.cPage = 'orders';
+      state.cOrderTab = 'all';
+      showToast(total > 0 ? '报名成功！已同步写入主订单表与活动名单' : '0元报名成功！已同步活动名单');
+      renderAll();
+    }
+
+    function renderCModal(container) {
+      const act = getActivity(state.selectedActivityId);
+      if (state.cModal === 'agreement') {
+        container.innerHTML = `
+          <div class="mp-modal-mask" onclick="state.cModal=null;renderCEnd()">
+            <div class="mp-modal-sheet" onclick="event.stopPropagation()">
+              <div style="font-size:15px;font-weight:700;margin-bottom:10px">《${act.agreementTitle}》</div>
+              <pre style="white-space:pre-wrap;font-family:inherit;font-size:12px;color:var(--text-secondary);line-height:1.7">${act.agreementBody}</pre>
+              <button class="c-primary-btn" style="width:100%;margin-top:16px" onclick="state.checkout.agreed=true;state.cModal=null;renderCEnd()">我已阅读并同意</button>
+            </div>
+          </div>
+        `;
+      } else if (state.cModal === 'pay') {
+        const tic = getTicket(act, state.checkout.ticketId);
+        const total = tic.price * state.checkout.qty;
+        container.innerHTML = `
+          <div class="mp-modal-mask" onclick="state.cModal=null;renderCEnd()">
+            <div class="mp-modal-sheet" onclick="event.stopPropagation()">
+              <div style="text-align:center">
+                <div style="font-size:13px;color:var(--text-secondary)">复用小程序微信收银台</div>
+                <div class="num" style="font-size:28px;font-weight:800;margin:8px 0">¥${total.toFixed(2)}</div>
+                <div style="font-size:11px;color:var(--b-primary);background:var(--b-primary-soft);padding:4px 10px;border-radius:999px;display:inline-block;margin-bottom:14px">
+                  支付后同步写入现有主订单表（order_type = 活动报名）
+                </div>
+              </div>
+              <button class="c-primary-btn" style="width:100%;background:#07C160" onclick="finalizeRegistration()">模拟微信支付成功</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderCOrders(content, bottom) {
+      const tabs = [
+        { id: 'all', label: '全部' },
+        { id: 'pending_verify', label: '待参与' },
+        { id: 'completed', label: '已完成' },
+        { id: 'cancelled', label: '已取消' }
+      ];
+      const list = state.cOrderTab === 'all' ? state.orders : state.orders.filter(o => o.status === state.cOrderTab);
+
+      content.innerHTML = `
+        <div class="c-cat-tabs" style="justify-content:space-around">
+          ${tabs.map(t => `<button class="c-cat-tab ${state.cOrderTab===t.id?'active':''}" onclick="state.cOrderTab='${t.id}';renderCEnd()">${t.label}</button>`).join('')}
+        </div>
+
+        <div class="c-card-list">
+          ${list.length === 0 ? `<div style="text-align:center;padding:60px 20px;color:var(--text-muted);font-size:13px">暂无相关报名单</div>` : ''}
+          ${list.map(o => {
+            const act = getActivity(o.activityId);
+            const ses = getSession(act, o.sessionId);
+            const tic = getTicket(act, o.ticketId);
+            const cancelCheck = canOrderCancel(o, act);
+            return `
+              <div class="c-act-card" style="cursor:default">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <span style="font-size:11px;color:var(--text-muted)" class="num">${o.id}</span>
+                  ${o.status === 'pending_verify' ? '<span class="tag tag-orange">待参与 · 待核销</span>' :
+                    o.status === 'completed' ? '<span class="tag tag-green">已完成</span>' :
+                    '<span class="tag tag-gray">已取消</span>'}
+                </div>
+                <div style="font-size:14px;font-weight:700">${act?.title || '-'}</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:3px">🕒 ${ses?.label || '-'}</div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">🎁 ${tic?.name || '-'} × ${o.qty}</div>
+
+                ${o.status === 'pending_verify' ? o.attendees.map((att, idx) => `
+                  <div class="qr-box">
+                    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">
+                      参与人 ${idx+1}：<strong>${att.data.name}</strong>
+                      ${att.data.size ? `（${att.data.gender || ''} ${att.data.size}码）` : ''}
+                    </div>
+                    <div class="fake-qr"></div>
+                    <div class="verify-code-text">${att.code}</div>
+                  </div>
+                `).join('') : ''}
+
+                <div class="c-act-bottom">
+                  <span class="num" style="font-size:13px;font-weight:700">实付：${o.totalPrice===0?'0元':'¥'+o.totalPrice.toFixed(2)}</span>
+                  <div>
+                    ${o.status === 'pending_verify'
+                      ? (cancelCheck.ok
+                          ? `<button class="btn btn-outline btn-sm" onclick="cancelOrder('${o.id}')">自助取消退款</button>`
+                          : `<span style="font-size:11px;color:var(--text-muted)">${cancelCheck.reason}</span>`)
+                      : ''}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      bottom.innerHTML = renderCTabBar('orders');
+    }
+
+    function cancelOrder(orderId, fromBEnd = false) {
+      const o = state.orders.find(x => x.id === orderId);
+      if (!o || o.status !== 'pending_verify') return;
+      const act = getActivity(o.activityId);
+      if (!fromBEnd && !canOrderCancel(o, act).ok) {
+        showToast('该活动不支持自助取消');
+        return;
+      }
+      const ses = getSession(act, o.sessionId);
+      const tic = getTicket(act, o.ticketId);
+
+      o.status = 'cancelled';
+      o.attendees.forEach(a => a.status = 'cancelled');
+      if (ses) ses.booked = Math.max(0, ses.booked - o.qty);
+      if (tic) tic.sold = Math.max(0, tic.sold - o.qty);
+
+      showToast('已取消报名并原路退款，场次名额与统计数据已实时更新！');
+      renderAll();
+    }
+
+    // ==================== C-END VERIFIER ====================
+    function renderCVerifier(content, bottom) {
+      const pendingList = allAttendeesFlat().filter(x => x.att.status === 'pending_verify');
+
+      content.innerHTML = `
+        <div class="scanner-hero">
+          <div style="font-size:12px;opacity:0.8">当前核销员：王志愿（临时授权）</div>
+          <div class="scanner-frame">
+            <div class="scanner-line"></div>
+            <span style="font-size:12px;color:var(--c-volt);font-weight:700">对准用户核销码扫描</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <input class="c-input" style="flex:1;height:34px" placeholder="或输入6位核销码"
+              value="${state.verifierInputCode}" oninput="state.verifierInputCode=this.value" />
+            <button class="btn btn-primary btn-sm" style="background:var(--c-volt);color:#111"
+              onclick="verifyByCode(state.verifierInputCode)">核销</button>
+          </div>
+        </div>
+
+        ${state.lastVerifiedResult ? `
+          <div class="verify-success-card">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="color:var(--success);font-weight:800;font-size:15px">✓ 核销签到成功</span>
+              <span style="font-size:11px;color:var(--text-muted)">刚刚</span>
+            </div>
+            <div style="font-size:13px;font-weight:700;margin-top:6px">
+              ${state.lastVerifiedResult.att.data.name}（${state.lastVerifiedResult.att.data.phone}）
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary)">${state.lastVerifiedResult.act.title} · ${state.lastVerifiedResult.ses.label}</div>
+
+            <div class="verify-highlight-kit">
+              <div style="font-size:11px;opacity:0.85;color:#fff">请直接发放以下套餐 / 物资</div>
+              <div style="font-size:16px;font-weight:800;margin-top:4px">${state.lastVerifiedResult.tic.name}</div>
+              <div style="font-size:18px;font-weight:800;margin-top:4px;color:#fff">
+                ${[state.lastVerifiedResult.att.data.gender, state.lastVerifiedResult.att.data.size ? state.lastVerifiedResult.att.data.size + '码' : '', state.lastVerifiedResult.att.data.petInfo, state.lastVerifiedResult.att.data.skinType].filter(Boolean).join(' · ') || '标准签到入场'}
+              </div>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="c-section-card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">模拟扫码（点击下方待核销名单一键扫码）</div>
+          ${pendingList.length === 0 ? `<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:18px">当前暂无待核销凭证，可切回“普通用户视角”先报一个名</div>` : ''}
+          ${pendingList.map(({ act, tic, att }) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed #ECEEF2">
+              <div>
+                <div style="font-size:13px;font-weight:700">${att.data.name} <span style="font-family:monospace;color:var(--b-primary)">#${att.code}</span></div>
+                <div style="font-size:11px;color:var(--text-secondary)">${act.title} · ${tic.name}</div>
+              </div>
+              <button class="c-cta-sm" style="background:var(--b-primary)" onclick="verifyByCode('${att.code}')">模拟扫码</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      bottom.innerHTML = `
+        <div class="mp-bottom-bar" style="justify-content:center">
+          <button class="btn btn-outline btn-sm" onclick="setCRole('user')">切回普通用户视角</button>
+        </div>
+      `;
+    }
+
+    function verifyByCode(code, fromBEnd = false) {
+      const clean = String(code || '').trim();
+      const match = allAttendeesFlat().find(x => x.att.code === clean);
+      if (!match) { showToast('未找到该核销码'); return; }
+      if (match.att.status !== 'pending_verify') { showToast('该凭证已核销或已取消'); return; }
+      match.att.status = 'completed';
+      if (match.order.attendees.every(a => a.status === 'completed')) match.order.status = 'completed';
+      state.lastVerifiedResult = match;
+      state.verifierInputCode = '';
+      showToast(fromBEnd ? `PC 后台已为 ${match.att.data.name} 补核销` : `扫码核销成功：${match.att.data.name}`);
+      renderAll();
+    }
+
+    function renderAll() { renderBEnd(); renderCEnd(); }
+    renderAll();
+  </script>
+</body>
+</html>
